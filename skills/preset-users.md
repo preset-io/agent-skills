@@ -25,7 +25,7 @@ These roles are set at the workspace level and apply to all resources within the
 | `Editor` | Can create and edit dashboards, charts, and datasets. |
 | `Viewer` | Read-only access to published dashboards. |
 
-See **preset-workspaces** for the full membership management API (add member, update role, remove member).
+See **preset-workspaces** for the full membership management API (add member, update role).
 
 ---
 
@@ -151,16 +151,6 @@ client.workspace(
 )
 ```
 
-### Delete a custom role
-
-```bash
-curl -s -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/security/roles/{id}"
-```
-
-> ⚠️ You cannot delete built-in roles (`Admin`, `Alpha`, `Gamma`, `sql_lab`, `Public`).
-
 ---
 
 ## Assign roles to users
@@ -198,20 +188,6 @@ def add_role_to_user(client, hostname, user_id, role_id):
             f"/security/users/{user_id}",
             json={"roles": existing_role_ids + [role_id]},
         )
-```
-
-### Helper: remove a role from a user
-
-```python
-def remove_role_from_user(client, hostname, user_id, role_id):
-    user = client.workspace("GET", hostname, f"/security/users/{user_id}")["result"]
-    remaining = [r["id"] for r in user["roles"] if r["id"] != role_id]
-    client.workspace(
-        "PUT",
-        hostname,
-        f"/security/users/{user_id}",
-        json={"roles": remaining},
-    )
 ```
 
 ---
@@ -293,18 +269,6 @@ client.workspace(
     f"/rowlevelsecurity/{rule_id}",
     json={"clause": "department IN ('finance', 'accounting')"},
 )
-```
-
-### Delete an RLS rule
-
-```bash
-curl -s -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/rowlevelsecurity/{id}"
-```
-
-```python
-client.workspace("DELETE", hostname, f"/rowlevelsecurity/{rule_id}")
 ```
 
 ---

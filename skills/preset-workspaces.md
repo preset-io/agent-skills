@@ -165,21 +165,6 @@ client.mgmt(
 )
 ```
 
-### Remove a member from a workspace
-
-```bash
-curl -s -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/workspaces/{workspace_id}/memberships/{membership_id}/"
-```
-
-```python
-client.mgmt(
-    "DELETE",
-    f"/teams/{team_slug}/workspaces/{workspace_id}/memberships/{membership_id}/",
-)
-```
-
 ## Team membership
 
 ### List team members
@@ -208,21 +193,6 @@ client.mgmt(
     "POST",
     f"/teams/{team_slug}/memberships/",
     json={"email": "newmember@example.com", "role_identifier": "Member"},
-)
-```
-
-### Remove a user from a team
-
-```bash
-curl -s -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/memberships/{membership_id}/"
-```
-
-```python
-client.mgmt(
-    "DELETE",
-    f"/teams/{team_slug}/memberships/{membership_id}/",
 )
 ```
 

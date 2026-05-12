@@ -30,8 +30,8 @@ Add `.github/copilot-instructions.md` referencing the skill files, or include th
 Agents activate these automatically based on what the user is trying to do.
 
 - **preset-api** — Authenticate with the Preset Management API (API token → JWT bearer token). Base URLs, pagination, Rison encoding, error codes, and security best practices. **Required by all other skills.**
-- **preset-workspaces** — List and inspect teams and workspaces. Manage workspace membership (add/remove/update roles). Audit access.
-- **preset-dashboards** — Create, retrieve, update, and delete dashboards. Export/import dashboard bundles. Manage embedded dashboard configuration and generate guest tokens for embedding.
+- **preset-workspaces** — List and inspect teams and workspaces. Manage workspace membership (add/update roles). Audit access.
+- **preset-dashboards** — Create, retrieve, and update dashboards. Export/import dashboard bundles. Manage embedded dashboard configuration and generate guest tokens for embedding.
 - **preset-datasets** — Manage database connections and datasets (physical tables and virtual SQL views). Manage columns, metrics, and cache settings. Execute SQL queries via SQL Lab.
 - **preset-users** — Manage Superset users and roles. Apply row-level security (RLS) rules for multi-tenant and fine-grained data access control.
 

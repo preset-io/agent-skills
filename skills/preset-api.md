@@ -137,7 +137,7 @@ To find a workspace's hostname, call `GET /api/v1/teams/{team_slug}/workspaces/`
 |---|---|
 | `200` | Success |
 | `201` | Resource created |
-| `204` | Success, no content (DELETE) |
+| `204` | Success, no content |
 | `400` | Bad request — check your JSON body |
 | `401` | Unauthenticated — re-request a token |
 | `403` | Forbidden — check team/workspace permissions |

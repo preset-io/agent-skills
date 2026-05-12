@@ -30,9 +30,9 @@ Agents activate these automatically based on the user's request.
 | Skill | Description |
 |---|---|
 | **preset-api** | Authenticate with the Preset Management API (client ID + secret → JWT bearer token). Covers base URLs, pagination, Rison-encoded query parameters, error codes, rate limits, and security best practices. **Required by all other skills.** |
-| **preset-workspaces** | List and inspect teams and workspaces. Add, update, and remove workspace members. Audit team and workspace access. |
-| **preset-dashboards** | Create, retrieve, update, and delete dashboards. Export/import dashboard bundles across workspaces. Configure embedded dashboards and generate guest tokens. |
-| **preset-datasets** | Manage database connections (create, test, update, delete). Manage datasets — physical tables and virtual SQL-defined views. Add columns and metrics. Sync schema changes. Execute SQL Lab queries. |
+| **preset-workspaces** | List and inspect teams and workspaces. Add and update workspace members. Audit team and workspace access. |
+| **preset-dashboards** | Create, retrieve, and update dashboards. Export/import dashboard bundles across workspaces. Configure embedded dashboards and generate guest tokens. |
+| **preset-datasets** | Manage database connections (create, test, update). Manage datasets — physical tables and virtual SQL-defined views. Add columns and metrics. Sync schema changes. Execute SQL Lab queries. |
 | **preset-users** | Manage Superset users and fine-grained roles. Create and assign custom roles. Apply row-level security (RLS) rules for multi-tenant and per-role data access control. |
 
 ## Team Deployment (Claude Code)

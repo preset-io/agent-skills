@@ -145,16 +145,6 @@ client.workspace(
 )
 ```
 
-### Delete a database connection
-
-```bash
-curl -s -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/database/{id}"
-```
-
-> ⚠️ Deleting a database also removes all datasets and charts that depend on it.
-
 ## Datasets
 
 ### List datasets
@@ -301,20 +291,6 @@ client.workspace("PUT", hostname, f"/dataset/{dataset_id}/refresh")
 ```
 
 Use this after altering a table in your database to sync new columns into the dataset definition.
-
-### Delete a dataset
-
-```bash
-curl -s -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/dataset/{id}"
-```
-
-```python
-client.workspace("DELETE", hostname, f"/dataset/{dataset_id}")
-```
-
-> ⚠️ Deleting a dataset also removes all charts that depend on it.
 
 ## Dataset columns and metrics
 

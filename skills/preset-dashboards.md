@@ -1,6 +1,6 @@
 # preset-dashboards
 
-Create, retrieve, update, delete, export, and import dashboards in a Preset workspace via the Superset API.
+Create, retrieve, update, export, and import dashboards in a Preset workspace via the Superset API.
 
 > **Prerequisite:** Complete authentication and resolve the workspace hostname using the **preset-api** and **preset-workspaces** skills.
 
@@ -131,18 +131,6 @@ client.workspace(
 ```
 
 Only include fields you want to change — unspecified fields are left untouched.
-
-## Delete a dashboard
-
-```bash
-curl -s -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/dashboard/{id}"
-```
-
-```python
-client.workspace("DELETE", hostname, f"/dashboard/{dashboard_id}")
-```
 
 ## Export dashboards
 

@@ -104,8 +104,16 @@ for team in teams:
 
 ### 4 — Call workspace APIs
 
+Use the hostname returned by step 3 — never use a hardcoded value:
+
 ```python
-hostname = "1a2b3c4d.us1a.preset.io"  # from the workspace listing
+# Derive hostname from the workspace listing — do not hardcode it
+first_team = teams[0]
+first_workspace = requests.get(
+    f"https://manage.app.preset.io/api/v1/teams/{first_team['slug']}/workspaces/",
+    headers=headers,
+).json()["payload"][0]
+hostname = first_workspace["workspace_status"]["hostname"]
 
 dashboards = requests.get(
     f"https://{hostname}/api/v1/dashboard/",

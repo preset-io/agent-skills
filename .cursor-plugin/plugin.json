@@ -1,0 +1,34 @@
+{
+  "name": "Preset Agent Skills",
+  "version": "1.0.0",
+  "description": "AI agent skills for the Preset API — manage workspaces, dashboards, datasets, users, and row-level security.",
+  "publisher": "preset-io",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "skills": [
+    {
+      "name": "preset-api",
+      "path": "skills/preset-api.md",
+      "description": "Authenticate with the Preset Management API. Required by all other skills."
+    },
+    {
+      "name": "preset-workspaces",
+      "path": "skills/preset-workspaces.md",
+      "description": "List and manage Preset teams and workspaces, and their membership."
+    },
+    {
+      "name": "preset-dashboards",
+      "path": "skills/preset-dashboards.md",
+      "description": "Create, update, export, import, and embed Preset dashboards."
+    },
+    {
+      "name": "preset-datasets",
+      "path": "skills/preset-datasets.md",
+      "description": "Manage database connections and datasets (physical and virtual). Execute SQL queries."
+    },
+    {
+      "name": "preset-users",
+      "path": "skills/preset-users.md",
+      "description": "Manage users, roles, and row-level security in Preset workspaces."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "preset-io": {
+      "source": {
+        "source": "github",
+        "repo": "preset-io/preset-agent-skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "preset-io@preset-io": true
+  }
+}

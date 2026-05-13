@@ -64,7 +64,7 @@ const { payload } = await resp.json();
 const token = payload.access_token;
 ```
 
-The JWT is valid for **6 hours**. Cache it and re-request only when it expires (HTTP 401).
+The JWT is valid for **5 hours** by default. Cache it with a buffer and refresh on HTTP 401.
 
 ### Step 3 — Attach the token to every request
 
@@ -80,6 +80,8 @@ import os, time, requests
 
 class PresetClient:
     MGMT_BASE = os.environ.get("PRESET_API_BASE", "https://api.app.preset.io/v1")
+    TOKEN_TTL_SECONDS = 5 * 3600
+    TOKEN_EXPIRY_BUFFER_SECONDS = 5 * 60
 
     def __init__(self):
         self._token = None
@@ -87,7 +89,7 @@ class PresetClient:
         self._session = requests.Session()
 
     def _ensure_token(self):
-        if time.time() < self._token_expiry - 60:
+        if time.time() < self._token_expiry:
             return
         resp = self._session.post(
             f"{self.MGMT_BASE}/auth/",
@@ -98,25 +100,33 @@ class PresetClient:
         )
         resp.raise_for_status()
         self._token = resp.json()["payload"]["access_token"]
-        self._token_expiry = time.time() + 6 * 3600  # tokens live 6 h
+        self._token_expiry = (
+            time.time() + self.TOKEN_TTL_SECONDS - self.TOKEN_EXPIRY_BUFFER_SECONDS
+        )
 
-    def mgmt(self, method, path, **kwargs):
+    def _request_with_auth(self, method, url, **kwargs):
         self._ensure_token()
         self._session.headers.update({"Authorization": f"Bearer {self._token}"})
-        resp = self._session.request(method, f"{self.MGMT_BASE}{path}", **kwargs)
+        resp = self._session.request(method, url, **kwargs)
+        if resp.status_code == 401:
+            self._token_expiry = 0
+            self._ensure_token()
+            self._session.headers.update({"Authorization": f"Bearer {self._token}"})
+            resp = self._session.request(method, url, **kwargs)
         resp.raise_for_status()
+        return resp
+
+    def mgmt(self, method, path, **kwargs):
+        resp = self._request_with_auth(method, f"{self.MGMT_BASE}{path}", **kwargs)
         return resp.json()
 
     def workspace(self, method, workspace_hostname, path, **kwargs):
         """Call the per-workspace Superset API."""
-        self._ensure_token()
         self._session.headers.update({
-            "Authorization": f"Bearer {self._token}",
             "Content-Type": "application/json",
         })
         url = f"https://{workspace_hostname}/api/v1{path}"
-        resp = self._session.request(method, url, **kwargs)
-        resp.raise_for_status()
+        resp = self._request_with_auth(method, url, **kwargs)
         return resp.json()
 
 client = PresetClient()
@@ -129,7 +139,7 @@ client = PresetClient()
 | Management API | `https://api.app.preset.io/v1` |
 | Workspace API (US region) | `https://<workspace-hostname>/api/v1` |
 
-To find a workspace's hostname, call `GET /v1/teams/{team_slug}/workspaces/` through the Management API and inspect the top-level `hostname` field (see **preset-workspaces** skill). For sandbox or staging environments, set `PRESET_API_BASE` to the matching public API host.
+To find a workspace's hostname, call `GET /v1/teams/{team_name}/workspaces/` through the Management API and inspect the top-level `hostname` field (see **preset-workspaces** skill). For sandbox or staging environments, set `PRESET_API_BASE` to the matching public API host.
 
 ## Common response codes
 
@@ -176,9 +186,9 @@ query = rison.dumps({
     "page_size": 25,
     "order_column": "changed_on_delta_humanized",
     "order_direction": "desc",
-    "filters": [{"col": "published", "opr": "FilterEqual", "value": True}],
+    "filters": [{"col": "published", "opr": "eq", "value": True}],
 })
-# ?q=(filters:!((col:published,opr:FilterEqual,value:!t)),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)
+# ?q=(filters:!((col:published,opr:eq,value:!t)),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)
 ```
 
 ## Security best practices
@@ -187,6 +197,6 @@ query = rison.dumps({
 - Never log or print access tokens.
 - Rotate API keys periodically from the Preset management console.
 - Scope API keys to the minimum permissions required.
-- Tokens expire in 6 hours; implement automatic refresh on 401 errors.
+- Tokens expire in 5 hours by default; cache with a buffer and retry once with a refreshed token on 401 errors.
 - Default to read-only API calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target and payload and get explicit user confirmation.
 - These Markdown skills call the public APIs directly. They do not automatically apply MCP runtime guardrails such as workspace binding, tool-level permission checks, MCP request-source tagging, or MCP metrics.

@@ -40,8 +40,8 @@ Useful filter examples for the Rison-encoded `q` parameter:
 
 | Goal | Filter |
 |---|---|
-| Published only | `filters:!((col:published,opr:FilterEqual,value:!t))` |
-| By title substring | `filters:!((col:title,opr:DashboardTitleOrSlugFilter,value:Sales))` |
+| Published only | `filters:!((col:published,opr:eq,value:!t))` |
+| By title or slug substring | `filters:!((col:dashboard_title,opr:title_or_slug,value:Sales))` |
 | Sort by last modified | `order_column:changed_on_delta_humanized,order_direction:desc` |
 
 ## Get a single dashboard

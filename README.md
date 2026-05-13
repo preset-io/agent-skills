@@ -85,7 +85,7 @@ token = resp.json()["payload"]["access_token"]
 headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 ```
 
-The JWT is valid for 6 hours. See **api/skills/preset-api.md** for a reusable client with automatic token refresh.
+The JWT is valid for 5 hours by default. See **api/skills/preset-api.md** for a reusable client with automatic token refresh.
 
 Use `PRESET_API_BASE` to target non-production environments; production examples use `https://api.app.preset.io/v1`.
 
@@ -98,7 +98,7 @@ teams = requests.get(
 
 for team in teams:
     workspaces = requests.get(
-        f"https://api.app.preset.io/v1/teams/{team['slug']}/workspaces/",
+        f"https://api.app.preset.io/v1/teams/{team['name']}/workspaces/",
         headers=headers,
     ).json()["payload"]
     for ws in workspaces:
@@ -113,7 +113,7 @@ Use the hostname returned by step 3 — never use a hardcoded value:
 # Derive hostname from the workspace listing — do not hardcode it
 first_team = teams[0]
 first_workspace = requests.get(
-    f"https://api.app.preset.io/v1/teams/{first_team['slug']}/workspaces/",
+    f"https://api.app.preset.io/v1/teams/{first_team['name']}/workspaces/",
     headers=headers,
 ).json()["payload"][0]
 hostname = first_workspace["hostname"]

@@ -11,7 +11,7 @@ Manage Preset teams and workspaces via the Management API.
 |---|---|
 | **Team** | The top-level organizational unit in Preset. Maps to a Preset subscription. |
 | **Workspace** | An isolated Superset instance inside a team. Each workspace has its own dashboards, charts, datasets, and users. |
-| **Team slug** | A URL-safe identifier for the team (e.g., `acme-data`). Returned by `GET /v1/teams/`. |
+| **Team name** | The stable team identifier used in Management API paths (e.g., `acme-data`). Returned by `GET /v1/teams/` as `name`. |
 | **Workspace hostname** | The unique host of a workspace's Superset API (e.g., `1a2b3c4d.us1a.preset.io`). |
 
 ## Teams
@@ -26,15 +26,15 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 ```python
 teams = client.mgmt("GET", "/teams/")["payload"]
 for t in teams:
-    print(t["name"], t["slug"])
+    print(t["name"], t.get("title"))
 ```
 
 **Response fields:**
 
 | Field | Description |
 |---|---|
-| `name` | Human-readable team name |
-| `slug` | URL-safe team identifier used in subsequent calls |
+| `name` | Stable team identifier used in subsequent API paths |
+| `title` | Human-readable team title |
 | `id` | Numeric team ID |
 | `created_on` | ISO 8601 creation timestamp |
 
@@ -42,11 +42,11 @@ for t in teams:
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_slug}/" | jq '.payload'
+  "https://api.app.preset.io/v1/teams/{team_name}/" | jq '.payload'
 ```
 
 ```python
-team = client.mgmt("GET", f"/teams/{team_slug}/")["payload"]
+team = client.mgmt("GET", f"/teams/{team_name}/")["payload"]
 ```
 
 ## Workspaces
@@ -55,11 +55,11 @@ team = client.mgmt("GET", f"/teams/{team_slug}/")["payload"]
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_slug}/workspaces/" | jq '.payload'
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/" | jq '.payload'
 ```
 
 ```python
-workspaces = client.mgmt("GET", f"/teams/{team_slug}/workspaces/")["payload"]
+workspaces = client.mgmt("GET", f"/teams/{team_name}/workspaces/")["payload"]
 for ws in workspaces:
     print(ws["title"], ws["hostname"], ws["workspace_status"])
 ```
@@ -78,25 +78,25 @@ for ws in workspaces:
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_slug}/workspaces/{workspace_id}/" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/" \
   | jq '.payload'
 ```
 
 ```python
-workspace = client.mgmt("GET", f"/teams/{team_slug}/workspaces/{workspace_id}/")["payload"]
+workspace = client.mgmt("GET", f"/teams/{team_name}/workspaces/{workspace_id}/")["payload"]
 hostname = workspace["hostname"]
 ```
 
 ### Helper: resolve workspace hostname from title
 
 ```python
-def get_workspace_hostname(client, team_slug, workspace_title):
+def get_workspace_hostname(client, team_name, workspace_title):
     """Return the API hostname for a workspace by its display title."""
-    workspaces = client.mgmt("GET", f"/teams/{team_slug}/workspaces/")["payload"]
+    workspaces = client.mgmt("GET", f"/teams/{team_name}/workspaces/")["payload"]
     for ws in workspaces:
         if ws["title"].lower() == workspace_title.lower():
             return ws["hostname"]
-    raise ValueError(f"Workspace '{workspace_title}' not found in team '{team_slug}'")
+    raise ValueError(f"Workspace '{workspace_title}' not found in team '{team_name}'")
 ```
 
 ## Workspace membership
@@ -105,14 +105,14 @@ def get_workspace_hostname(client, team_slug, workspace_title):
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_slug}/workspaces/{workspace_id}/memberships/" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/memberships/" \
   | jq '.payload'
 ```
 
 ```python
 members = client.mgmt(
     "GET",
-    f"/teams/{team_slug}/workspaces/{workspace_id}/memberships/",
+    f"/teams/{team_name}/workspaces/{workspace_id}/memberships/",
 )["payload"]
 ```
 
@@ -127,27 +127,35 @@ members = client.mgmt(
 
 ### Invite a user to a team and workspace
 
+Resolve the intended team role first. The common member role is usually named `User`, but use the role ID returned by your API response rather than hard-coding it:
+
+```python
+roles = client.mgmt("GET", "/team-roles/")["payload"]
+team_role_id = next(role["id"] for role in roles if role["name"] == "User")
+```
+
 ```bash
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  "https://api.app.preset.io/v1/teams/{team_slug}/invites/" \
-  -d '{"email": "jdoe@example.com", "workspace_ids": [123], "workspace_role_identifier": "PresetGamma"}'
+  "https://api.app.preset.io/v1/teams/{team_name}/invites/" \
+  -d '{"email": "jdoe@example.com", "team_role_id": 2, "workspace_ids": [123], "workspace_role_identifier": "PresetGamma"}'
 ```
 
 ```python
 client.mgmt(
     "POST",
-    f"/teams/{team_slug}/invites/",
+    f"/teams/{team_name}/invites/",
     json={
         "email": "jdoe@example.com",
+        "team_role_id": team_role_id,
         "workspace_ids": [workspace_id],
         "workspace_role_identifier": "PresetGamma",
     },
 )
 ```
 
-Use the invite API to add users who are not already workspace members. Use `PUT /teams/{team_slug}/workspaces/{workspace_id}/membership` for role updates to existing users.
+Use the invite API to add users who are not already workspace members. Use `PUT /teams/{team_name}/workspaces/{workspace_id}/membership` for role updates to existing users.
 
 ### Update a member's role
 
@@ -155,14 +163,14 @@ Use the invite API to add users who are not already workspace members. Use `PUT 
 curl -s -X PUT \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  "https://api.app.preset.io/v1/teams/{team_slug}/workspaces/{workspace_id}/membership" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/membership" \
   -d '{"user_id": 42, "role_identifier": "Admin"}'
 ```
 
 ```python
 client.mgmt(
     "PUT",
-    f"/teams/{team_slug}/workspaces/{workspace_id}/membership",
+    f"/teams/{team_name}/workspaces/{workspace_id}/membership",
     json={"user_id": user_id, "role_identifier": "Admin"},
 )
 ```
@@ -188,11 +196,11 @@ Valid default `role_identifier` values:
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_slug}/memberships/" | jq '.payload'
+  "https://api.app.preset.io/v1/teams/{team_name}/memberships/" | jq '.payload'
 ```
 
 ```python
-team_members = client.mgmt("GET", f"/teams/{team_slug}/memberships/")["payload"]
+team_members = client.mgmt("GET", f"/teams/{team_name}/memberships/")["payload"]
 ```
 
 ### Invite a user to a team only
@@ -201,15 +209,15 @@ team_members = client.mgmt("GET", f"/teams/{team_slug}/memberships/")["payload"]
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  "https://api.app.preset.io/v1/teams/{team_slug}/invites/" \
-  -d '{"email": "newmember@example.com"}'
+  "https://api.app.preset.io/v1/teams/{team_name}/invites/" \
+  -d '{"email": "newmember@example.com", "team_role_id": 2}'
 ```
 
 ```python
 client.mgmt(
     "POST",
-    f"/teams/{team_slug}/invites/",
-    json={"email": "newmember@example.com"},
+    f"/teams/{team_name}/invites/",
+    json={"email": "newmember@example.com", "team_role_id": team_role_id},
 )
 ```
 
@@ -220,7 +228,7 @@ client.mgmt(
 ```python
 teams = client.mgmt("GET", "/teams/")["payload"]
 for team in teams:
-    workspaces = client.mgmt("GET", f"/teams/{team['slug']}/workspaces/")["payload"]
+    workspaces = client.mgmt("GET", f"/teams/{team['name']}/workspaces/")["payload"]
     for ws in workspaces:
         hostname = ws["hostname"]
         state = ws["workspace_status"]

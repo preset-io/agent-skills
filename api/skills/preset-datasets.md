@@ -95,9 +95,9 @@ Useful filters:
 
 | Goal | Filter expression |
 |---|---|
-| Physical only | `filters:!((col:is_sqllab_view,opr:FilterEqual,value:!f))` |
-| Virtual only | `filters:!((col:is_sqllab_view,opr:FilterEqual,value:!t))` |
-| By database | `filters:!((col:database,opr:DatasetIsNullOrEmptyFilter,value:1))` |
+| Physical only | `filters:!((col:sql,opr:dataset_is_null_or_empty,value:!t))` |
+| Virtual only | `filters:!((col:sql,opr:dataset_is_null_or_empty,value:!f))` |
+| By database | `filters:!((col:database,opr:rel_o_m,value:1))` |
 
 ## Get a single dataset
 

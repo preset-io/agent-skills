@@ -2,7 +2,7 @@
 
 Multi-provider agent skills for [Preset](https://preset.io) — managed, cloud-hosted Apache Superset. The same skill content runs in **Claude Code**, **Cursor**, **OpenAI Codex**, and **GitHub Copilot**.
 
-This file is auto-loaded by OpenAI Codex. Other providers discover skills from `skills/`.
+This file is auto-loaded by OpenAI Codex. Other providers discover skills from `api/skills/`.
 
 ## Installation
 
@@ -19,7 +19,7 @@ Configure `.cursor-plugin/plugin.json` from this repo as a Cursor plugin source.
 
 ### OpenAI Codex
 
-Codex auto-loads this `AGENTS.md` and the `skills/` directory from the repo root.
+Codex auto-loads this `AGENTS.md` and the `api/skills/` directory from the repo root.
 
 ### GitHub Copilot
 

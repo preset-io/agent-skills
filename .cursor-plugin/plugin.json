@@ -7,27 +7,27 @@
   "skills": [
     {
       "name": "preset-api",
-      "path": "skills/preset-api.md",
+      "path": "api/skills/preset-api.md",
       "description": "Authenticate with the Preset Management API. Required by all other skills."
     },
     {
       "name": "preset-workspaces",
-      "path": "skills/preset-workspaces.md",
+      "path": "api/skills/preset-workspaces.md",
       "description": "List and manage Preset teams and workspaces, and their membership."
     },
     {
       "name": "preset-dashboards",
-      "path": "skills/preset-dashboards.md",
+      "path": "api/skills/preset-dashboards.md",
       "description": "Create, update, export, import, and embed Preset dashboards."
     },
     {
       "name": "preset-datasets",
-      "path": "skills/preset-datasets.md",
+      "path": "api/skills/preset-datasets.md",
       "description": "Manage database connections and datasets (physical and virtual). Execute SQL queries."
     },
     {
       "name": "preset-users",
-      "path": "skills/preset-users.md",
+      "path": "api/skills/preset-users.md",
       "description": "Manage users, roles, and row-level security in Preset workspaces."
     }
   ]

@@ -84,7 +84,7 @@ token = resp.json()["payload"]["access_token"]
 headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 ```
 
-The JWT is valid for 6 hours. See **skills/preset-api.md** for a reusable client with automatic token refresh.
+The JWT is valid for 6 hours. See **api/skills/preset-api.md** for a reusable client with automatic token refresh.
 
 ### 3 — Discover your workspaces
 

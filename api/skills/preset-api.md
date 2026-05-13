@@ -171,7 +171,7 @@ Management API list endpoints return paginated results:
 }
 ```
 
-Use `?page=N&page_size=100` to paginate. Superset API endpoints use cursor-based pagination with `?q=(page:0,page_size:100)` (Rison-encoded) query parameters.
+Use `?page=N&page_size=100` to paginate Management API lists. Superset API list endpoints use page-number pagination inside the Rison-encoded `q` parameter, such as `?q=(page:0,page_size:100)`.
 
 ## Rison encoding for Superset API queries
 

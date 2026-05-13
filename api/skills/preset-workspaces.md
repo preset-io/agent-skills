@@ -120,9 +120,10 @@ members = client.mgmt(
 
 | Field | Description |
 |---|---|
+| `user.id` | Numeric user ID required by role-update requests |
 | `user.email` | Member's email address |
 | `user.username` | Member's Preset username |
-| `role_identifier` | Preset workspace role identifier such as `Admin`, `PresetAlpha`, `PresetBeta`, `PresetGamma`, `PresetDelta`, `PresetReportsOnly`, `PresetDashboardsOnly`, `PresetEpsilon`, `PresetNoAccess`, or `PresetLimitedAdmin` |
+| `workspace_role.role_identifier` | Preset workspace role identifier such as `Admin`, `PresetAlpha`, `PresetBeta`, `PresetGamma`, `PresetDelta`, `PresetReportsOnly`, `PresetDashboardsOnly`, `PresetEpsilon`, `PresetNoAccess`, or `PresetLimitedAdmin` |
 | `active` | Whether the membership is active |
 
 ### Invite a user to a team and workspace
@@ -173,6 +174,15 @@ client.mgmt(
     f"/teams/{team_name}/workspaces/{workspace_id}/membership",
     json={"user_id": user_id, "role_identifier": "Admin"},
 )
+```
+
+Resolve `user_id` from the workspace membership response before updating a role:
+
+```python
+member = next(
+    m for m in members if m["user"]["email"].lower() == "jdoe@example.com"
+)
+user_id = member["user"]["id"]
 ```
 
 Valid default `role_identifier` values:

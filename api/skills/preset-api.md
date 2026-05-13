@@ -6,7 +6,7 @@ Authenticate and interact with the Preset Management API. This skill is a prereq
 
 Preset is a managed, cloud-hosted Apache Superset platform. It exposes two API layers:
 
-1. **Preset Management API** (`https://manage.app.preset.io/api/v1/`) — manage teams, workspaces, users, roles, and billing.
+1. **Preset Management API** (`https://api.app.preset.io/v1/`) — manage teams, workspaces, users, roles, and billing.
 2. **Workspace Superset API** (`https://<workspace-hostname>/api/v1/`) — per-workspace operations: dashboards, charts, datasets, databases, saved queries, and SQL execution.
 
 All requests require a bearer token obtained through the authentication flow below.
@@ -31,7 +31,7 @@ export PRESET_CLIENT_SECRET="your-api-token-secret"
 ### Step 2 — Exchange credentials for a JWT
 
 ```bash
-curl -s -X POST "https://manage.app.preset.io/api/v1/auth/" \
+curl -s -X POST "https://api.app.preset.io/v1/auth/" \
   -H "Content-Type: application/json" \
   -d "{\"name\": \"$PRESET_CLIENT_ID\", \"secret\": \"$PRESET_CLIENT_SECRET\"}" \
   | jq -r '.payload.access_token'
@@ -41,7 +41,7 @@ curl -s -X POST "https://manage.app.preset.io/api/v1/auth/" \
 import os, requests
 
 resp = requests.post(
-    "https://manage.app.preset.io/api/v1/auth/",
+    "https://api.app.preset.io/v1/auth/",
     json={
         "name": os.environ["PRESET_CLIENT_ID"],
         "secret": os.environ["PRESET_CLIENT_SECRET"],
@@ -52,7 +52,7 @@ token = resp.json()["payload"]["access_token"]
 ```
 
 ```javascript
-const resp = await fetch("https://manage.app.preset.io/api/v1/auth/", {
+const resp = await fetch("https://api.app.preset.io/v1/auth/", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -79,7 +79,7 @@ Content-Type: application/json
 import os, time, requests
 
 class PresetClient:
-    MGMT_BASE = "https://manage.app.preset.io/api/v1"
+    MGMT_BASE = os.environ.get("PRESET_API_BASE", "https://api.app.preset.io/v1")
 
     def __init__(self):
         self._token = None
@@ -126,10 +126,10 @@ client = PresetClient()
 
 | Layer | Base URL |
 |---|---|
-| Management API | `https://manage.app.preset.io/api/v1` |
+| Management API | `https://api.app.preset.io/v1` |
 | Workspace API (US region) | `https://<workspace-hostname>/api/v1` |
 
-To find a workspace's hostname, call `GET /api/v1/teams/{team_slug}/workspaces/` and inspect the `workspace_status.hostname` field (see **preset-workspaces** skill).
+To find a workspace's hostname, call `GET /v1/teams/{team_slug}/workspaces/` through the Management API and inspect the top-level `hostname` field (see **preset-workspaces** skill). For sandbox or staging environments, set `PRESET_API_BASE` to the matching public API host.
 
 ## Common response codes
 
@@ -188,3 +188,5 @@ query = rison.dumps({
 - Rotate API keys periodically from the Preset management console.
 - Scope API keys to the minimum permissions required.
 - Tokens expire in 6 hours; implement automatic refresh on 401 errors.
+- Default to read-only API calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target and payload and get explicit user confirmation.
+- These Markdown skills call the public APIs directly. They do not automatically apply MCP runtime guardrails such as workspace binding, tool-level permission checks, MCP request-source tagging, or MCP metrics.

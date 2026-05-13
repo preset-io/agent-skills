@@ -30,10 +30,11 @@ Add `.github/copilot-instructions.md` referencing the skill files, or include th
 Agents activate these automatically based on what the user is trying to do.
 
 - **preset-api** — Authenticate with the Preset Management API (API token → JWT bearer token). Base URLs, pagination, Rison encoding, error codes, and security best practices. **Required by all other skills.**
-- **preset-workspaces** — List and inspect teams and workspaces. Manage workspace membership (add/update roles). Audit access.
-- **preset-dashboards** — Create, retrieve, and update dashboards. Export/import dashboard bundles. Manage embedded dashboard configuration and generate guest tokens for embedding.
-- **preset-datasets** — Manage database connections and datasets (physical tables and virtual SQL views). Manage columns, metrics, and cache settings. Execute SQL queries via SQL Lab.
-- **preset-users** — Manage Superset users and roles. Apply row-level security (RLS) rules for multi-tenant and fine-grained data access control.
+- **preset-workspaces** — List and inspect teams and workspaces, resolve workspace hostnames, invite users, and update workspace membership with explicit confirmation.
+- **preset-dashboards** — Inspect dashboards, dashboard charts, and dashboard datasets in a workspace.
+- **preset-datasets** — Inspect database connections, schemas, tables, datasets, columns, and metrics in a workspace.
+
+User, role, RLS, guest-token, import/export, SQL execution, and other mutation workflows are intentionally deferred to later phases.
 
 See [`README.md`](./README.md) for installation instructions and team deployment.
 
@@ -56,7 +57,7 @@ Generate API keys at [manage.app.preset.io](https://manage.app.preset.io) → av
 import os, requests
 
 resp = requests.post(
-    "https://manage.app.preset.io/api/v1/auth/",
+    "https://api.app.preset.io/v1/auth/",
     json={
         "name": os.environ["PRESET_CLIENT_ID"],
         "secret": os.environ["PRESET_CLIENT_SECRET"],
@@ -70,16 +71,16 @@ headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json
 
 ```python
 teams = requests.get(
-    "https://manage.app.preset.io/api/v1/teams/", headers=headers
+    "https://api.app.preset.io/v1/teams/", headers=headers
 ).json()["payload"]
 
 for team in teams:
     workspaces = requests.get(
-        f"https://manage.app.preset.io/api/v1/teams/{team['slug']}/workspaces/",
+        f"https://api.app.preset.io/v1/teams/{team['slug']}/workspaces/",
         headers=headers,
     ).json()["payload"]
     for ws in workspaces:
-        print(team["name"], "/", ws["title"], "→", ws["workspace_status"]["hostname"])
+        print(team["name"], "/", ws["title"], "→", ws["hostname"])
 ```
 
 ### 4 — Call workspace APIs
@@ -90,10 +91,10 @@ Use the hostname returned by step 3 — never use a hardcoded value. For example
 # Derive hostname from the workspace listing — do not hardcode it
 first_team = teams[0]
 first_workspace = requests.get(
-    f"https://manage.app.preset.io/api/v1/teams/{first_team['slug']}/workspaces/",
+    f"https://api.app.preset.io/v1/teams/{first_team['slug']}/workspaces/",
     headers=headers,
 ).json()["payload"][0]
-hostname = first_workspace["workspace_status"]["hostname"]
+hostname = first_workspace["hostname"]
 
 dashboards = requests.get(
     f"https://{hostname}/api/v1/dashboard/",
@@ -102,3 +103,7 @@ dashboards = requests.get(
 ```
 
 When a user specifies a particular team or workspace by name, filter the listing results to find the matching hostname rather than assuming any specific value.
+
+## Safety policy
+
+Default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target and payload and get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.

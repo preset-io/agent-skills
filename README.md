@@ -30,10 +30,11 @@ Agents activate these automatically based on the user's request.
 | Skill | Description |
 |---|---|
 | **preset-api** | Authenticate with the Preset Management API (client ID + secret → JWT bearer token). Covers base URLs, pagination, Rison-encoded query parameters, error codes, rate limits, and security best practices. **Required by all other skills.** |
-| **preset-workspaces** | List and inspect teams and workspaces. Add and update workspace members. Audit team and workspace access. |
-| **preset-dashboards** | Create, retrieve, and update dashboards. Export/import dashboard bundles across workspaces. Configure embedded dashboards and generate guest tokens. |
-| **preset-datasets** | Manage database connections (create, test, update). Manage datasets — physical tables and virtual SQL-defined views. Add columns and metrics. Sync schema changes. Execute SQL Lab queries. |
-| **preset-users** | Manage Superset users and fine-grained roles. Create and assign custom roles. Apply row-level security (RLS) rules for multi-tenant and per-role data access control. |
+| **preset-workspaces** | List and inspect teams and workspaces, resolve workspace hostnames, invite users, and update workspace membership with explicit confirmation. |
+| **preset-dashboards** | Inspect dashboards, dashboard charts, and dashboard datasets in a workspace. |
+| **preset-datasets** | Inspect database connections, schemas, tables, datasets, columns, and metrics in a workspace. |
+
+User, role, RLS, guest-token, import/export, SQL execution, and other mutation workflows are intentionally deferred to later phases.
 
 ## Team Deployment (Claude Code)
 
@@ -74,7 +75,7 @@ export PRESET_CLIENT_SECRET="your-api-token-secret"
 import os, requests
 
 resp = requests.post(
-    "https://manage.app.preset.io/api/v1/auth/",
+    "https://api.app.preset.io/v1/auth/",
     json={
         "name": os.environ["PRESET_CLIENT_ID"],
         "secret": os.environ["PRESET_CLIENT_SECRET"],
@@ -86,20 +87,22 @@ headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json
 
 The JWT is valid for 6 hours. See **api/skills/preset-api.md** for a reusable client with automatic token refresh.
 
+Use `PRESET_API_BASE` to target non-production environments; production examples use `https://api.app.preset.io/v1`.
+
 ### 3 — Discover your workspaces
 
 ```python
 teams = requests.get(
-    "https://manage.app.preset.io/api/v1/teams/", headers=headers
+    "https://api.app.preset.io/v1/teams/", headers=headers
 ).json()["payload"]
 
 for team in teams:
     workspaces = requests.get(
-        f"https://manage.app.preset.io/api/v1/teams/{team['slug']}/workspaces/",
+        f"https://api.app.preset.io/v1/teams/{team['slug']}/workspaces/",
         headers=headers,
     ).json()["payload"]
     for ws in workspaces:
-        print(team["name"], "/", ws["title"], "→", ws["workspace_status"]["hostname"])
+        print(team["name"], "/", ws["title"], "→", ws["hostname"])
 ```
 
 ### 4 — Call workspace APIs
@@ -110,10 +113,10 @@ Use the hostname returned by step 3 — never use a hardcoded value:
 # Derive hostname from the workspace listing — do not hardcode it
 first_team = teams[0]
 first_workspace = requests.get(
-    f"https://manage.app.preset.io/api/v1/teams/{first_team['slug']}/workspaces/",
+    f"https://api.app.preset.io/v1/teams/{first_team['slug']}/workspaces/",
     headers=headers,
 ).json()["payload"][0]
-hostname = first_workspace["workspace_status"]["hostname"]
+hostname = first_workspace["hostname"]
 
 dashboards = requests.get(
     f"https://{hostname}/api/v1/dashboard/",
@@ -125,10 +128,14 @@ dashboards = requests.get(
 
 | Layer | Base URL |
 |---|---|
-| Preset Management API | `https://manage.app.preset.io/api/v1/` |
+| Preset Management API | `https://api.app.preset.io/v1/` |
 | Workspace Superset API | `https://{workspace_hostname}/api/v1/` |
 
-Full API documentation is available at [docs.preset.io](https://docs.preset.io).
+Full Superset workspace API documentation is available at [superset.apache.org/developer-docs/api](https://superset.apache.org/developer-docs/api/). Treat the Preset Management API examples in this repo as Preset-specific guidance.
+
+## Safety policy
+
+Agents should default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target and payload and get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
 
 ## License
 

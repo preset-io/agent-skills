@@ -3,6 +3,7 @@
 Manage Preset teams and workspaces via the Management API.
 
 > **Prerequisite:** Complete authentication using the **preset-api** skill before calling any endpoint below.
+> **Safety:** Membership changes and invitations mutate access. Confirm the exact user, team, workspace, and role with the user before making those calls.
 
 ## Key concepts
 
@@ -10,7 +11,7 @@ Manage Preset teams and workspaces via the Management API.
 |---|---|
 | **Team** | The top-level organizational unit in Preset. Maps to a Preset subscription. |
 | **Workspace** | An isolated Superset instance inside a team. Each workspace has its own dashboards, charts, datasets, and users. |
-| **Team slug** | A URL-safe identifier for the team (e.g., `acme-data`). Returned by `GET /api/v1/teams/`. |
+| **Team slug** | A URL-safe identifier for the team (e.g., `acme-data`). Returned by `GET /v1/teams/`. |
 | **Workspace hostname** | The unique host of a workspace's Superset API (e.g., `1a2b3c4d.us1a.preset.io`). |
 
 ## Teams
@@ -19,7 +20,7 @@ Manage Preset teams and workspaces via the Management API.
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://manage.app.preset.io/api/v1/teams/" | jq '.payload'
+  "https://api.app.preset.io/v1/teams/" | jq '.payload'
 ```
 
 ```python
@@ -41,7 +42,7 @@ for t in teams:
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/" | jq '.payload'
+  "https://api.app.preset.io/v1/teams/{team_slug}/" | jq '.payload'
 ```
 
 ```python
@@ -54,13 +55,13 @@ team = client.mgmt("GET", f"/teams/{team_slug}/")["payload"]
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/workspaces/" | jq '.payload'
+  "https://api.app.preset.io/v1/teams/{team_slug}/workspaces/" | jq '.payload'
 ```
 
 ```python
 workspaces = client.mgmt("GET", f"/teams/{team_slug}/workspaces/")["payload"]
 for ws in workspaces:
-    print(ws["title"], ws["workspace_status"]["hostname"])
+    print(ws["title"], ws["hostname"], ws["workspace_status"])
 ```
 
 **Response fields:**
@@ -69,21 +70,21 @@ for ws in workspaces:
 |---|---|
 | `id` | Numeric workspace ID |
 | `title` | Human-readable workspace title |
-| `workspace_status.hostname` | Hostname for the workspace's Superset API |
-| `workspace_status.state` | `"running"`, `"starting"`, `"stopped"`, etc. |
+| `hostname` | Hostname for the workspace's Superset API |
+| `workspace_status` | Status enum such as `READY`, `HIBERNATED`, `UPGRADING`, or `ERROR` |
 | `region` | Cloud region (e.g., `"us-east-1"`) |
 
 ### Get a specific workspace
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/workspaces/{workspace_id}/" \
+  "https://api.app.preset.io/v1/teams/{team_slug}/workspaces/{workspace_id}/" \
   | jq '.payload'
 ```
 
 ```python
 workspace = client.mgmt("GET", f"/teams/{team_slug}/workspaces/{workspace_id}/")["payload"]
-hostname = workspace["workspace_status"]["hostname"]
+hostname = workspace["hostname"]
 ```
 
 ### Helper: resolve workspace hostname from title
@@ -94,7 +95,7 @@ def get_workspace_hostname(client, team_slug, workspace_title):
     workspaces = client.mgmt("GET", f"/teams/{team_slug}/workspaces/")["payload"]
     for ws in workspaces:
         if ws["title"].lower() == workspace_title.lower():
-            return ws["workspace_status"]["hostname"]
+            return ws["hostname"]
     raise ValueError(f"Workspace '{workspace_title}' not found in team '{team_slug}'")
 ```
 
@@ -104,7 +105,7 @@ def get_workspace_hostname(client, team_slug, workspace_title):
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/workspaces/{workspace_id}/memberships/" \
+  "https://api.app.preset.io/v1/teams/{team_slug}/workspaces/{workspace_id}/memberships/" \
   | jq '.payload'
 ```
 
@@ -121,31 +122,32 @@ members = client.mgmt(
 |---|---|
 | `user.email` | Member's email address |
 | `user.username` | Member's Preset username |
-| `role_identifier` | `"Admin"`, `"Editor"`, or `"Viewer"` |
+| `role_identifier` | Preset workspace role identifier such as `Admin`, `PresetAlpha`, `PresetBeta`, `PresetGamma`, `PresetDelta`, `PresetReportsOnly`, `PresetDashboardsOnly`, `PresetEpsilon`, `PresetNoAccess`, or `PresetLimitedAdmin` |
 | `active` | Whether the membership is active |
 
-### Add a member to a workspace
+### Invite a user to a team and workspace
 
 ```bash
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/workspaces/{workspace_id}/memberships/" \
-  -d '{"role_identifier": "Editor", "user": {"username": "jdoe@example.com"}}'
+  "https://api.app.preset.io/v1/teams/{team_slug}/invites/" \
+  -d '{"email": "jdoe@example.com", "workspace_ids": [123], "workspace_role_identifier": "PresetGamma"}'
 ```
 
 ```python
 client.mgmt(
     "POST",
-    f"/teams/{team_slug}/workspaces/{workspace_id}/memberships/",
+    f"/teams/{team_slug}/invites/",
     json={
-        "role_identifier": "Editor",  # "Admin", "Editor", or "Viewer"
-        "user": {"username": "jdoe@example.com"},
+        "email": "jdoe@example.com",
+        "workspace_ids": [workspace_id],
+        "workspace_role_identifier": "PresetGamma",
     },
 )
 ```
 
-Valid `role_identifier` values: `"Admin"`, `"Editor"`, `"Viewer"`.
+Use the invite API to add users who are not already workspace members. Use `PUT /teams/{team_slug}/workspaces/{workspace_id}/membership` for role updates to existing users.
 
 ### Update a member's role
 
@@ -153,17 +155,32 @@ Valid `role_identifier` values: `"Admin"`, `"Editor"`, `"Viewer"`.
 curl -s -X PUT \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/workspaces/{workspace_id}/memberships/{membership_id}/" \
-  -d '{"role_identifier": "Admin"}'
+  "https://api.app.preset.io/v1/teams/{team_slug}/workspaces/{workspace_id}/membership" \
+  -d '{"user_id": 42, "role_identifier": "Admin"}'
 ```
 
 ```python
 client.mgmt(
     "PUT",
-    f"/teams/{team_slug}/workspaces/{workspace_id}/memberships/{membership_id}/",
-    json={"role_identifier": "Admin"},
+    f"/teams/{team_slug}/workspaces/{workspace_id}/membership",
+    json={"user_id": user_id, "role_identifier": "Admin"},
 )
 ```
+
+Valid default `role_identifier` values:
+
+| Identifier | Friendly role |
+|---|---|
+| `Admin` | Workspace Admin |
+| `PresetLimitedAdmin` | Limited Admin |
+| `PresetAlpha` | Primary Creator |
+| `PresetBeta` | Secondary Creator |
+| `PresetGamma` | Limited Creator |
+| `PresetDelta` | Visualization Creator |
+| `PresetReportsOnly` | Viewer |
+| `PresetDashboardsOnly` | Dashboard Viewer |
+| `PresetEpsilon` | Dashboard Interactor |
+| `PresetNoAccess` | No Access |
 
 ## Team membership
 
@@ -171,28 +188,28 @@ client.mgmt(
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/memberships/" | jq '.payload'
+  "https://api.app.preset.io/v1/teams/{team_slug}/memberships/" | jq '.payload'
 ```
 
 ```python
 team_members = client.mgmt("GET", f"/teams/{team_slug}/memberships/")["payload"]
 ```
 
-### Invite a user to a team
+### Invite a user to a team only
 
 ```bash
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  "https://manage.app.preset.io/api/v1/teams/{team_slug}/memberships/" \
-  -d '{"email": "newmember@example.com", "role_identifier": "Member"}'
+  "https://api.app.preset.io/v1/teams/{team_slug}/invites/" \
+  -d '{"email": "newmember@example.com"}'
 ```
 
 ```python
 client.mgmt(
     "POST",
-    f"/teams/{team_slug}/memberships/",
-    json={"email": "newmember@example.com", "role_identifier": "Member"},
+    f"/teams/{team_slug}/invites/",
+    json={"email": "newmember@example.com"},
 )
 ```
 
@@ -205,8 +222,8 @@ teams = client.mgmt("GET", "/teams/")["payload"]
 for team in teams:
     workspaces = client.mgmt("GET", f"/teams/{team['slug']}/workspaces/")["payload"]
     for ws in workspaces:
-        hostname = ws["workspace_status"]["hostname"]
-        state = ws["workspace_status"]["state"]
+        hostname = ws["hostname"]
+        state = ws["workspace_status"]
         print(f"{team['name']} / {ws['title']} — {hostname} ({state})")
 ```
 
@@ -214,11 +231,11 @@ for team in teams:
 
 ```python
 def workspace_is_ready(ws):
-    return ws["workspace_status"]["state"] == "running"
+    return ws["workspace_status"] == "READY"
 
 for ws in workspaces:
     if not workspace_is_ready(ws):
-        print(f"Skipping {ws['title']}: workspace is {ws['workspace_status']['state']}")
+        print(f"Skipping {ws['title']}: workspace is {ws['workspace_status']}")
         continue
     # safe to make Superset API calls
 ```

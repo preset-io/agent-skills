@@ -165,13 +165,13 @@ Management API list endpoints return paginated results:
 ```json
 {
   "payload": [...],
-  "total": 42,
-  "page": 1,
-  "page_size": 25
+  "meta": {
+    "count": 42
+  }
 }
 ```
 
-Use `?page=N&page_size=100` to paginate Management API lists. Superset API list endpoints use page-number pagination inside the Rison-encoded `q` parameter, such as `?q=(page:0,page_size:100)`.
+Use `?page_number=1&page_size=100` to paginate Management API lists. `page_number` is 1-based. Superset API list endpoints use page-number pagination inside the Rison-encoded `q` parameter, such as `?q=(page:0,page_size:100)`.
 
 ## Rison encoding for Superset API queries
 

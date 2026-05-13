@@ -1,17 +1,14 @@
 # Preset agent skills
 
-Multi-provider agent skills for [Preset](https://preset.io) — managed, cloud-hosted Apache Superset. The same skill content runs in **Claude Code**, **Cursor**, **OpenAI Codex**, and **GitHub Copilot**.
+Phase 1 seed API skills for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This PR ships Markdown guidance for direct API use; native Claude/Codex plugin packaging and `skills/**/SKILL.md` layout are deferred to Phase 2.
 
-This file is auto-loaded by OpenAI Codex. Other providers discover skills from `api/skills/`.
+This file is auto-loaded by OpenAI Codex and references the Markdown skill files in `api/skills/`.
 
-## Installation
+## Current usage
 
 ### Claude Code
 
-```
-/plugin marketplace add https://github.com/preset-io/preset-agent-skills.git
-/plugin install preset-io@preset-io
-```
+Native Claude plugin packaging is not included in Phase 1. Until `.claude-plugin/plugin.json` and `skills/**/SKILL.md` exist, use the Markdown files in `api/skills/` as reference material.
 
 ### Cursor
 
@@ -19,7 +16,7 @@ Configure `.cursor-plugin/plugin.json` from this repo as a Cursor plugin source.
 
 ### OpenAI Codex
 
-Codex auto-loads this `AGENTS.md` and the `api/skills/` directory from the repo root.
+Codex auto-loads this `AGENTS.md` from the repo root.
 
 ### GitHub Copilot
 
@@ -36,7 +33,7 @@ Agents activate these automatically based on what the user is trying to do.
 
 User, role, RLS, guest-token, import/export, SQL execution, and other mutation workflows are intentionally deferred to later phases.
 
-See [`README.md`](./README.md) for installation instructions and team deployment.
+See [`README.md`](./README.md) for usage notes.
 
 ---
 

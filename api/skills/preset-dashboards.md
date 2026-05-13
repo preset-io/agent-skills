@@ -33,7 +33,7 @@ q = rison.dumps({"page": 0, "page_size": 25})
 result = client.workspace("GET", hostname, f"/dashboard/?q={q}")
 dashboards = result["result"]
 for d in dashboards:
-    print(d["id"], d["title"], "published:", d["published"])
+    print(d["id"], d["dashboard_title"], "published:", d["published"])
 ```
 
 Useful filter examples for the Rison-encoded `q` parameter:
@@ -58,7 +58,7 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 
 ```python
 dashboard = client.workspace("GET", hostname, f"/dashboard/{dashboard_id}")["result"]
-print(dashboard["title"], dashboard["url"])
+print(dashboard["dashboard_title"], dashboard["url"])
 ```
 
 Common response fields:
@@ -67,7 +67,7 @@ Common response fields:
 |---|---|
 | `id` | Numeric dashboard ID |
 | `uuid` | Stable dashboard UUID |
-| `title` | Display name |
+| `dashboard_title` | Display name |
 | `slug` | URL-safe identifier, when present |
 | `published` | Whether the dashboard is published |
 | `url` | Relative URL path within the workspace |

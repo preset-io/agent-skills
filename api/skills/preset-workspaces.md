@@ -123,8 +123,12 @@ members = client.mgmt(
 | `user.id` | Numeric user ID required by role-update requests |
 | `user.email` | Member's email address |
 | `user.username` | Member's Preset username |
+| `user.first_name` | Member's first name |
+| `user.last_name` | Member's last name |
 | `workspace_role.role_identifier` | Preset workspace role identifier such as `Admin`, `PresetAlpha`, `PresetBeta`, `PresetGamma`, `PresetDelta`, `PresetReportsOnly`, `PresetDashboardsOnly`, `PresetEpsilon`, `PresetNoAccess`, or `PresetLimitedAdmin` |
-| `active` | Whether the membership is active |
+| `workspace_role.name` | Workspace role display name |
+| `workspace_role.role_name` | Workspace role name |
+| `is_role_from_group` | Whether the workspace role is inherited from a user group |
 
 ### Invite a user to a team and workspace
 

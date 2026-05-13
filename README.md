@@ -1,15 +1,12 @@
 # preset-agent-skills
 
-Multi-provider agent skills for [Preset](https://preset.io) — managed, cloud-hosted Apache Superset. The same shared skill content runs in **Claude Code**, **Cursor**, **OpenAI Codex**, and **GitHub Copilot**.
+Phase 1 seed API skills for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This PR ships Markdown guidance for direct API use; native Claude/Codex plugin packaging and `skills/**/SKILL.md` layout are deferred to Phase 2.
 
-## Installation
+## Current usage
 
 ### Claude Code
 
-```
-/plugin marketplace add https://github.com/preset-io/preset-agent-skills.git
-/plugin install preset-io@preset-io
-```
+Native Claude plugin packaging is not included in Phase 1. Until `.claude-plugin/plugin.json` and `skills/**/SKILL.md` exist, use the Markdown files in `api/skills/` as reference material.
 
 ### Cursor
 
@@ -17,7 +14,7 @@ Configure `.cursor-plugin/plugin.json` from this repo as a Cursor plugin source.
 
 ### OpenAI Codex
 
-Codex auto-loads `AGENTS.md` from the repo root, which references all skills.
+Codex auto-loads `AGENTS.md` from the repo root, which references the Phase 1 Markdown skill files.
 
 ### GitHub Copilot
 
@@ -35,26 +32,6 @@ Agents activate these automatically based on the user's request.
 | **preset-datasets** | Inspect database connections, schemas, tables, datasets, columns, and metrics in a workspace. |
 
 User, role, RLS, guest-token, import/export, SQL execution, and other mutation workflows are intentionally deferred to later phases.
-
-## Team Deployment (Claude Code)
-
-To make this plugin available to your entire team automatically, add the following to your project's `.claude/settings.json`:
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "preset-io": {
-      "source": {
-        "source": "github",
-        "repo": "preset-io/preset-agent-skills"
-      }
-    }
-  },
-  "enabledPlugins": {
-    "preset-io@preset-io": true
-  }
-}
-```
 
 ## Quick start
 

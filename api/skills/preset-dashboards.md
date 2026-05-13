@@ -74,7 +74,7 @@ Common response fields:
 | `position_json` | JSON string describing the layout |
 | `json_metadata` | JSON string with filters, cross-filters, and other metadata |
 | `charts` | Chart summaries included in the dashboard |
-| `owners` | Owner objects with id, username, and email |
+| `owners` | Owner objects with id, first_name, and last_name |
 
 ## Get dashboard charts
 

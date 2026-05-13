@@ -132,19 +132,19 @@ members = client.mgmt(
 
 ### Invite a user to a team and workspace
 
-Resolve the intended team role first. The common member role is usually named `User`, but use the role ID returned by your API response rather than hard-coding it:
+Invite requests require a numeric `team_role_id`. Do not call `GET /team-roles/` with the API-key JWT from **preset-api**; that endpoint is not available to user API keys. Resolve and verify the intended team role ID from an approved admin context before making the invite call.
 
 ```python
-roles = client.mgmt("GET", "/team-roles/")["payload"]
-team_role_id = next(role["id"] for role in roles if role["name"] == "User")
+team_role_id = verified_team_role_id
 ```
 
 ```bash
+TEAM_ROLE_ID="<verified-team-role-id>"
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   "https://api.app.preset.io/v1/teams/{team_name}/invites/" \
-  -d '{"email": "jdoe@example.com", "team_role_id": 2, "workspace_ids": [123], "workspace_role_identifier": "PresetGamma"}'
+  -d "{\"email\": \"jdoe@example.com\", \"team_role_id\": $TEAM_ROLE_ID, \"workspace_ids\": [123], \"workspace_role_identifier\": \"PresetGamma\"}"
 ```
 
 ```python
@@ -220,11 +220,12 @@ team_members = client.mgmt("GET", f"/teams/{team_name}/memberships/")["payload"]
 ### Invite a user to a team only
 
 ```bash
+TEAM_ROLE_ID="<verified-team-role-id>"
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   "https://api.app.preset.io/v1/teams/{team_name}/invites/" \
-  -d '{"email": "newmember@example.com", "team_role_id": 2}'
+  -d "{\"email\": \"newmember@example.com\", \"team_role_id\": $TEAM_ROLE_ID}"
 ```
 
 ```python

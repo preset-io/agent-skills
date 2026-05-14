@@ -11,10 +11,7 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 
 ```python
 version = client.workspace_root("GET", hostname, "/version")
-print(version)
 ```
-
-If the reusable client does not yet include `workspace_root()`, call the full URL with the authenticated session or use `requests.get("https://{hostname}/version", headers=headers)`.
 
 Useful fields, when present:
 
@@ -39,7 +36,7 @@ for path in sorted(paths):
         print(path, sorted(paths[path]))
 ```
 
-Use the OpenAPI response to verify that documented endpoints exist in the target workspace before writing or executing examples.
+Use the OpenAPI response to verify that documented endpoints exist in the target workspace before writing or executing examples. If OpenAPI discovery returns `404` or is disabled in a local/dev shell, fall back to the pinned Superset source/routes for that workspace build and verify candidate endpoints with read-only metadata calls before using them.
 
 ## Current User And Permissions
 

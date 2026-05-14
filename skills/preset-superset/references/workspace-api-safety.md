@@ -15,7 +15,7 @@ These are generally safe for normal discovery when the user has requested the wo
 
 ## Data-Returning Reads
 
-These can expose customer data, sample rows, SQL results, or database structure. Before calling them, summarize the workspace, endpoint, object ID, row limit or page size, and expected returned data:
+These can expose customer data, sample rows, SQL results, SQL text, or database structure. Before calling them, summarize the workspace, endpoint, object ID, row limit or page size, and expected returned data, then get explicit user confirmation:
 
 | Surface | Examples |
 |---|---|
@@ -23,6 +23,7 @@ These can expose customer data, sample rows, SQL results, or database structure.
 | Database samples | `/api/v1/database/{pk}/select_star/...` |
 | Distinct values | `/api/v1/dataset/distinct/{column_name}`, datasource column values |
 | SQL Lab results | `/api/v1/sqllab/results/`, `/api/v1/sqllab/export/{client_id}/` |
+| SQL text-bearing records | `/api/v1/query/`, `/api/v1/query/{pk}`, `/api/v1/saved_query/`, `/api/v1/saved_query/{pk}` |
 | Exports | `/api/v1/assets/export/`, dashboard/chart/dataset/database/saved query exports |
 
 Prefer page sizes and query limits that answer the user request with the least data exposure.

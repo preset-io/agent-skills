@@ -17,6 +17,8 @@ The bootstrap response helps identify SQL Lab availability, database options, an
 
 ## Query History
 
+Query history can include SQL text. Before listing or retrieving query records, summarize the workspace, endpoint, page size or query ID, and expected SQL-text exposure, then get explicit user confirmation.
+
 ```python
 import rison
 
@@ -33,9 +35,11 @@ Useful query endpoints:
 | Query updates since timestamp | `GET /api/v1/query/updated_since` |
 | Related fields | `GET /api/v1/query/related/{column_name}` |
 
-Query history can include SQL text. Do not paste SQL into logs or comments unless the user asks and it is safe to share.
+Do not paste SQL into logs or comments unless the user asks and it is safe to share.
 
 ## Saved Queries
+
+Saved queries can include SQL text. Before listing or retrieving saved query records, summarize the workspace, endpoint, page size or saved query ID, and expected SQL-text exposure, then get explicit user confirmation.
 
 ```python
 q = rison.dumps({"page": 0, "page_size": 25})

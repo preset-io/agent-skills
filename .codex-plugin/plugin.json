@@ -17,6 +17,7 @@
     "dashboards",
     "datasets",
     "sqllab",
+    "import-export",
     "embedding"
   ],
   "skills": "./skills/",

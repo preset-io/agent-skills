@@ -17,6 +17,6 @@ Use this skill for SQL Lab and query metadata workflows in a Preset workspace.
 
 ## Scope
 
-Default to SQL Lab metadata reads. Do not execute SQL, stop queries, export result sets, create/update/delete saved queries, import saved queries, or create permalinks without explicit confirmation.
+Default to SQL Lab bootstrap and capability metadata only. Query history and saved-query reads can return SQL text, so get explicit confirmation before listing or retrieving them. Do not execute SQL, stop queries, export result sets, create/update/delete saved queries, import saved queries, or create permalinks without explicit confirmation.
 
 SQL can read customer data, run expensive warehouse work, or expose database metadata. Always summarize the workspace, database, SQL text, expected row limit, and expected effect before execution.

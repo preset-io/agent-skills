@@ -17,7 +17,6 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 - **preset-sqllab** skill - SQL Lab bootstrap, query history, saved query inspection, permalink routing, and SQL execution guardrails.
 - **preset-import-export** skill - Import/export endpoint inventory with disclosure and mutation gates.
 - **preset-embedding** skill - Embedded dashboard configuration reads and security-sensitive guest-token/trusted-domain deferrals.
-- Phase 4 QA matrix for package, static, and live workspace validations.
 
 ### Changed
 

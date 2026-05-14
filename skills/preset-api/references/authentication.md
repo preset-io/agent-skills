@@ -23,10 +23,14 @@ Store long-lived API credentials in a secrets manager such as AWS Secrets Manage
 ```bash
 auth_response="$(mktemp)"
 trap 'rm -f "$auth_response"' EXIT
+auth_payload="$(jq -nc \
+  --arg name "$PRESET_CLIENT_ID" \
+  --arg secret "$PRESET_CLIENT_SECRET" \
+  '{name: $name, secret: $secret}')"
 
 curl -s -X POST "https://api.app.preset.io/v1/auth/" \
   -H "Content-Type: application/json" \
-  -d "{\"name\": \"$PRESET_CLIENT_ID\", \"secret\": \"$PRESET_CLIENT_SECRET\"}" \
+  -d "$auth_payload" \
   -o "$auth_response"
 
 jq -e '.payload.access_token | strings | length > 0' "$auth_response" >/dev/null

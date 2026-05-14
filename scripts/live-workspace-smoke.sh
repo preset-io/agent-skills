@@ -18,9 +18,18 @@ WORKSPACE_HOSTNAME="${PRESET_WORKSPACE_HOSTNAME:-}"
 WORKSPACE_SCHEME="${PRESET_WORKSPACE_SCHEME:-https}"
 OPENAPI_EXPECTED_STATUSES="${PRESET_OPENAPI_EXPECTED_STATUSES:-200}"
 TRUSTED_WORKSPACE_HOSTS="${PRESET_TRUSTED_WORKSPACE_HOSTS:-}"
+ALLOW_LOCAL_WORKSPACE_HOSTS="${PRESET_ALLOW_LOCAL_WORKSPACE_HOSTS:-false}"
 INCLUDE_SQL_TEXT_ENDPOINTS="${PRESET_INCLUDE_SQL_TEXT_ENDPOINTS:-false}"
 RESPONSE_DIR="$(mktemp -d -t preset-agent-skills-live-smoke.XXXXXX)"
 trap 'rm -rf "$RESPONSE_DIR"' EXIT
+
+case "$ALLOW_LOCAL_WORKSPACE_HOSTS" in
+  true|false)
+    ;;
+  *)
+    fail "PRESET_ALLOW_LOCAL_WORKSPACE_HOSTS must be true or false"
+    ;;
+esac
 
 case "$INCLUDE_SQL_TEXT_ENDPOINTS" in
   true|false)
@@ -38,27 +47,70 @@ case "$WORKSPACE_SCHEME" in
     ;;
 esac
 
-validate_workspace_hostname() {
+hostname_without_port() {
   local hostname="$1"
-  local host_without_port
+
+  if [[ "$hostname" == \[*\]* ]]; then
+    hostname="${hostname#\[}"
+    hostname="${hostname%%\]*}"
+  elif [[ "$hostname" == *:* ]]; then
+    hostname="${hostname%%:*}"
+  fi
+
+  printf "%s" "$hostname"
+}
+
+validate_workspace_hostname_shape() {
+  local hostname="$1"
 
   [[ "$hostname" != *"://"* ]] || fail "PRESET_WORKSPACE_HOSTNAME must be a hostname, not a URL"
   [[ "$hostname" != */* ]] || fail "PRESET_WORKSPACE_HOSTNAME must not include a path"
   [[ "$hostname" != *@* ]] || fail "PRESET_WORKSPACE_HOSTNAME must not include user info"
+}
 
-  host_without_port="$hostname"
-  if [[ "$hostname" == \[*\]* ]]; then
-    host_without_port="${hostname#\[}"
-    host_without_port="${host_without_port%%\]*}"
-  elif [[ "$hostname" == *:* ]]; then
-    host_without_port="${hostname%%:*}"
-  fi
+is_local_workspace_hostname() {
+  local host_without_port="$1"
 
   case "$host_without_port" in
-    localhost|127.0.0.1|::1|*.preset.io|*.preset.zone)
+    localhost|127.0.0.1|::1|*.local.preset.zone)
       return 0
       ;;
   esac
+
+  return 1
+}
+
+workspace_hostname_in_management_api() {
+  local hostname="$1"
+  local teams_json
+  local team_name
+  local workspaces_json
+  local match
+
+  teams_json="$(curl -fsS -H "Authorization: Bearer $token" "$MGMT_BASE/teams/")"
+
+  while IFS= read -r team_name; do
+    [[ -n "$team_name" ]] || continue
+    workspaces_json="$(curl -fsS -H "Authorization: Bearer $token" "$MGMT_BASE/teams/$team_name/workspaces/")"
+    match="$(jq -r --arg host "$hostname" '.payload[] | select(.hostname == $host) | .hostname' <<<"$workspaces_json" | head -n 1)"
+    if [[ "$match" == "$hostname" ]]; then
+      return 0
+    fi
+  done < <(jq -r '.payload[].name // empty' <<<"$teams_json")
+
+  return 1
+}
+
+validate_workspace_hostname() {
+  local hostname="$1"
+  local host_without_port
+
+  validate_workspace_hostname_shape "$hostname"
+  host_without_port="$(hostname_without_port "$hostname")"
+
+  if workspace_hostname_in_management_api "$hostname"; then
+    return 0
+  fi
 
   if [[ -n "$TRUSTED_WORKSPACE_HOSTS" ]]; then
     local trusted
@@ -73,7 +125,11 @@ validate_workspace_hostname() {
     IFS="$old_ifs"
   fi
 
-  fail "refusing to send a bearer token to untrusted workspace host: $hostname"
+  if [[ "$ALLOW_LOCAL_WORKSPACE_HOSTS" == "true" ]] && is_local_workspace_hostname "$host_without_port"; then
+    return 0
+  fi
+
+  fail "refusing to send a bearer token to workspace host not returned by the Management API: $hostname"
 }
 
 auth_payload="$(jq -nc \

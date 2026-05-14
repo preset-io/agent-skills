@@ -3,7 +3,7 @@
 Inspect dashboards in a Preset workspace via the Superset API.
 
 > **Prerequisite:** Complete authentication and resolve the workspace hostname using the **preset-api** and **preset-workspaces** skills.
-> **Phase 1 scope:** This seed skill is read-only. Dashboard create/update, import/export, embedded configuration, and guest-token creation are intentionally deferred to later phases and require explicit user confirmation before implementation.
+> **Scope:** This skill is read-only. Dashboard create/update, import/export, embedded configuration, and guest-token creation require separate review and explicit user confirmation before implementation.
 
 ## Key concepts
 
@@ -104,4 +104,4 @@ for dataset in datasets:
 
 ## Mutation boundary
 
-Do not create, update, import, export, embed, or issue guest tokens from this Phase 1 seed skill. For any future dashboard mutation workflow, first summarize the target workspace, dashboard IDs or UUIDs, request body, and expected effect, then get explicit user confirmation.
+Do not create, update, import, export, embed, or issue guest tokens from this skill. For any future dashboard mutation workflow, first summarize the target workspace, dashboard IDs or UUIDs, request body, and expected effect, then get explicit user confirmation.

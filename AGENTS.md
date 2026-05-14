@@ -1,6 +1,6 @@
 # Preset agent skills
 
-Phase 1 seed API skills for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This PR ships Markdown guidance for direct API use; native Claude/Codex plugin packaging and `skills/**/SKILL.md` layout are deferred to Phase 2.
+Agent API skills for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This package ships Markdown guidance for direct API use across agent clients.
 
 This file is auto-loaded by OpenAI Codex and references the Markdown skill files in `api/skills/`.
 
@@ -8,7 +8,7 @@ This file is auto-loaded by OpenAI Codex and references the Markdown skill files
 
 ### Claude Code
 
-Native Claude plugin packaging is not included in Phase 1. Until `.claude-plugin/plugin.json` and `skills/**/SKILL.md` exist, use the Markdown files in `api/skills/` as reference material.
+Claude Code reads `CLAUDE.md` from the repo root. Native Claude plugin packaging is planned separately; for now, use the Markdown files in `api/skills/` as reference material.
 
 ### Cursor
 
@@ -31,7 +31,7 @@ Agents activate these automatically based on what the user is trying to do.
 - **preset-dashboards** — Inspect dashboards, dashboard charts, and dashboard datasets in a workspace.
 - **preset-datasets** — Inspect database connections, schemas, tables, datasets, columns, and metrics in a workspace.
 
-User, role, RLS, guest-token, import/export, SQL execution, and other mutation workflows are intentionally deferred to later phases.
+User, role, RLS, guest-token, import/export, SQL execution, and other sensitive mutation workflows require separate review before they are documented here.
 
 See [`README.md`](./README.md) for usage notes.
 

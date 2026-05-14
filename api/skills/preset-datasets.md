@@ -3,7 +3,7 @@
 Inspect datasets and database metadata in a Preset workspace via the Superset API.
 
 > **Prerequisite:** Complete authentication and resolve the workspace hostname using the **preset-api** and **preset-workspaces** skills.
-> **Phase 1 scope:** This seed skill is read-only. Database connection changes, dataset creation/update, schema refresh, import/export, metric/column edits, and SQL Lab execution are intentionally deferred to later phases and require explicit user confirmation before implementation.
+> **Scope:** This skill is read-only. Database connection changes, dataset creation/update, schema refresh, import/export, metric/column edits, and SQL Lab execution require separate review and explicit user confirmation before implementation.
 
 ## Key concepts
 
@@ -127,4 +127,4 @@ Common dataset fields:
 
 ## Mutation boundary
 
-Do not create or update databases, datasets, columns, metrics, imports, exports, schema refreshes, or SQL Lab queries from this Phase 1 seed skill. For any future dataset or database mutation workflow, first summarize the target workspace, database/dataset IDs, request body or SQL, and expected effect, then get explicit user confirmation.
+Do not create or update databases, datasets, columns, metrics, imports, exports, schema refreshes, or SQL Lab queries from this skill. For any future dataset or database mutation workflow, first summarize the target workspace, database/dataset IDs, request body or SQL, and expected effect, then get explicit user confirmation.

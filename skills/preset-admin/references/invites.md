@@ -1,6 +1,6 @@
 # Invites Reference
 
-Invite endpoints require team-admin permissions. Creating, canceling, or resending invites changes access and sends or affects email delivery. Load the safety policy and get explicit confirmation before mutating invites.
+Invite list, create, bulk-create, and cancel endpoints require team-admin permissions. Resending is API-key allowed in Manager, but still affects email delivery. Load the safety policy and get explicit confirmation before mutating invites.
 
 Invite payloads use both numeric `team_role_id` and string workspace role identifiers. See [role-identifiers.md](role-identifiers.md) before selecting roles.
 
@@ -116,6 +116,8 @@ Confirm the invite ID, email, team, and expected cancellation effect before dele
 
 ## Resend A Pending Invite
 
+Resolve `invite_id` from the team's pending invite list before resending. Confirmation should include the invite ID, email, team, and expected email delivery effect.
+
 ```bash
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
@@ -126,7 +128,11 @@ curl -s -X POST \
 client.mgmt("POST", f"/teams/{team_name}/invites/resend/{invite_id}/")
 ```
 
-Confirm the invite ID, email, and team before resending.
+## Accept Invite Codes
+
+Accepting an invite is an end-user/session flow, not an admin API-key workflow. Manager exposes an unauthenticated invite lookup and a session-user `POST /teams/{team_name}/invites/accept/{code}/` route, but agents using this skill should not accept invites on a user's behalf with API credentials.
+
+When a user asks to accept an invite, direct them to the Preset UI or ask for confirmation to design a separate browser/session-backed workflow. Do not improvise an API-key accept example.
 
 ## Common Failures
 

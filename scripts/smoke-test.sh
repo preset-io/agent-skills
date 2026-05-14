@@ -93,6 +93,13 @@ require_grep "name-<workspace_name>" skills/preset-admin/references/workspace-ma
 require_grep "user-access/" skills/preset-admin/references/workspace-management.md
 require_grep "Always read the current workspace first" skills/preset-admin/references/workspace-management.md
 require_grep "full desired state" skills/preset-admin/references/workspace-management.md
+require_grep "Update Workspace Member Role" skills/preset-admin/references/workspace-management.md
+require_grep "/membership" skills/preset-admin/references/workspace-management.md
+require_grep "default workspace role identifiers only" skills/preset-admin/references/workspace-management.md
+require_grep "browser/session-backed context" skills/preset-admin/references/workspace-management.md
+require_grep "Accept Invite Codes" skills/preset-admin/references/invites.md
+require_grep "Do not improvise an API-key accept example" skills/preset-admin/references/invites.md
+require_grep "session-user" skills/preset-admin/references/invites.md
 
 if grep -Eq "Invite A User|guarded membership workflows|manage membership|role-update examples" \
   skills/preset-workspaces/SKILL.md \

@@ -58,4 +58,6 @@ Always state the numeric `team_role_id`, intended role name, target team, and ta
 
 ## Custom Workspace Roles
 
-Custom workspace roles are valid when they appear in `team["workspace_roles"]`. Do not invent custom role identifiers. If the requested custom role is not present in the team payload, stop and ask the user for the correct role or admin context.
+Custom workspace roles are valid only on endpoints that accept the team's dynamic workspace role list. Do not invent custom role identifiers. If the requested custom role is not present in the team payload, stop and ask the user for the correct role or admin context.
+
+`PUT /teams/{team_name}/workspaces/{workspace_id}/membership` currently validates default workspace role identifiers, so do not use custom workspace role identifiers for direct workspace member role updates unless Manager's request schema changes.

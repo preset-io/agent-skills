@@ -137,16 +137,51 @@ members = client.mgmt(
 )["payload"]
 ```
 
-## Workspace User Access
+## Update Workspace Member Role
 
-This read-only endpoint returns workspace access information suitable for non-admin displays:
+`PUT /teams/{team_name}/workspaces/{workspace_id}/membership` updates direct workspace access for an existing team member. This endpoint accepts a numeric workspace ID, not `name-<workspace_name>`, and currently validates default workspace role identifiers only.
+
+Before updating a member role:
+
+1. Load [role-identifiers.md](role-identifiers.md) and choose a default `role_identifier`.
+2. List the workspace memberships and resolve the target `user_id` from the API response.
+3. Check `is_role_from_group`. If it is true, the effective role is inherited from a group and a direct role update may not change access.
+4. For creator role upgrades on Enterprise teams, preflight seat limits with `GET /teams/{team_name}/user-limit/`.
+5. Confirm the target team, workspace ID, workspace title, user ID, email, current role, new role, group-derived role status, and seat-limit result.
 
 ```python
-access = client.mgmt(
+members = client.mgmt(
     "GET",
-    f"/teams/{team_name}/workspaces/{workspace_name}/user-access/",
+    f"/teams/{team_name}/workspaces/{workspace_id}/memberships/"
+    "?page_number=1&page_size=100"
+    "&user_name_or_email=jdoe@example.com",
+)["payload"]
+
+member = next(
+    m for m in members
+    if m["user"]["email"].lower() == "jdoe@example.com"
+)
+
+if member.get("is_role_from_group"):
+    raise RuntimeError("Role is inherited from a group; confirm before direct update")
+
+limits = client.mgmt("GET", f"/teams/{team_name}/user-limit/")["payload"]
+
+updated = client.mgmt(
+    "PUT",
+    f"/teams/{team_name}/workspaces/{workspace_id}/membership",
+    json={
+        "user_id": member["user"]["id"],
+        "role_identifier": "PresetGamma",
+    },
 )["payload"]
 ```
+
+Use `PresetNoAccess` to remove direct workspace access. Do not use custom workspace role identifiers with this endpoint unless Manager's request schema changes to accept them.
+
+## Workspace User Access
+
+`GET /teams/{team_name}/workspaces/{workspace_name}/user-access/` returns workspace access information suitable for non-admin displays, but Manager does not mark this route as `user_api_key_allowed`. Do not call it with the API-key JWT client from `preset-api`; use the workspace membership list for API-key examples or a browser/session-backed context outside this skill.
 
 ## Defer Adjacent Workspace Admin APIs
 

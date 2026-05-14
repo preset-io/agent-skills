@@ -2,7 +2,7 @@
 
 Use `preset-workspaces` for read-only discovery and hostname resolution. Use this reference when the task involves workspace lifecycle management or membership edge cases.
 
-Workspace create, update, delete, un-hibernate, and membership role changes are sensitive administration workflows. Load the safety policy and get explicit confirmation before mutating.
+Workspace create, update, delete, un-hibernate, and membership role changes are sensitive administration workflows. Load the safety policy and get explicit confirmation before mutating. Existing-member role changes are covered in [Update Workspace Member Role](#update-workspace-member-role).
 
 ## Create A Workspace
 
@@ -102,22 +102,22 @@ client.mgmt("DELETE", f"/teams/{team_name}/workspaces/{workspace_id}/")
 
 ## Un-Hibernate A Workspace
 
-Un-hibernating may resume compute and incur runtime cost. Confirm the target `team_name`, workspace title, stable workspace `name`, hostname, and expected cost or availability effect before calling this endpoint.
+Un-hibernating may resume compute and incur runtime cost. Confirm the target `team_name`, workspace title, stable workspace slug, hostname, and expected cost or availability effect before calling this endpoint.
 
 ```bash
 curl -s -X PATCH \
   -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_name}/un-hibernate/"
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_slug}/un-hibernate/"
 ```
 
 ```python
 workspace = client.mgmt(
     "PATCH",
-    f"/teams/{team_name}/workspaces/{workspace_name}/un-hibernate/",
+    f"/teams/{team_name}/workspaces/{workspace_slug}/un-hibernate/",
 )["payload"]
 ```
 
-Use the stable workspace `name`, not the display title.
+Use the stable workspace slug from the workspace `name` field, not the display title.
 
 ## Workspace Membership Edge Cases
 

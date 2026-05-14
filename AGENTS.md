@@ -1,110 +1,27 @@
-# Preset agent skills
+# Preset Agent Skills
 
-Agent API skills for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This package ships Markdown guidance for direct API use across agent clients.
+This repository contains installable Preset API skills for OpenAI Codex and other agent clients.
 
-This file is auto-loaded by OpenAI Codex and references the Markdown skill files in `api/skills/`.
+## Skill Routing
 
-## Current usage
+Use the `skills/*/SKILL.md` files as the canonical instructions:
 
-### Claude Code
+- `skills/preset-api/SKILL.md` - authenticate with the Preset Management API and prepare safe API access. Required before all other Preset API skills.
+- `skills/preset-workspaces/SKILL.md` - list teams and workspaces, resolve workspace hostnames, inspect workspace status, and handle guarded membership workflows.
+- `skills/preset-dashboards/SKILL.md` - inspect dashboards, dashboard charts, and dashboard datasets. Read-only.
+- `skills/preset-datasets/SKILL.md` - inspect database connections, schemas, tables, datasets, columns, and metrics. Read-only.
 
-Claude Code reads `CLAUDE.md` from the repo root. Native Claude plugin packaging is planned separately; for now, use the Markdown files in `api/skills/` as reference material.
+Detailed examples live in each skill's `references/` directory. Load only the reference files needed for the user's task.
 
-### Cursor
+## Client Entry Points
 
-Configure `.cursor-plugin/plugin.json` from this repo as a Cursor plugin source.
+- OpenAI Codex: `.codex-plugin/plugin.json` plus this `AGENTS.md`.
+- Claude Code: `.claude-plugin/plugin.json` plus `CLAUDE.md`.
+- Cursor: `.cursor-plugin/plugin.json`.
+- GitHub Copilot: `.github/copilot-instructions.md`.
 
-### OpenAI Codex
+## Safety Policy
 
-Codex auto-loads this `AGENTS.md` from the repo root.
+Default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, SQL execution, role/RLS change, database connection change, dataset mutation, dashboard mutation, or guest-token creation, summarize the exact target, payload, and expected effect, then get explicit user confirmation.
 
-### GitHub Copilot
-
-Add `.github/copilot-instructions.md` referencing the skill files, or include the skill content directly.
-
-## Skills
-
-Use these skill files based on what the user is trying to do.
-
-- **preset-api** — Authenticate with the Preset Management API (API token → JWT bearer token). Base URLs, pagination, Rison encoding, error codes, and security best practices. **Required by all other skills.**
-- **preset-workspaces** — List and inspect teams and workspaces, resolve workspace hostnames, invite users, and update workspace membership with explicit confirmation.
-- **preset-dashboards** — Inspect dashboards, dashboard charts, and dashboard datasets in a workspace.
-- **preset-datasets** — Inspect database connections, schemas, tables, datasets, columns, and metrics in a workspace.
-
-Broader user administration, RLS, guest-token, import/export, SQL execution, database changes, destructive operations, and other sensitive workflows require separate review before they are documented here. The workspace skill includes limited team-admin membership and invite examples; those require explicit confirmation and appropriate permissions.
-
-See [`README.md`](./README.md) for usage notes.
-
----
-
-## Quick-start
-
-### 1 — Set credentials
-
-```bash
-export PRESET_CLIENT_ID="your-api-token-name"
-export PRESET_CLIENT_SECRET="your-api-token-secret"
-```
-
-Generate API keys at [manage.app.preset.io](https://manage.app.preset.io) → avatar → **API keys**.
-
-### 2 — Authenticate
-
-```python
-import os, requests
-
-resp = requests.post(
-    "https://api.app.preset.io/v1/auth/",
-    json={
-        "name": os.environ["PRESET_CLIENT_ID"],
-        "secret": os.environ["PRESET_CLIENT_SECRET"],
-    },
-)
-resp.raise_for_status()
-token = resp.json()["payload"]["access_token"]
-headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-```
-
-### 3 — Discover your workspaces
-
-```python
-teams = requests.get(
-    "https://api.app.preset.io/v1/teams/", headers=headers
-).json()["payload"]
-
-for team in teams:
-    workspaces = requests.get(
-        f"https://api.app.preset.io/v1/teams/{team['name']}/workspaces/",
-        headers=headers,
-    ).json()["payload"]
-    for ws in workspaces:
-        print(team["name"], "/", ws["title"], "→", ws["hostname"])
-```
-
-### 4 — Call workspace APIs
-
-Use the hostname returned by step 3 — never use a hardcoded value. Resolve the intended team and workspace by name:
-
-```python
-requested_team_name = "acme-data"
-requested_workspace_title = "Production Analytics"
-
-team = next(t for t in teams if t["name"] == requested_team_name)
-workspaces = requests.get(
-    f"https://api.app.preset.io/v1/teams/{team['name']}/workspaces/",
-    headers=headers,
-).json()["payload"]
-workspace = next(ws for ws in workspaces if ws["title"] == requested_workspace_title)
-hostname = workspace["hostname"]
-
-dashboards = requests.get(
-    f"https://{hostname}/api/v1/dashboard/",
-    headers=headers,
-).json()["result"]
-```
-
-When a user specifies a particular team or workspace by name, filter the listing results to find the matching hostname rather than assuming any specific value.
-
-## Safety policy
-
-Default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
+Do not expose credentials, client secrets, bearer tokens, database passwords, SQLAlchemy URIs, access tokens, refresh tokens, or signed guest tokens.

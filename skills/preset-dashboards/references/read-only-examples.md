@@ -1,17 +1,4 @@
-# preset-dashboards
-
-Inspect dashboards in a Preset workspace via the Superset API.
-
-> **Prerequisite:** Complete authentication and resolve the workspace hostname using the **preset-api** and **preset-workspaces** skills.
-> **Scope:** This skill is read-only. Dashboard create/update, import/export, embedded configuration, and guest-token creation require separate review and explicit user confirmation before implementation.
-
-## Key concepts
-
-| Term | Description |
-|---|---|
-| **Dashboard** | A collection of charts and text elements arranged in a layout. |
-| **Slug** | Optional URL-friendly identifier for a dashboard (e.g., `sales-overview`). |
-| **Published** | When `true`, the dashboard is visible to workspace members with access to it. |
+# Read-Only Dashboard Examples
 
 All Superset API calls use the workspace hostname returned by the Management API:
 
@@ -19,7 +6,15 @@ All Superset API calls use the workspace hostname returned by the Management API
 https://{workspace_hostname}/api/v1/dashboard/
 ```
 
-## List dashboards
+## Key Concepts
+
+| Term | Description |
+|---|---|
+| Dashboard | A collection of charts and text elements arranged in a layout |
+| Slug | Optional URL-friendly identifier for a dashboard |
+| Published | When `true`, the dashboard is visible to workspace members with access |
+
+## List Dashboards
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
@@ -27,16 +22,21 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 ```
 
 ```python
-import rison  # pip install rison
+import rison
 
 q = rison.dumps({"page": 0, "page_size": 25})
 result = client.workspace("GET", hostname, f"/dashboard/?q={q}")
 dashboards = result["result"]
-for d in dashboards:
-    print(d["id"], d["dashboard_title"], "published:", d["published"])
+for dashboard in dashboards:
+    print(
+        dashboard["id"],
+        dashboard["dashboard_title"],
+        "published:",
+        dashboard["published"],
+    )
 ```
 
-Useful filter examples for the Rison-encoded `q` parameter:
+Useful Rison filters:
 
 | Goal | Filter |
 |---|---|
@@ -44,14 +44,12 @@ Useful filter examples for the Rison-encoded `q` parameter:
 | By title or slug substring | `filters:!((col:dashboard_title,opr:title_or_slug,value:Sales))` |
 | Sort by last modified | `order_column:changed_on_delta_humanized,order_direction:desc` |
 
-## Get a single dashboard
+## Get A Dashboard
 
 ```bash
-# By numeric ID
 curl -s -H "Authorization: Bearer $TOKEN" \
   "https://{workspace_hostname}/api/v1/dashboard/{id}" | jq '.result'
 
-# By slug
 curl -s -H "Authorization: Bearer $TOKEN" \
   "https://{workspace_hostname}/api/v1/dashboard/{slug}" | jq '.result'
 ```
@@ -74,9 +72,9 @@ Common response fields:
 | `position_json` | JSON string describing the layout |
 | `json_metadata` | JSON string with filters, cross-filters, and other metadata |
 | `charts` | Chart summaries included in the dashboard |
-| `owners` | Owner objects with id, first_name, and last_name |
+| `owners` | Owner objects with `id`, `first_name`, and `last_name` |
 
-## Get dashboard charts
+## Get Dashboard Charts
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
@@ -89,7 +87,7 @@ for chart in charts:
     print(chart["id"], chart["slice_name"], chart["viz_type"])
 ```
 
-## Get dashboard datasets
+## Get Dashboard Datasets
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
@@ -101,7 +99,3 @@ datasets = client.workspace("GET", hostname, f"/dashboard/{dashboard_id}/dataset
 for dataset in datasets:
     print(dataset["id"], dataset["table_name"])
 ```
-
-## Mutation boundary
-
-Do not create, update, import, export, embed, or issue guest tokens from this skill. For any future dashboard mutation workflow, first summarize the target workspace, dashboard IDs or UUIDs, request body, and expected effect, then get explicit user confirmation.

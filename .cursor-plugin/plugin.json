@@ -1,28 +1,28 @@
 {
   "name": "Preset Agent Skills",
   "version": "0.1.0",
-  "description": "AI agent skills for the Preset API — authenticate, discover workspaces, and inspect dashboards and datasets.",
+  "description": "AI agent skills for the Preset API: authenticate, discover workspaces, and inspect dashboards and datasets.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/preset-agent-skills",
   "skills": [
     {
       "name": "preset-api",
-      "path": "api/skills/preset-api.md",
+      "path": "skills/preset-api/SKILL.md",
       "description": "Authenticate with the Preset Management API. Required by all other skills."
     },
     {
       "name": "preset-workspaces",
-      "path": "api/skills/preset-workspaces.md",
+      "path": "skills/preset-workspaces/SKILL.md",
       "description": "List Preset teams and workspaces, resolve workspace hostnames, and manage membership with confirmation."
     },
     {
       "name": "preset-dashboards",
-      "path": "api/skills/preset-dashboards.md",
+      "path": "skills/preset-dashboards/SKILL.md",
       "description": "Inspect dashboards, dashboard charts, and dashboard datasets."
     },
     {
       "name": "preset-datasets",
-      "path": "api/skills/preset-datasets.md",
+      "path": "skills/preset-datasets/SKILL.md",
       "description": "Inspect database connections, schemas, tables, datasets, columns, and metrics."
     }
   ]

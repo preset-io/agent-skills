@@ -1,20 +1,15 @@
-# preset-datasets
+# Read-Only Dataset And Database Examples
 
-Inspect datasets and database metadata in a Preset workspace via the Superset API.
-
-> **Prerequisite:** Complete authentication and resolve the workspace hostname using the **preset-api** and **preset-workspaces** skills.
-> **Scope:** This skill is read-only. Database connection changes, dataset creation/update, schema refresh, import/export, metric/column edits, and SQL Lab execution require separate review and explicit user confirmation before implementation.
-
-## Key concepts
+## Key Concepts
 
 | Term | Description |
 |---|---|
-| **Physical dataset** | Mapped to an actual table or view in a connected database. |
-| **Virtual dataset** | Defined by a custom SQL query, also called a SQL Lab dataset or virtual table. |
-| **Database** | A database connection configured in Superset. |
-| **Schema** | The database schema that contains the dataset's table. |
+| Physical dataset | Mapped to an actual table or view in a connected database |
+| Virtual dataset | Defined by a custom SQL query, also called a SQL Lab dataset or virtual table |
+| Database | A database connection configured in Superset |
+| Schema | The database schema that contains the dataset table |
 
-## List database connections
+## List Database Connections
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
@@ -40,7 +35,7 @@ Common database fields:
 | `expose_in_sqllab` | Whether the connection is available in SQL Lab |
 | `allow_run_async` | Whether async query execution is enabled |
 
-## Get a single database connection
+## Get A Database Connection
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
@@ -52,7 +47,7 @@ db = client.workspace("GET", hostname, f"/database/{db_id}")["result"]
 print(db["database_name"], db["backend"])
 ```
 
-## List schemas for a database
+## List Schemas For A Database
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
@@ -64,7 +59,7 @@ q = rison.dumps({"force": False})
 schemas = client.workspace("GET", hostname, f"/database/{db_id}/schemas/?q={q}")["result"]
 ```
 
-## List tables in a schema
+## List Tables In A Schema
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
@@ -77,7 +72,7 @@ q = rison.dumps({"schema_name": "public", "force": False})
 tables = client.workspace("GET", hostname, f"/database/{db_id}/tables/?q={q}")["result"]
 ```
 
-## List datasets
+## List Datasets
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
@@ -87,8 +82,8 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 ```python
 q = rison.dumps({"page": 0, "page_size": 25})
 datasets = client.workspace("GET", hostname, f"/dataset/?q={q}")["result"]
-for ds in datasets:
-    print(ds["id"], ds["table_name"], ds.get("kind"))
+for dataset in datasets:
+    print(dataset["id"], dataset["table_name"], dataset.get("kind"))
 ```
 
 Useful filters:
@@ -99,7 +94,7 @@ Useful filters:
 | Virtual only | `filters:!((col:sql,opr:dataset_is_null_or_empty,value:!f))` |
 | By database | `filters:!((col:database,opr:rel_o_m,value:1))` |
 
-## Get a single dataset
+## Get A Dataset
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
@@ -124,7 +119,3 @@ Common dataset fields:
 | `metrics` | Metric definitions |
 | `database.id` | ID of the parent database connection |
 | `owners` | Owner objects |
-
-## Mutation boundary
-
-Do not create or update databases, datasets, columns, metrics, imports, exports, schema refreshes, or SQL Lab queries from this skill. For any future dataset or database mutation workflow, first summarize the target workspace, database/dataset IDs, request body or SQL, and expected effect, then get explicit user confirmation.

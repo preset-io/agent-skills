@@ -31,7 +31,7 @@ Use these skill files based on what the user is trying to do.
 - **preset-dashboards** — Inspect dashboards, dashboard charts, and dashboard datasets in a workspace.
 - **preset-datasets** — Inspect database connections, schemas, tables, datasets, columns, and metrics in a workspace.
 
-User, role, RLS, guest-token, import/export, SQL execution, and other sensitive mutation workflows require separate review before they are documented here.
+Broader user administration, RLS, guest-token, import/export, SQL execution, database changes, destructive operations, and other sensitive workflows require separate review before they are documented here. The workspace skill includes limited team-admin membership and invite examples; those require explicit confirmation and appropriate permissions.
 
 See [`README.md`](./README.md) for usage notes.
 
@@ -82,16 +82,19 @@ for team in teams:
 
 ### 4 — Call workspace APIs
 
-Use the hostname returned by step 3 — never use a hardcoded value. For example, to list dashboards in the first workspace of the first team:
+Use the hostname returned by step 3 — never use a hardcoded value. Resolve the intended team and workspace by name:
 
 ```python
-# Derive hostname from the workspace listing — do not hardcode it
-first_team = teams[0]
-first_workspace = requests.get(
-    f"https://api.app.preset.io/v1/teams/{first_team['name']}/workspaces/",
+requested_team_name = "acme-data"
+requested_workspace_title = "Production Analytics"
+
+team = next(t for t in teams if t["name"] == requested_team_name)
+workspaces = requests.get(
+    f"https://api.app.preset.io/v1/teams/{team['name']}/workspaces/",
     headers=headers,
-).json()["payload"][0]
-hostname = first_workspace["hostname"]
+).json()["payload"]
+workspace = next(ws for ws in workspaces if ws["title"] == requested_workspace_title)
+hostname = workspace["hostname"]
 
 dashboards = requests.get(
     f"https://{hostname}/api/v1/dashboard/",

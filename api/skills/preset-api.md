@@ -137,7 +137,7 @@ client = PresetClient()
 | Layer | Base URL |
 |---|---|
 | Management API | `https://api.app.preset.io/v1` |
-| Workspace API (US region) | `https://<workspace-hostname>/api/v1` |
+| Workspace API (hostname resolved dynamically) | `https://<workspace-hostname>/api/v1` |
 
 To find a workspace's hostname, call `GET /v1/teams/{team_name}/workspaces/` through the Management API and inspect the top-level `hostname` field (see **preset-workspaces** skill). For sandbox or staging environments, set `PRESET_API_BASE` to the matching public API host.
 

@@ -6,7 +6,7 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ---
 
-## [v1.0.0] — 2024-01-01
+## [v0.1.0] — 2026-05-14
 
 ### Added
 
@@ -15,6 +15,6 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 - **preset-dashboards** skill — Read-only dashboard discovery, dashboard detail, dashboard charts, and dashboard datasets.
 - **preset-datasets** skill — Read-only database, schema, table, and dataset discovery.
 - Safety policy — Mutating operations default to deferred/confirmation-gated workflows.
-- `AGENTS.md` — Root-level instructions for OpenAI Codex and multi-provider agent routing.
-- `.claude/settings.json` — Claude Code team deployment configuration.
+- `AGENTS.md` — Root-level instructions for OpenAI Codex.
+- `CLAUDE.md` — Root-level instructions for Claude Code.
 - `.cursor-plugin/plugin.json` — Cursor plugin configuration.

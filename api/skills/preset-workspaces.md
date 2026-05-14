@@ -107,14 +107,14 @@ Workspace membership and invite endpoints require team-admin permissions. API-ke
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/memberships/?page_number=1&page_size=100" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/memberships?page_number=1&page_size=100" \
   | jq '.payload'
 ```
 
 ```python
 members = client.mgmt(
     "GET",
-    f"/teams/{team_name}/workspaces/{workspace_id}/memberships/?page_number=1&page_size=100",
+    f"/teams/{team_name}/workspaces/{workspace_id}/memberships?page_number=1&page_size=100",
 )["payload"]
 ```
 
@@ -244,6 +244,8 @@ client.mgmt(
 ## Common patterns
 
 ### Iterate over all workspaces across all teams
+
+Use this fan-out pattern only for inventory or admin tasks. For single-target user requests, resolve the specific team and workspace by name instead of scanning every workspace.
 
 ```python
 teams = client.mgmt("GET", "/teams/")["payload"]

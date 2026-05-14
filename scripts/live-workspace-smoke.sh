@@ -18,8 +18,17 @@ WORKSPACE_HOSTNAME="${PRESET_WORKSPACE_HOSTNAME:-}"
 WORKSPACE_SCHEME="${PRESET_WORKSPACE_SCHEME:-https}"
 OPENAPI_EXPECTED_STATUSES="${PRESET_OPENAPI_EXPECTED_STATUSES:-200}"
 TRUSTED_WORKSPACE_HOSTS="${PRESET_TRUSTED_WORKSPACE_HOSTS:-}"
+INCLUDE_SQL_TEXT_ENDPOINTS="${PRESET_INCLUDE_SQL_TEXT_ENDPOINTS:-false}"
 RESPONSE_DIR="$(mktemp -d -t preset-agent-skills-live-smoke.XXXXXX)"
 trap 'rm -rf "$RESPONSE_DIR"' EXIT
+
+case "$INCLUDE_SQL_TEXT_ENDPOINTS" in
+  true|false)
+    ;;
+  *)
+    fail "PRESET_INCLUDE_SQL_TEXT_ENDPOINTS must be true or false"
+    ;;
+esac
 
 case "$WORKSPACE_SCHEME" in
   http|https)
@@ -134,7 +143,12 @@ api_get "$api_base/database/available/" "200,403"
 api_get "$api_base/database/?q=$q_one" "200,403"
 api_get "$api_base/dataset/?q=$q_one" "200,403"
 api_get "$api_base/sqllab/" "200,403,404"
-api_get "$api_base/query/?q=$q_one" "200,403"
-api_get "$api_base/saved_query/?q=$q_one" "200,403"
+
+if [[ "$INCLUDE_SQL_TEXT_ENDPOINTS" == "true" ]]; then
+  api_get "$api_base/query/?q=$q_one" "200,403"
+  api_get "$api_base/saved_query/?q=$q_one" "200,403"
+else
+  echo "skipped SQL text-bearing query and saved-query endpoints"
+fi
 
 echo "Live workspace metadata smoke completed."

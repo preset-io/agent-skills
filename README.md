@@ -17,9 +17,7 @@ skills/
   preset-embedding/SKILL.md
 ```
 
-Each skill keeps the always-loaded instructions small and stores detailed API examples in `references/` files loaded on demand.
-
-Use `preset-api` first for authentication and safety rules, then `preset-workspaces` to resolve the team and workspace hostname. After that, load the smallest domain skill that matches the task, such as dashboards/charts, datasets/databases, SQL Lab, import/export, or embedding. For workspace Superset API work, use `preset-superset` to pin behavior to the target workspace's runtime version and OpenAPI contract before relying on broad public docs.
+Each `SKILL.md` stays small and always-loaded; detailed API examples live in `references/` files the agent loads on demand, so the always-on context budget stays tight.
 
 ## Supported Clients
 
@@ -45,6 +43,18 @@ Use `preset-api` first for authentication and safety rules, then `preset-workspa
 | [preset-embedding](skills/preset-embedding/SKILL.md) | Inspect embedded dashboard configuration and route guest-token/trusted-domain workflows to security-sensitive review. |
 
 Broader user groups, SCIM, RLS, DAR/permission APIs, guest-token creation, SQL execution, database changes, API key CRUD, billing/payment, and other sensitive workflows require separate review before they are documented here. The admin skill includes team-admin membership, invite, workspace lifecycle, and audit examples; those require explicit confirmation and appropriate permissions. Import/export workflows are documented with disclosure and mutation gates.
+
+## How Skills Compose
+
+For any workspace task, agents walk a fixed dependency chain:
+
+1. **`preset-api`** — exchange `PRESET_CLIENT_ID` / `PRESET_CLIENT_SECRET` for a JWT and build a reusable client.
+2. **`preset-workspaces`** — list teams and workspaces; resolve the workspace hostname from the API (never hard-coded).
+3. **`preset-superset`** — pin examples to the workspace's actual Superset build via `/version` and `/api/v1/_openapi`; check `/me/roles/` if permissions are uncertain.
+4. **Domain skill** — load the focused `references/` file for the operation: `preset-dashboards`, `preset-datasets`, `preset-sqllab`, `preset-import-export`, or `preset-embedding`.
+5. **Safety gate** — before any mutation, export, SQL execution, or data-returning read, load [`preset-api/references/safety-policy.md`](skills/preset-api/references/safety-policy.md), summarize target + payload + effect, and get explicit user confirmation.
+
+For Management API admin work (teams, invites, roles, audits, workspace lifecycle), substitute `preset-admin` for steps 3–4.
 
 ## Quick Start
 

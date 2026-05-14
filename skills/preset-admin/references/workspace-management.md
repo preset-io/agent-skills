@@ -41,27 +41,50 @@ Common request fields:
 
 ## Update A Workspace
 
-`PUT` updates the workspace resource. Only send the fields being intentionally changed, and confirm whether omitted optional fields are preserved by the current Manager serializer before using a broad copied payload.
+`PUT` updates the workspace resource, but Manager does not treat every omitted field as preserved. Some omitted optional fields are passed to the manager as `None` or `False`, which can clear display metadata or disable boolean settings. Always read the current workspace first and send the full desired state for fields managed by this endpoint.
 
-Confirmation summary should include the target `team_name`, workspace ID, current title, new title or metadata, and expected effect.
+Confirmation summary should include the target `team_name`, workspace ID, current title, current hostname, every field being preserved, every field being changed, and the expected effect.
 
 ```bash
-curl -s -X PUT \
+CURRENT_WORKSPACE="$(curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/")"
+
+CURRENT_WORKSPACE="$CURRENT_WORKSPACE" jq -n '{
+  title: "Analytics",
+  descr: (env.CURRENT_WORKSPACE | fromjson | .payload.descr),
+  color: (env.CURRENT_WORKSPACE | fromjson | .payload.color),
+  icon: (env.CURRENT_WORKSPACE | fromjson | .payload.icon),
+  allow_public_dashboards: (env.CURRENT_WORKSPACE | fromjson | .payload.allow_public_dashboards)
+}' \
+| curl -s -X PUT \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/" \
-  -d '{"title":"Analytics"}'
+  -d @-
 ```
 
 ```python
+current = client.mgmt(
+    "GET",
+    f"/teams/{team_name}/workspaces/{workspace_id}/",
+)["payload"]
+
+payload = {
+    "title": "Analytics",
+    "descr": current.get("descr"),
+    "color": current.get("color"),
+    "icon": current.get("icon"),
+    "allow_public_dashboards": current.get("allow_public_dashboards", False),
+}
+
 updated = client.mgmt(
     "PUT",
     f"/teams/{team_name}/workspaces/{workspace_id}/",
-    json={"title": "Analytics"},
+    json=payload,
 )["payload"]
 ```
 
-Only send the fields being intentionally changed. Avoid sending secrets such as `slack_token` unless the user explicitly asks and provides an approved secret-handling path.
+Do not include secrets such as `slack_token` unless the user explicitly asks and provides an approved secret-handling path. Treat AI Assist, embedding, MCP, and Copilot settings as separate sensitive configuration changes, not incidental workspace metadata updates.
 
 ## Delete A Workspace
 
@@ -98,7 +121,7 @@ Use the stable workspace `name`, not the display title.
 
 ## Workspace Membership Edge Cases
 
-The normal membership list and role-update examples live in `preset-workspaces`. These details are important for admin work:
+The read-only workspace membership list lives in `preset-workspaces`. These details are important for admin work:
 
 - `GET /teams/{team_name}/workspaces/{workspace_id_or_name}/memberships/` accepts either a numeric workspace ID or `name-<workspace_name>`.
 - Use `user_name_or_email` to search members.

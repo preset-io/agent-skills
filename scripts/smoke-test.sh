@@ -91,8 +91,16 @@ require_grep "PresetMachineRole" skills/preset-admin/references/role-identifiers
 require_grep "Do not guess from role names" skills/preset-admin/references/role-identifiers.md
 require_grep "name-<workspace_name>" skills/preset-admin/references/workspace-management.md
 require_grep "user-access/" skills/preset-admin/references/workspace-management.md
+require_grep "Always read the current workspace first" skills/preset-admin/references/workspace-management.md
+require_grep "full desired state" skills/preset-admin/references/workspace-management.md
 
-if grep -q "Invite A User" skills/preset-workspaces/references/membership.md; then
+if grep -Eq "Invite A User|guarded membership workflows|manage membership|role-update examples" \
+  skills/preset-workspaces/SKILL.md \
+  skills/preset-workspaces/references/membership.md \
+  AGENTS.md \
+  CLAUDE.md \
+  .github/copilot-instructions.md \
+  .cursor-plugin/plugin.json; then
   fail "preset-workspaces membership reference should not duplicate invite workflows"
 fi
 

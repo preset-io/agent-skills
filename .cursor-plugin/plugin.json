@@ -13,7 +13,7 @@
     {
       "name": "preset-workspaces",
       "path": "skills/preset-workspaces/SKILL.md",
-      "description": "List Preset teams and workspaces, resolve workspace hostnames, and manage membership with confirmation."
+      "description": "List Preset teams and workspaces, resolve workspace hostnames, and inspect workspace membership."
     },
     {
       "name": "preset-admin",

@@ -3,7 +3,7 @@
 Use the skill files in this repository when helping with Preset API work:
 
 - `skills/preset-api/SKILL.md` for authentication, API conventions, pagination, Rison, and safety policy.
-- `skills/preset-workspaces/SKILL.md` for team and workspace discovery, hostname resolution, and guarded membership workflows.
+- `skills/preset-workspaces/SKILL.md` for read-only team and workspace discovery, hostname resolution, and workspace membership listing.
 - `skills/preset-admin/SKILL.md` for team memberships, workspace lifecycle, invite lifecycle, role identifiers, and audit logs.
 - `skills/preset-dashboards/SKILL.md` for read-only dashboard inspection.
 - `skills/preset-datasets/SKILL.md` for read-only dataset and database metadata inspection.

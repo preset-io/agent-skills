@@ -7,7 +7,7 @@ This repository contains installable Preset API skills for OpenAI Codex and othe
 Use the `skills/*/SKILL.md` files as the canonical instructions:
 
 - `skills/preset-api/SKILL.md` - authenticate with the Preset Management API and prepare safe API access. Required before all other Preset API skills.
-- `skills/preset-workspaces/SKILL.md` - list teams and workspaces, resolve workspace hostnames, inspect workspace status, and handle guarded membership workflows.
+- `skills/preset-workspaces/SKILL.md` - list teams and workspaces, resolve workspace hostnames, inspect workspace status, and list workspace membership.
 - `skills/preset-admin/SKILL.md` - manage team memberships, workspace lifecycle, invite lifecycle, role identifiers, and audit logs with guarded mutations.
 - `skills/preset-dashboards/SKILL.md` - inspect dashboards, dashboard charts, and dashboard datasets. Read-only.
 - `skills/preset-datasets/SKILL.md` - inspect database connections, schemas, tables, datasets, columns, and metrics. Read-only.

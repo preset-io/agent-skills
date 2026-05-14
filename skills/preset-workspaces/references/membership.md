@@ -35,10 +35,12 @@ Common response fields:
 
 ## Invite A User To A Team And Workspace
 
-Invite requests require a numeric `team_role_id`. Do not call `GET /team-roles/` with the API-key JWT from `preset-api`; that endpoint is not available to user API keys. Resolve and verify the intended team role ID from an approved admin context before making the invite call.
+Invite requests require a numeric `team_role_id`. Do not call `GET /team-roles/` with the API-key JWT from `preset-api`; that endpoint is not available to user API keys. The value must be supplied out-of-band by an admin, for example through approved environment configuration or a ticket/comment from a team admin. Resolve and verify the intended team role ID before making the invite call.
 
 ```python
-team_role_id = verified_team_role_id
+import os
+
+team_role_id = int(os.environ["PRESET_TEAM_ROLE_ID"])
 ```
 
 ```bash

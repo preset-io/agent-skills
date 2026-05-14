@@ -9,6 +9,8 @@
 | Team name | Stable team identifier used in Management API paths. Returned by `GET /teams/` as `name`. |
 | Workspace hostname | Unique host of a workspace's Superset API. |
 
+Production examples use `https://api.app.preset.io/v1`. For sandbox or staging environments, set `PRESET_API_BASE` as described in `preset-api` and use that base URL for Management API calls.
+
 ## List Teams
 
 ```bash

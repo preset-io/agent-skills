@@ -16,6 +16,7 @@ Use this skill for Preset Management API operations involving teams, workspaces,
 
 ## Guardrails
 
+- Production Management API examples use `https://api.app.preset.io/v1`. For sandbox or staging environments, set `PRESET_API_BASE` as described in `preset-api`.
 - Resolve workspace hostnames from `GET /teams/{team_name}/workspaces/`; never assume or hard-code a hostname.
 - Treat workspace membership and team invitations as access-control mutations.
 - Do not call `GET /team-roles/` with an API-key JWT; resolve `team_role_id` from an approved admin context before invite calls.

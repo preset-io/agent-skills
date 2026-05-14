@@ -101,18 +101,20 @@ def get_workspace_hostname(client, team_name, workspace_title):
 
 ## Workspace membership
 
+Workspace membership and invite endpoints require team-admin permissions. API-key JWTs are accepted, but requests return `403` if the key owner is not a team admin.
+
 ### List members of a workspace
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/memberships/" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/memberships/?page_number=1&page_size=100" \
   | jq '.payload'
 ```
 
 ```python
 members = client.mgmt(
     "GET",
-    f"/teams/{team_name}/workspaces/{workspace_id}/memberships/",
+    f"/teams/{team_name}/workspaces/{workspace_id}/memberships/?page_number=1&page_size=100",
 )["payload"]
 ```
 
@@ -210,11 +212,14 @@ Valid default `role_identifier` values:
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/memberships/" | jq '.payload'
+  "https://api.app.preset.io/v1/teams/{team_name}/memberships/?page_number=1&page_size=100" | jq '.payload'
 ```
 
 ```python
-team_members = client.mgmt("GET", f"/teams/{team_name}/memberships/")["payload"]
+team_members = client.mgmt(
+    "GET",
+    f"/teams/{team_name}/memberships/?page_number=1&page_size=100",
+)["payload"]
 ```
 
 ### Invite a user to a team only

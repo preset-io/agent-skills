@@ -9,6 +9,8 @@ fail() {
   exit 1
 }
 
+command -v jq >/dev/null || fail "jq is required"
+
 require_file() {
   test -f "$1" || fail "missing file $1"
 }
@@ -54,6 +56,10 @@ require_jq '
     "skills/preset-workspaces/SKILL.md"
   ]
 ' .cursor-plugin/plugin.json
+
+while IFS= read -r path; do
+  require_file "$path"
+done < <(jq -r '.skills[].path' .cursor-plugin/plugin.json)
 
 require_file .github/copilot-instructions.md
 test ! -d api/skills || fail "legacy api/skills directory still exists"

@@ -8,14 +8,14 @@ Membership changes and invitations mutate access. Confirm the exact user, team, 
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/memberships/?page_number=1&page_size=100" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/memberships?page_number=1&page_size=100" \
   | jq '.payload'
 ```
 
 ```python
 members = client.mgmt(
     "GET",
-    f"/teams/{team_name}/workspaces/{workspace_id}/memberships/?page_number=1&page_size=100",
+    f"/teams/{team_name}/workspaces/{workspace_id}/memberships?page_number=1&page_size=100",
 )["payload"]
 ```
 

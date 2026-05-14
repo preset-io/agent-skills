@@ -77,3 +77,14 @@ Example encoded value:
 ```text
 ?q=(filters:!((col:published,opr:eq,value:!t)),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)
 ```
+
+## Superset Version And OpenAPI
+
+For workspace API examples, prefer the target workspace's own runtime metadata over broad public docs:
+
+| Goal | Endpoint |
+|---|---|
+| Workspace version | `GET https://<workspace-hostname>/version` |
+| Workspace OpenAPI | `GET https://<workspace-hostname>/api/v1/_openapi` |
+
+Use `preset-superset` before documenting or calling an endpoint that may vary by Superset version or feature flag.

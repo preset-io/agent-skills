@@ -131,6 +131,14 @@ class PresetClient:
         resp = self._request_with_auth(method, url, **kwargs)
         return resp.json()
 
+    def workspace_root_response(self, method, workspace_hostname, path, **kwargs):
+        url = f"https://{workspace_hostname}{path}"
+        return self._request_with_auth(method, url, **kwargs)
+
+    def workspace_root(self, method, workspace_hostname, path, **kwargs):
+        resp = self.workspace_root_response(method, workspace_hostname, path, **kwargs)
+        return resp.json()
+
 
 client = PresetClient()
 ```

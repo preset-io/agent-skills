@@ -35,8 +35,12 @@ required_skills=(
   preset-api
   preset-admin
   preset-workspaces
+  preset-superset
   preset-dashboards
   preset-datasets
+  preset-sqllab
+  preset-import-export
+  preset-embedding
 )
 
 for skill in "${required_skills[@]}"; do
@@ -55,9 +59,43 @@ require_jq '
     "skills/preset-api/SKILL.md",
     "skills/preset-dashboards/SKILL.md",
     "skills/preset-datasets/SKILL.md",
+    "skills/preset-embedding/SKILL.md",
+    "skills/preset-import-export/SKILL.md",
+    "skills/preset-sqllab/SKILL.md",
+    "skills/preset-superset/SKILL.md",
     "skills/preset-workspaces/SKILL.md"
   ]
 ' .cursor-plugin/plugin.json
+
+required_phase4_references=(
+  skills/preset-superset/references/version-openapi.md
+  skills/preset-superset/references/workspace-api-safety.md
+  skills/preset-dashboards/references/charts-and-dashboard-api.md
+  skills/preset-datasets/references/database-and-dataset-api.md
+  skills/preset-sqllab/references/query-history.md
+  skills/preset-sqllab/references/guarded-sql-execution.md
+  skills/preset-import-export/references/import-export.md
+  skills/preset-embedding/references/embedded-dashboards.md
+)
+
+for file in "${required_phase4_references[@]}"; do
+  require_file "$file"
+done
+
+require_grep "/api/v1/_openapi" skills/preset-superset/references/version-openapi.md
+require_grep "/api/v1/me/roles/" skills/preset-superset/references/version-openapi.md
+require_grep "HTTP method alone is not enough" skills/preset-superset/references/workspace-api-safety.md
+require_grep "chart data retrieval" skills/preset-api/references/safety-policy.md
+require_grep "/api/v1/chart/{pk}/data/" skills/preset-dashboards/references/charts-and-dashboard-api.md
+require_grep "/api/v1/dashboard/{id_or_slug}/tabs" skills/preset-dashboards/references/charts-and-dashboard-api.md
+require_grep "/api/v1/database/{pk}/table_metadata/" skills/preset-datasets/references/database-and-dataset-api.md
+require_grep "/api/v1/datasource/{datasource_type}/{datasource_id}/column/{column_name}/values/" skills/preset-datasets/references/database-and-dataset-api.md
+require_grep "/api/v1/sqllab/execute/" skills/preset-sqllab/references/guarded-sql-execution.md
+require_grep "/api/v1/query/updated_since" skills/preset-sqllab/references/query-history.md
+require_grep "/api/v1/assets/export/" skills/preset-import-export/references/import-export.md
+require_grep "Never print import secrets" skills/preset-import-export/references/import-export.md
+require_grep "/api/v1/embedded_dashboard/{uuid}" skills/preset-embedding/references/embedded-dashboards.md
+require_grep "/api/v1/security/guest_token/" skills/preset-embedding/references/embedded-dashboards.md
 
 required_admin_references=(
   skills/preset-admin/references/audit-logs.md
@@ -77,6 +115,7 @@ require_grep "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/" skills
 require_grep "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/actions/" skills/preset-admin/references/audit-logs.md
 require_grep "/audit/teams/{team_name}/logs/downloads/" skills/preset-admin/references/audit-logs.md
 require_grep "mgmt_v2_response" skills/preset-admin/references/audit-logs.md
+require_grep "workspace_root" skills/preset-api/references/authentication.md
 require_grep "token = download" skills/preset-admin/references/audit-logs.md
 require_grep "allow_redirects=False" skills/preset-admin/references/audit-logs.md
 require_grep "proxy/access logs" skills/preset-admin/references/audit-logs.md

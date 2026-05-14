@@ -9,8 +9,12 @@ Use the `skills/*/SKILL.md` files as the canonical instructions:
 - `skills/preset-api/SKILL.md` - authenticate with the Preset Management API and prepare safe API access. Required before all other Preset API skills.
 - `skills/preset-workspaces/SKILL.md` - list teams and workspaces, resolve workspace hostnames, inspect workspace status, and list workspace membership.
 - `skills/preset-admin/SKILL.md` - manage team memberships, workspace lifecycle, invite lifecycle, role identifiers, and audit logs with guarded mutations.
-- `skills/preset-dashboards/SKILL.md` - inspect dashboards, dashboard charts, and dashboard datasets. Read-only.
-- `skills/preset-datasets/SKILL.md` - inspect database connections, schemas, tables, datasets, columns, and metrics. Read-only.
+- `skills/preset-superset/SKILL.md` - inspect workspace Superset version, OpenAPI, current-user permissions, menu capabilities, and API safety classification.
+- `skills/preset-dashboards/SKILL.md` - inspect dashboards, charts, dashboard charts/datasets/tabs, thumbnails/screenshots, and chart data safety boundaries.
+- `skills/preset-datasets/SKILL.md` - inspect database connections, schemas, catalogs, tables, datasets, columns, metrics, table metadata, and data-returning dataset boundaries.
+- `skills/preset-sqllab/SKILL.md` - inspect SQL Lab bootstrap, query history, saved queries, and SQL execution safety boundaries.
+- `skills/preset-import-export/SKILL.md` - route Superset workspace import/export workflows with disclosure and mutation gates.
+- `skills/preset-embedding/SKILL.md` - inspect embedded dashboard configuration and route guest-token/trusted-domain workflows to security-sensitive review.
 
 Detailed examples live in each skill's `references/` directory. Load only the reference files needed for the user's task.
 
@@ -23,6 +27,6 @@ Detailed examples live in each skill's `references/` directory. Load only the re
 
 ## Safety Policy
 
-Default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, or guest-token creation, summarize the exact target, payload, and expected effect, then get explicit user confirmation.
+Default to metadata reads. Some `GET` endpoints can expose customer data or database structure, including chart data, table samples, SQL Lab results, distinct values, and exports. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, SQL result retrieval, chart data retrieval, table sample retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation.
 
 Do not expose credentials, client secrets, bearer tokens, database passwords, SQLAlchemy URIs, access tokens, refresh tokens, or signed guest tokens.

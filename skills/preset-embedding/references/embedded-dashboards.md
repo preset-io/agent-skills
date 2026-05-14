@@ -45,4 +45,4 @@ Do not run these without explicit confirmation:
 
 Before mutating embedded configuration, summarize the dashboard, allowed domains, expected origin behavior, and rollback path.
 
-Before guest-token creation, use a dedicated security-sensitive workflow. Guest tokens are signed credentials and must never be printed in logs, examples, PR comments, or handoff notes.
+Before guest-token creation, use `preset-guest-tokens`. For embedded RLS clauses, use `preset-embedded-rls`. Guest tokens are signed credentials and must never be printed in logs, examples, PR comments, or handoff notes.

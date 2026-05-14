@@ -2,6 +2,8 @@
 
 SQL execution is high impact even when the SQL is read-only. It can expose customer data, run expensive warehouse work, or create side effects in engines that allow non-read statements.
 
+Use `preset-sql-execution` for SQL execution, result retrieval, result export, query stop, and saved-query mutation workflows. This reference remains as the SQL Lab endpoint map; the focused Phase 5 skill owns the approval template.
+
 ## Confirmation Required
 
 Before calling SQL execution or result export endpoints, summarize:

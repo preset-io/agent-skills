@@ -1,7 +1,7 @@
 {
   "name": "preset-agent-skills",
   "version": "0.1.0",
-  "description": "Preset API skills for authentication, workspace discovery, team/workspace administration, and Superset workspace API workflows.",
+  "description": "Preset API skills for authentication, workspace discovery, administration, Superset workspace APIs, and security-sensitive workflows.",
   "author": {
     "name": "Preset",
     "url": "https://preset.io/"
@@ -18,13 +18,16 @@
     "datasets",
     "sqllab",
     "import-export",
-    "embedding"
+    "embedding",
+    "guest-tokens",
+    "rls",
+    "security"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Preset Agent Skills",
-    "shortDescription": "Authenticate with Preset, administer teams/workspaces, and use Superset workspace APIs.",
-    "longDescription": "Markdown skills for agents using the public Preset Management API and workspace Superset APIs. Includes guarded authentication guidance, workspace discovery, admin workflows for memberships, invites, roles, audits, version-aware Superset OpenAPI discovery, dashboard/chart, dataset/database, SQL Lab, import/export, and embedding guidance.",
+    "shortDescription": "Authenticate with Preset, administer teams/workspaces, use Superset APIs, and handle sensitive workflows.",
+    "longDescription": "Markdown skills for agents using the public Preset Management API and workspace Superset APIs. Includes guarded authentication guidance, workspace discovery, admin workflows for memberships, invites, roles, audits, version-aware Superset OpenAPI discovery, dashboard/chart, dataset/database, SQL Lab, import/export, embedding, guest-token, RLS, database-connection, role/permission, and destructive-import guidance.",
     "developerName": "Preset",
     "category": "Coding",
     "capabilities": [
@@ -37,7 +40,9 @@
       "Check my workspace Superset OpenAPI",
       "List audit logs for my Preset team",
       "List dashboards in a Preset workspace",
-      "Inspect SQL Lab query history"
+      "Inspect SQL Lab query history",
+      "Review a Preset guest-token request",
+      "Review a Preset SQL execution request"
     ],
     "brandColor": "#00A5B5"
   }

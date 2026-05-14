@@ -38,4 +38,6 @@ Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL
 3. Explain whether the action changes access, data, credentials, metadata, cache, or execution state.
 4. Get explicit user confirmation before making the call.
 
+For security-sensitive workflows, route to the focused Phase 5 skill: `preset-guest-tokens`, `preset-embedded-rls`, `preset-sql-execution`, `preset-database-connections`, `preset-roles-permissions`, or `preset-destructive-imports`.
+
 Never expose credentials, bearer tokens, database passwords, SQLAlchemy URIs, access tokens, refresh tokens, signed guest tokens, or exported secret values in logs, examples, PR comments, or handoff notes.

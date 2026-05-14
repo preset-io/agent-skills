@@ -29,6 +29,8 @@ Before exporting, summarize:
 
 Imports mutate workspace metadata. Database imports can require passwords, SSH tunnel passwords, private keys, private key passwords, or encrypted extra secrets.
 
+Use `preset-destructive-imports` for overwrite, sparse-update, all-assets restore, database import, or secret-bearing import workflows.
+
 | Surface | Endpoint |
 |---|---|
 | All assets | `POST /api/v1/assets/import/` |

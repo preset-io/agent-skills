@@ -17,6 +17,6 @@ Use this skill for dataset and database metadata inspection in a Preset workspac
 
 ## Scope
 
-Default to metadata reads. Sample rows, distinct values, datasource column values, and exports can expose customer data or database structure, so treat them as data-returning reads that require target and limit confirmation.
+Default to metadata reads. Sample rows, distinct values, datasource column values, database connection configuration, and exports can expose customer data, credentials, or database structure, so treat them as data-returning or credential-bearing reads that require explicit confirmation after summarizing the target and limit where applicable.
 
 Do not create or update databases, datasets, columns, metrics, imports, exports, schema refreshes, uploads, database tests, SQL validation, or SQL Lab queries from this skill without explicit confirmation. For dataset or database mutations, summarize the target workspace, database/dataset IDs, request body or SQL, and expected effect before making the call.

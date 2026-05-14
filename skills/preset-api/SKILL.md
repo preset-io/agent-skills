@@ -19,4 +19,4 @@ Use this skill as the prerequisite for all other Preset API skills.
 - Never log or print access tokens.
 - Use `PRESET_API_BASE` and `PRESET_API_BASE_V2` only when targeting a non-production Management API.
 - Derive workspace hostnames from the Management API before calling workspace Superset APIs.
-- Default to metadata reads. Require explicit user confirmation before mutations, data-returning reads, SQL execution, imports, exports, role/RLS changes, database connection changes, cache changes, or guest-token creation.
+- Default to metadata reads. Require explicit user confirmation before mutations, data-returning reads, SQL text reads, database connection configuration reads, SQL execution, imports, exports, role/RLS changes, database connection changes, cache changes, or guest-token creation.

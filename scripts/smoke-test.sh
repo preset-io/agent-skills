@@ -49,10 +49,15 @@ for skill in "${required_skills[@]}"; do
   require_grep "^name: $skill$" "$file"
   require_grep "^description: " "$file"
   require_dir "skills/$skill/references"
+  require_grep "skills/$skill/SKILL.md" AGENTS.md
+  require_grep "skills/$skill/SKILL.md" CLAUDE.md
+  require_grep "skills/$skill/SKILL.md" .github/copilot-instructions.md
+  require_grep "skills/$skill/SKILL.md" README.md
 done
 
 require_jq '.skills == "./skills/"' .codex-plugin/plugin.json
 require_jq '.name == "preset-agent-skills"' .claude-plugin/plugin.json
+require_jq 'has("skills") | not' .claude-plugin/plugin.json
 require_jq '
   [.skills[].path] | sort == [
     "skills/preset-admin/SKILL.md",

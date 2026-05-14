@@ -1,8 +1,8 @@
 # Safety Policy Reference
 
-Default to metadata reads. HTTP method alone is not enough to decide whether a call is safe: some `GET` endpoints return customer data, SQL text, exports, sample rows, or database structure.
+Default to metadata reads. HTTP method alone is not enough to decide whether a call is safe: some `GET` endpoints return customer data, SQL text, exports, sample rows, database connection configuration, or database structure.
 
-Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, SQL result retrieval, chart data retrieval, table sample retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation:
+Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, SQL result retrieval, chart data retrieval, table sample retrieval, query-history retrieval, saved-query retrieval, database connection configuration retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation:
 
 1. Identify the exact team, workspace, dashboard, dataset, database, user, role, or SQL target.
 2. Summarize the endpoint, HTTP method, request body, and expected effect.

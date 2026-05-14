@@ -28,6 +28,8 @@ Each `SKILL.md` stays small and always-loaded; detailed API examples live in `re
 | Cursor | `.cursor-plugin/plugin.json` |
 | GitHub Copilot | `.github/copilot-instructions.md` |
 
+Claude Code uses the plugin manifest for package metadata and `CLAUDE.md` plus the `skills/` directory for convention-based skill discovery. Cursor enumerates skill files directly in `.cursor-plugin/plugin.json`; Codex points at the `skills/` directory through `.codex-plugin/plugin.json`.
+
 ## Skills
 
 | Skill | Description |
@@ -136,7 +138,7 @@ PRESET_WORKSPACE_HOSTNAME="workspace.app.preset.io" \
 ./scripts/live-workspace-smoke.sh
 ```
 
-When `PRESET_WORKSPACE_HOSTNAME` is set, the script verifies the hostname against the Management API workspace list before sending the bearer token to the workspace. If the hostname is omitted, the script selects the first workspace returned by the Management API.
+When `PRESET_WORKSPACE_HOSTNAME` is set, the script verifies the hostname against the Management API workspace list before sending the bearer token to the workspace. If the hostname is omitted, the script selects the first READY workspace returned by the Management API.
 
 Local dev shells such as `superset.local.preset.zone` are not returned by hosted workspace discovery. Use the local override only for local environments:
 
@@ -153,7 +155,7 @@ The live smoke script skips SQL text-bearing query and saved-query endpoints by 
 
 ## Safety Policy
 
-Agents should default to metadata reads. Some `GET` endpoints can expose customer data, SQL text, or database structure, including chart data, table samples, SQL Lab results, query history, saved queries, distinct values, and exports. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, SQL result retrieval, chart data retrieval, table sample retrieval, query-history retrieval, saved-query retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
+Agents should default to metadata reads. Some `GET` endpoints can expose customer data, SQL text, database connection configuration, or database structure, including chart data, table samples, SQL Lab results, query history, saved queries, distinct values, and exports. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, SQL result retrieval, chart data retrieval, table sample retrieval, query-history retrieval, saved-query retrieval, database connection configuration retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
 
 ## License
 

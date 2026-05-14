@@ -209,12 +209,15 @@ api_get() {
 
 if [[ -z "$WORKSPACE_HOSTNAME" ]]; then
   teams_json="$(curl -fsS -H "Authorization: Bearer $token" "$MGMT_BASE/teams/")"
-  team_name="$(jq -r '.payload[0].name // empty' <<<"$teams_json")"
-  test -n "$team_name" || fail "could not find a team; set PRESET_WORKSPACE_HOSTNAME to validate a known workspace"
+  WORKSPACE_HOSTNAME=""
+  while IFS= read -r team_name; do
+    [[ -n "$team_name" ]] || continue
+    workspaces_json="$(curl -fsS -H "Authorization: Bearer $token" "$MGMT_BASE/teams/$team_name/workspaces/")"
+    WORKSPACE_HOSTNAME="$(jq -r '.payload[] | select(.hostname != null and .workspace_status == "READY") | .hostname' <<<"$workspaces_json" | head -n 1)"
+    [[ -n "$WORKSPACE_HOSTNAME" ]] && break
+  done < <(jq -r '.payload[].name // empty' <<<"$teams_json")
 
-  workspaces_json="$(curl -fsS -H "Authorization: Bearer $token" "$MGMT_BASE/teams/$team_name/workspaces/")"
-  WORKSPACE_HOSTNAME="$(jq -r '.payload[] | select(.hostname != null) | .hostname' <<<"$workspaces_json" | head -n 1)"
-  test -n "$WORKSPACE_HOSTNAME" || fail "could not find a workspace hostname; set PRESET_WORKSPACE_HOSTNAME"
+  test -n "$WORKSPACE_HOSTNAME" || fail "could not find a READY workspace hostname; set PRESET_WORKSPACE_HOSTNAME"
 fi
 
 validate_workspace_hostname "$WORKSPACE_HOSTNAME"

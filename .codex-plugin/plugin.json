@@ -1,0 +1,37 @@
+{
+  "name": "preset-agent-skills",
+  "version": "0.1.0",
+  "description": "Preset API skills for authentication, workspace discovery, and read-only dashboard and dataset inspection.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/preset-agent-skills",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "superset",
+    "api",
+    "dashboards",
+    "datasets"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Preset Agent Skills",
+    "shortDescription": "Authenticate with Preset and inspect workspaces, dashboards, and datasets.",
+    "longDescription": "Markdown skills for agents using the public Preset Management API and workspace Superset APIs. Includes guarded authentication guidance, workspace discovery, and read-only dashboard and dataset examples.",
+    "developerName": "Preset",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://preset.io/",
+    "defaultPrompt": [
+      "Authenticate with the Preset API",
+      "Find my Preset workspace hostname",
+      "List dashboards in a Preset workspace"
+    ],
+    "brandColor": "#00A5B5"
+  }
+}

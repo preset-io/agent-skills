@@ -1,0 +1,19 @@
+{
+  "name": "preset-agent-skills",
+  "version": "0.1.0",
+  "description": "Preset API skills for authentication, workspace discovery, and read-only dashboard and dataset inspection.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/preset-agent-skills",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "superset",
+    "api",
+    "dashboards",
+    "datasets"
+  ]
+}

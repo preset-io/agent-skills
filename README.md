@@ -1,35 +1,26 @@
-# preset-agent-skills
+# Preset Agent Skills
 
-Agent API skills for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This package ships Markdown guidance for direct API use across agent clients.
+Agent API guidance for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This repository helps coding agents authenticate with Preset, discover workspaces, and inspect dashboards and datasets through the public APIs.
 
-## Current usage
+## Entry Points
 
-### Claude Code
+- **OpenAI Codex:** reads `AGENTS.md` from the repo root.
+- **Claude Code:** reads `CLAUDE.md` from the repo root.
+- **Cursor:** use `.cursor-plugin/plugin.json` as the Cursor plugin manifest.
+- **GitHub Copilot:** reference the Markdown skill files from `.github/copilot-instructions.md`, or include the relevant guidance directly.
 
-Claude Code reads `CLAUDE.md` from the repo root. Native Claude plugin packaging is planned separately; for now, use the Markdown files in `api/skills/` as reference material.
-
-### Cursor
-
-Configure `.cursor-plugin/plugin.json` from this repo as a Cursor plugin source.
-
-### OpenAI Codex
-
-Codex auto-loads `AGENTS.md` from the repo root, which references the Markdown skill files.
-
-### GitHub Copilot
-
-Add `.github/copilot-instructions.md` referencing the skill files, or include the skill content in your repository's Copilot instructions.
+Native plugin packaging for clients that require additional manifests is planned separately. The canonical skill content in this repository is currently Markdown under `api/skills/`.
 
 ## Skills
 
-Agents activate these automatically based on the user's request.
+Use these skill files based on the task:
 
 | Skill | Description |
 |---|---|
-| **preset-api** | Authenticate with the Preset Management API (client ID + secret → JWT bearer token). Covers base URLs, pagination, Rison-encoded query parameters, error codes, rate limits, and security best practices. **Required by all other skills.** |
-| **preset-workspaces** | List and inspect teams and workspaces, resolve workspace hostnames, invite users, and update workspace membership with explicit confirmation. |
-| **preset-dashboards** | Inspect dashboards, dashboard charts, and dashboard datasets in a workspace. |
-| **preset-datasets** | Inspect database connections, schemas, tables, datasets, columns, and metrics in a workspace. |
+| [preset-api](api/skills/preset-api.md) | Authenticate with the Preset Management API (client ID + secret to JWT bearer token). Covers base URLs, pagination, Rison-encoded query parameters, error codes, rate limits, and security best practices. Required by all other skills. |
+| [preset-workspaces](api/skills/preset-workspaces.md) | List and inspect teams and workspaces, resolve workspace hostnames, invite users, and update workspace membership with explicit confirmation. |
+| [preset-dashboards](api/skills/preset-dashboards.md) | Inspect dashboards, dashboard charts, and dashboard datasets in a workspace. |
+| [preset-datasets](api/skills/preset-datasets.md) | Inspect database connections, schemas, tables, datasets, columns, and metrics in a workspace. |
 
 User, role, RLS, guest-token, import/export, SQL execution, and other sensitive mutation workflows require separate review before they are documented here.
 
@@ -58,6 +49,7 @@ resp = requests.post(
         "secret": os.environ["PRESET_CLIENT_SECRET"],
     },
 )
+resp.raise_for_status()
 token = resp.json()["payload"]["access_token"]
 headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 ```
@@ -71,13 +63,17 @@ Use `PRESET_API_BASE` to target non-production environments; production examples
 ```python
 teams = requests.get(
     "https://api.app.preset.io/v1/teams/", headers=headers
-).json()["payload"]
+)
+teams.raise_for_status()
+teams = teams.json()["payload"]
 
 for team in teams:
-    workspaces = requests.get(
+    resp = requests.get(
         f"https://api.app.preset.io/v1/teams/{team['name']}/workspaces/",
         headers=headers,
-    ).json()["payload"]
+    )
+    resp.raise_for_status()
+    workspaces = resp.json()["payload"]
     for ws in workspaces:
         print(team["name"], "/", ws["title"], "→", ws["hostname"])
 ```
@@ -89,16 +85,20 @@ Use the hostname returned by step 3 — never use a hardcoded value:
 ```python
 # Derive hostname from the workspace listing — do not hardcode it
 first_team = teams[0]
-first_workspace = requests.get(
+resp = requests.get(
     f"https://api.app.preset.io/v1/teams/{first_team['name']}/workspaces/",
     headers=headers,
-).json()["payload"][0]
+)
+resp.raise_for_status()
+first_workspace = resp.json()["payload"][0]
 hostname = first_workspace["hostname"]
 
-dashboards = requests.get(
+resp = requests.get(
     f"https://{hostname}/api/v1/dashboard/",
     headers=headers,
-).json()["result"]
+)
+resp.raise_for_status()
+dashboards = resp.json()["result"]
 ```
 
 ## API reference
@@ -112,7 +112,7 @@ Full Superset workspace API documentation is available at [superset.apache.org/d
 
 ## Safety policy
 
-Agents should default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target and payload and get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
+Agents should default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
 
 ## License
 

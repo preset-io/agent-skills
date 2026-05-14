@@ -198,5 +198,5 @@ query = rison.dumps({
 - Rotate API keys periodically from the Preset management console.
 - Scope API keys to the minimum permissions required.
 - Tokens expire in 5 hours by default; cache with a buffer and retry once with a refreshed token on 401 errors.
-- Default to read-only API calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target and payload and get explicit user confirmation.
+- Default to read-only API calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target, payload, and expected effect, then get explicit user confirmation.
 - These Markdown skills call the public APIs directly. They do not automatically apply MCP runtime guardrails such as workspace binding, tool-level permission checks, MCP request-source tagging, or MCP metrics.

@@ -24,7 +24,7 @@ Add `.github/copilot-instructions.md` referencing the skill files, or include th
 
 ## Skills
 
-Agents activate these automatically based on what the user is trying to do.
+Use these skill files based on what the user is trying to do.
 
 - **preset-api** — Authenticate with the Preset Management API (API token → JWT bearer token). Base URLs, pagination, Rison encoding, error codes, and security best practices. **Required by all other skills.**
 - **preset-workspaces** — List and inspect teams and workspaces, resolve workspace hostnames, invite users, and update workspace membership with explicit confirmation.
@@ -103,4 +103,4 @@ When a user specifies a particular team or workspace by name, filter the listing
 
 ## Safety policy
 
-Default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target and payload and get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
+Default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, SQL execution, role/RLS change, database connection change, or guest-token creation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.

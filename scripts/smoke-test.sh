@@ -33,6 +33,7 @@ require_jq() {
 
 required_skills=(
   preset-api
+  preset-admin
   preset-workspaces
   preset-dashboards
   preset-datasets
@@ -50,12 +51,33 @@ require_jq '.skills == "./skills/"' .codex-plugin/plugin.json
 require_jq '.name == "preset-agent-skills"' .claude-plugin/plugin.json
 require_jq '
   [.skills[].path] | sort == [
+    "skills/preset-admin/SKILL.md",
     "skills/preset-api/SKILL.md",
     "skills/preset-dashboards/SKILL.md",
     "skills/preset-datasets/SKILL.md",
     "skills/preset-workspaces/SKILL.md"
   ]
 ' .cursor-plugin/plugin.json
+
+required_admin_references=(
+  skills/preset-admin/references/audit-logs.md
+  skills/preset-admin/references/deferrals.md
+  skills/preset-admin/references/invites.md
+  skills/preset-admin/references/role-identifiers.md
+  skills/preset-admin/references/team-memberships.md
+  skills/preset-admin/references/workspace-management.md
+)
+
+for file in "${required_admin_references[@]}"; do
+  require_file "$file"
+done
+
+require_grep "/api/v2/audit/teams" skills/preset-admin/references/audit-logs.md
+require_grep "user_name_or_email" skills/preset-admin/references/team-memberships.md
+require_grep "has-seats-remaining" skills/preset-admin/references/team-memberships.md
+require_grep "invites/many" skills/preset-admin/references/invites.md
+require_grep "workspace_roles" skills/preset-admin/references/role-identifiers.md
+require_grep "name-<workspace_name>" skills/preset-admin/references/workspace-management.md
 
 while IFS= read -r path; do
   require_file "$path"

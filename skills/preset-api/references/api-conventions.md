@@ -4,12 +4,13 @@
 
 | Layer | Base URL |
 |---|---|
-| Preset Management API | `https://api.app.preset.io/v1` |
+| Preset Management API v1 | `https://api.app.preset.io/v1` |
+| Preset Management API v2 | `https://api.app.preset.io/v2` |
 | Workspace Superset API | `https://<workspace-hostname>/api/v1` |
 
 Call `GET /teams/{team_name}/workspaces/` through the Management API and inspect the top-level `hostname` field before calling workspace APIs.
 
-For sandbox or staging environments, set `PRESET_API_BASE` to the matching public Management API host.
+For sandbox or staging environments, set `PRESET_API_BASE` and `PRESET_API_BASE_V2` to the matching public Management API hosts.
 
 ## Headers
 

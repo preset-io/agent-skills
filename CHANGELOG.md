@@ -8,6 +8,11 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ## Unreleased
 
+### Added
+
+- **preset-admin** skill - Team membership management, workspace lifecycle operations, invite lifecycle workflows, role identifier guidance, seat-limit preflights, audit log queries, and confirmation-gated audit downloads.
+- Management API v2 conventions and reusable client support for audit log endpoints.
+
 ### Changed
 
 - Converted the seed API guidance into a skill-package layout under `skills/*/SKILL.md`.

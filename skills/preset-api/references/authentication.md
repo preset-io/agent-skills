@@ -71,6 +71,7 @@ import requests
 
 class PresetClient:
     MGMT_BASE = os.environ.get("PRESET_API_BASE", "https://api.app.preset.io/v1")
+    MGMT_BASE_V2 = os.environ.get("PRESET_API_BASE_V2", "https://api.app.preset.io/v2")
     # Preset JWTs are valid for 5 hours by default; refresh early using the buffer.
     TOKEN_TTL_SECONDS = 5 * 3600
     TOKEN_EXPIRY_BUFFER_SECONDS = 5 * 60
@@ -116,6 +117,13 @@ class PresetClient:
 
     def mgmt(self, method, path, **kwargs):
         resp = self._request_with_auth(method, f"{self.MGMT_BASE}{path}", **kwargs)
+        return resp.json()
+
+    def mgmt_v2_response(self, method, path, **kwargs):
+        return self._request_with_auth(method, f"{self.MGMT_BASE_V2}{path}", **kwargs)
+
+    def mgmt_v2(self, method, path, **kwargs):
+        resp = self.mgmt_v2_response(method, path, **kwargs)
         return resp.json()
 
     def workspace(self, method, workspace_hostname, path, **kwargs):

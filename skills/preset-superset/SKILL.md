@@ -14,6 +14,8 @@ Use this skill to prepare safe, version-aware Superset workspace API access.
 3. Load [references/version-openapi.md](references/version-openapi.md) to capture `/version`, `/api/v1/_openapi`, `/api/v1/me/`, `/api/v1/me/roles/`, and `/api/v1/menu/`.
 4. Load [references/workspace-api-safety.md](references/workspace-api-safety.md) before calling endpoints that return customer data, exports, credentials, or execution results.
 
+Only send bearer tokens to workspace hostnames resolved from the Preset Management API, except for explicit local-dev smoke validation against known local hosts.
+
 ## Scope
 
 This skill is read-only discovery. Do not use it to run SQL, fetch chart data, export assets, import assets, mutate dashboard state, mutate datasets/databases, issue guest tokens, or change access controls.

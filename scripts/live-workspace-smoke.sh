@@ -47,6 +47,19 @@ case "$WORKSPACE_SCHEME" in
     ;;
 esac
 
+write_auth_payload() {
+  local output_file="$1"
+  local secret_file="$RESPONSE_DIR/auth-secret.txt"
+
+  printf "%s" "$PRESET_CLIENT_SECRET" > "$secret_file"
+
+  jq -nc \
+    --arg name "$PRESET_CLIENT_ID" \
+    --rawfile secret "$secret_file" \
+    '{name: $name, secret: $secret}' > "$output_file"
+  rm -f "$secret_file"
+}
+
 hostname_without_port() {
   local hostname="$1"
 
@@ -132,19 +145,44 @@ validate_workspace_hostname() {
   fail "refusing to send a bearer token to workspace host not returned by the Management API: $hostname"
 }
 
-auth_payload="$(jq -nc \
-  --arg name "$PRESET_CLIENT_ID" \
-  --arg secret "$PRESET_CLIENT_SECRET" \
-  '{name: $name, secret: $secret}')"
+auth_payload_file="$RESPONSE_DIR/auth-payload.json"
+write_auth_payload "$auth_payload_file"
 
 token="$(
   curl -fsS -X POST "$MGMT_BASE/auth/" \
     -H "Content-Type: application/json" \
-    -d "$auth_payload" \
+    --data "@$auth_payload_file" \
     | jq -r '.payload.access_token'
 )"
 
 test -n "$token" && test "$token" != "null" || fail "auth response did not include payload.access_token"
+
+print_failure_summary() {
+  local response_file="$1"
+  local summary
+
+  summary="$(
+    jq -r '
+      if type == "object" then
+        .message
+        // .error
+        // .error_type
+        // .errors[0].message
+        // .errors[0].error
+        // .result.message
+        // empty
+      else
+        empty
+      end
+    ' "$response_file" 2>/dev/null | head -n 1
+  )"
+
+  if [[ -n "$summary" ]]; then
+    echo "Response summary: $summary" >&2
+  else
+    echo "Response body omitted." >&2
+  fi
+}
 
 api_get() {
   local url="$1"
@@ -160,7 +198,7 @@ api_get() {
 
   if [[ ",$expected," != *",$status,"* ]]; then
     echo "Unexpected status for $url: $status" >&2
-    sed -n '1,20p' "$response_file" >&2
+    print_failure_summary "$response_file"
     rm -f "$response_file"
     exit 1
   fi
@@ -180,6 +218,10 @@ if [[ -z "$WORKSPACE_HOSTNAME" ]]; then
 fi
 
 validate_workspace_hostname "$WORKSPACE_HOSTNAME"
+host_without_port="$(hostname_without_port "$WORKSPACE_HOSTNAME")"
+if [[ "$WORKSPACE_SCHEME" == "http" ]] && ! is_local_workspace_hostname "$host_without_port"; then
+  fail "PRESET_WORKSPACE_SCHEME=http is only allowed for local workspace hosts"
+fi
 
 base="$WORKSPACE_SCHEME://$WORKSPACE_HOSTNAME"
 api_base="$base/api/v1"
@@ -187,7 +229,7 @@ q_one="%28page%3A0%2Cpage_size%3A1%29"
 
 echo "Validating workspace: $WORKSPACE_HOSTNAME"
 
-api_get "$base/version" "200,401,403,404"
+api_get "$base/version" "200,404"
 api_get "$api_base/_openapi" "$OPENAPI_EXPECTED_STATUSES"
 api_get "$api_base/me/" "200"
 api_get "$api_base/me/roles/" "200"

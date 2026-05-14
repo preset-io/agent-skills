@@ -21,6 +21,7 @@ These can expose customer data, sample rows, SQL results, SQL text, or database 
 |---|---|
 | Chart data | `/api/v1/chart/{pk}/data/`, `/api/v1/chart/data` |
 | Database samples | `/api/v1/database/{pk}/select_star/...` |
+| Connection configuration | `/api/v1/database/{pk}/connection` |
 | Distinct values | `/api/v1/dataset/distinct/{column_name}`, datasource column values |
 | SQL Lab results | `/api/v1/sqllab/results/`, `/api/v1/sqllab/export/{client_id}/` |
 | SQL text-bearing records | `/api/v1/query/`, `/api/v1/query/{pk}`, `/api/v1/saved_query/`, `/api/v1/saved_query/{pk}` |

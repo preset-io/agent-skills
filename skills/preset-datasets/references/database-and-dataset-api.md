@@ -18,7 +18,6 @@ Useful database endpoints:
 | List databases | `GET /api/v1/database/` |
 | Available database names | `GET /api/v1/database/available/` |
 | Get database detail | `GET /api/v1/database/{pk}` |
-| Connection metadata | `GET /api/v1/database/{pk}/connection` |
 | Catalogs | `GET /api/v1/database/{pk}/catalogs/` |
 | Schemas | `GET /api/v1/database/{pk}/schemas/` |
 | Tables | `GET /api/v1/database/{pk}/tables/` |
@@ -28,11 +27,18 @@ Useful database endpoints:
 | Function names | `GET /api/v1/database/{pk}/function_names/` |
 | Upload schemas | `GET /api/v1/database/{pk}/schemas_access_for_file_upload/` |
 
-Connection metadata and table metadata can expose database structure. Keep page sizes and filters narrow.
+Table metadata can expose database structure. Keep page sizes and filters narrow.
 
-## Data-Returning Database Reads
+## Data-Returning And Credential-Bearing Database Reads
 
-`GET /api/v1/database/{pk}/select_star/{table_name}/...` returns table rows. Before calling it, summarize the workspace, database ID, schema, table name, and row limit.
+Before calling these endpoints, summarize the workspace, database ID, requested endpoint, expected fields or row limit, and credential-disclosure risk, then get explicit user confirmation:
+
+| Goal | Endpoint |
+|---|---|
+| Connection configuration | `GET /api/v1/database/{pk}/connection` |
+| Table sample rows | `GET /api/v1/database/{pk}/select_star/{table_name}/...` |
+
+Treat connection responses as credential-bearing. They can include SQLAlchemy URIs, `extra` JSON, server certificates, SSH tunnel configuration, or engine-specific connection fields. Do not print or paste these values into logs, examples, PR comments, or handoff notes.
 
 ## Dataset Metadata Reads
 

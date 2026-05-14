@@ -16,6 +16,6 @@ Use this skill for Superset workspace import/export workflows.
 
 ## Scope
 
-Imports mutate workspace metadata and may create or change databases, datasets, charts, dashboards, saved queries, and themes. Exports can disclose SQL, dataset metadata, database metadata, tags, and masked credential fields.
+Imports mutate workspace metadata and may create or change databases, datasets, charts, dashboards, saved queries, and themes. Exports can disclose SQL, dataset metadata, database metadata, tags, object UUIDs, and credential-bearing engine or `extra` fields.
 
 Do not import or export without explicit confirmation that names the workspace, endpoint, object IDs or bundle, and expected disclosure or mutation.

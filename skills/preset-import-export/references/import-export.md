@@ -4,7 +4,7 @@ All examples use the workspace hostname resolved by `preset-workspaces`.
 
 ## Export Endpoints
 
-Exports can disclose SQL text, dashboard layout, dataset metadata, database metadata, tags, masked credential fields, and object UUIDs. Confirm before calling.
+Exports can disclose SQL text, dashboard layout, dataset metadata, database metadata, tags, object UUIDs, and credential-bearing engine or `extra` fields. Treat all export bundles as potentially containing credentials. Confirm before calling.
 
 | Surface | Endpoint |
 |---|---|

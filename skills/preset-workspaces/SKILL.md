@@ -21,4 +21,4 @@ Use this skill for Preset Management API discovery involving teams, workspaces, 
 - Resolve workspace hostnames from `GET /teams/{team_name}/workspaces/`; never assume or hard-code a hostname.
 - Treat workspace membership and team invitations as access-control mutations.
 - Do not call `GET /team-roles/` with an API-key JWT; resolve `team_role_id` from an approved admin context before invite calls.
-- Prefer `preset-admin` for Phase 3 admin workflows so role, seat-limit, audit, and deferral guidance is loaded.
+- Use `preset-admin` for Phase 3 admin workflows so role, seat-limit, audit, and deferral guidance is loaded.

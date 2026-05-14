@@ -8,14 +8,14 @@ Membership changes and invitations mutate access. Confirm the exact user, team, 
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/memberships?page_number=1&page_size=100" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/memberships/?page_number=1&page_size=100" \
   | jq '.payload'
 ```
 
 ```python
 members = client.mgmt(
     "GET",
-    f"/teams/{team_name}/workspaces/{workspace_id}/memberships?page_number=1&page_size=100",
+    f"/teams/{team_name}/workspaces/{workspace_id}/memberships/?page_number=1&page_size=100",
 )["payload"]
 ```
 
@@ -34,6 +34,8 @@ Common response fields:
 | `is_role_from_group` | Whether the workspace role is inherited from a user group |
 
 ## Invite A User To A Team And Workspace
+
+Use `preset-admin` for new invite workflows. This legacy example is retained for existing workspace skill users.
 
 Invite requests require a numeric `team_role_id`. Do not call `GET /team-roles/` with the API-key JWT from `preset-api`; that endpoint is not available to user API keys. The value must be supplied out-of-band by an admin, for example through approved environment configuration or a ticket/comment from a team admin. Resolve and verify the intended team role ID before making the invite call.
 
@@ -94,20 +96,7 @@ member = next(
 user_id = member["user"]["id"]
 ```
 
-Valid default `role_identifier` values:
-
-| Identifier | Friendly role |
-|---|---|
-| `Admin` | Workspace Admin |
-| `PresetLimitedAdmin` | Limited Admin |
-| `PresetAlpha` | Primary Creator |
-| `PresetBeta` | Secondary Creator |
-| `PresetGamma` | Limited Creator |
-| `PresetDelta` | Visualization Creator |
-| `PresetReportsOnly` | Viewer |
-| `PresetDashboardsOnly` | Dashboard Viewer |
-| `PresetEpsilon` | Dashboard Interactor |
-| `PresetNoAccess` | No Access |
+For role identifiers, use `preset-admin` and load [../../preset-admin/references/role-identifiers.md](../../preset-admin/references/role-identifiers.md). That reference documents dynamic `workspace_roles`, feature-gated roles, custom roles, and `PresetMachineRole`.
 
 ## List Team Members
 

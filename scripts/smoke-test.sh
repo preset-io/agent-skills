@@ -73,11 +73,18 @@ for file in "${required_admin_references[@]}"; do
 done
 
 require_grep "/api/v2/audit/teams" skills/preset-admin/references/audit-logs.md
+require_grep "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/" skills/preset-admin/references/audit-logs.md
+require_grep "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/actions/" skills/preset-admin/references/audit-logs.md
+require_grep "/audit/teams/{team_name}/logs/downloads/" skills/preset-admin/references/audit-logs.md
+require_grep "mgmt_v2_response" skills/preset-admin/references/audit-logs.md
 require_grep "user_name_or_email" skills/preset-admin/references/team-memberships.md
 require_grep "has-seats-remaining" skills/preset-admin/references/team-memberships.md
 require_grep "invites/many" skills/preset-admin/references/invites.md
+require_grep "TEAM_ROLE_ID" skills/preset-admin/references/invites.md
 require_grep "workspace_roles" skills/preset-admin/references/role-identifiers.md
+require_grep "PresetMachineRole" skills/preset-admin/references/role-identifiers.md
 require_grep "name-<workspace_name>" skills/preset-admin/references/workspace-management.md
+require_grep "user-access/" skills/preset-admin/references/workspace-management.md
 
 while IFS= read -r path; do
   require_file "$path"

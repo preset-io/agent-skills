@@ -1,6 +1,6 @@
 # Audit Logs Reference
 
-Audit log APIs are Manager v2 routes. In Manager source they are mounted at `/api/v2/audit/teams/{team_name}/logs`. When using the public API host, set `PRESET_API_BASE_V2` for your environment; production examples use `https://api.app.preset.io/v2`.
+Audit log APIs are Manager v2 routes. In Manager source they are mounted under `/api/v2/audit/teams/{team_name}/logs`. The public API base already includes the API prefix, so production examples use `https://api.app.preset.io/v2/audit/teams/{team_name}/logs`. Set `PRESET_API_BASE_V2` for non-production environments.
 
 Audit queries are read-only. Audit downloads can expose sensitive activity data and may send email or create a retrievable download token, so require explicit confirmation before `POST /downloads/`.
 
@@ -29,8 +29,8 @@ Supported filters:
 | `action` | One or more friendly action names or action URNs |
 | `user` | One or more usernames or emails |
 | `workspace_name` | One or more workspace names |
-| `start_time` | Inclusive start datetime |
-| `end_time` | Inclusive end datetime |
+| `start_time` | Inclusive ISO 8601 start datetime |
+| `end_time` | Inclusive ISO 8601 end datetime |
 | `page_number` | 1-based page number |
 | `page_size` | Page size, max 500 |
 | `direction` | `asc` or `desc` |
@@ -90,6 +90,8 @@ Useful Phase 3 actions include:
 
 Confirmation summary should include the team, filters, `via_email` value, approximate scope if known, and whether a CSV or email-delivered download is expected.
 
+For email-delivered downloads, use `client.mgmt_v2()` because Manager returns JSON:
+
 ```python
 download = client.mgmt_v2(
     "POST",
@@ -106,13 +108,39 @@ download = client.mgmt_v2(
 )
 ```
 
-When `via_email` is true, Manager returns `201` with a token and sends the actual download link later. When `via_email` is false, Manager returns a CSV file response.
+When `via_email` is true, Manager returns `201` with a token and sends the actual download link later.
+
+For immediate CSV downloads, use `client.mgmt_v2_response()` because the response body is CSV, not JSON:
+
+```python
+resp = client.mgmt_v2_response(
+    "POST",
+    f"/audit/teams/{team_name}/logs/downloads/",
+    json={
+        "via_email": False,
+        "action": ["user:workspace_role_update", "invite:create"],
+        "workspace_name": ["abcd1234"],
+        "page_number": 1,
+        "page_size": 500,
+        "order_by": "timestamp",
+        "direction": "desc",
+    },
+)
+csv_bytes = resp.content
+```
 
 ## Retrieve Audit Log Download
 
 ```bash
-curl -s -L -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/downloads/?token={token}"
+DOWNLOAD_URL="$(
+  curl -sS -D - -o /dev/null \
+    -H "Authorization: Bearer $TOKEN" \
+    "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/downloads/?token={token}" \
+    | awk 'tolower($1) == "location:" {print $2}' \
+    | tr -d '\r'
+)"
+
+curl -sS "$DOWNLOAD_URL"
 ```
 
 ```python

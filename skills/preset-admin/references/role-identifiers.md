@@ -20,7 +20,7 @@ for role in workspace_roles:
     print(role["role_identifier"], role.get("name") or role.get("role_name"))
 ```
 
-The `workspace_roles` field is produced by Manager from default roles, feature flags, and team custom roles. It is the safest source for a specific team because roles such as `PresetLimitedAdmin`, `PresetDelta`, `PresetEpsilon`, or custom role identifiers may or may not be enabled.
+The `workspace_roles` field is produced by Manager from default roles, feature flags, and team custom roles. It is the safest source for a specific team because roles such as `PresetLimitedAdmin`, `PresetDelta`, `PresetEpsilon`, or custom role identifiers may or may not be enabled. The `name` and `role_name` fields vary by source serializer, so examples use `role.get("name") or role.get("role_name")` when printing a friendly label.
 
 ## Default Workspace Role Identifiers
 

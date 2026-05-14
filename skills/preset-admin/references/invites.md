@@ -43,11 +43,12 @@ Confirmation summary should include:
 - seat-limit preflight result
 
 ```bash
+TEAM_ROLE_ID="${PRESET_TEAM_ROLE_ID:?set PRESET_TEAM_ROLE_ID to the verified team role ID}"
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   "https://api.app.preset.io/v1/teams/{team_name}/invites/" \
-  -d '{"email":"jdoe@example.com","team_role_id":2,"workspace_ids":[123],"workspace_role_identifier":"PresetGamma"}'
+  -d "{\"email\":\"jdoe@example.com\",\"team_role_id\":$TEAM_ROLE_ID,\"workspace_ids\":[123],\"workspace_role_identifier\":\"PresetGamma\"}"
 ```
 
 ```python

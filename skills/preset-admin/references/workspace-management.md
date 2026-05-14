@@ -6,7 +6,7 @@ Workspace create, update, delete, un-hibernate, and membership role changes are 
 
 ## Create A Workspace
 
-Confirmation summary should include the team, title, region or cluster selection, whether example data will be loaded, and any public dashboard or embedding-related setting.
+Confirmation summary should include the target `team_name`, workspace title, region or cluster selection, whether example data will be loaded, and any public dashboard or embedding-related setting.
 
 ```bash
 curl -s -X POST \
@@ -41,6 +41,18 @@ Common request fields:
 
 ## Update A Workspace
 
+`PUT` updates the workspace resource. Only send the fields being intentionally changed, and confirm whether omitted optional fields are preserved by the current Manager serializer before using a broad copied payload.
+
+Confirmation summary should include the target `team_name`, workspace ID, current title, new title or metadata, and expected effect.
+
+```bash
+curl -s -X PUT \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/" \
+  -d '{"title":"Analytics","descr":"Production analytics workspace","color":"#00A5B5"}'
+```
+
 ```python
 updated = client.mgmt(
     "PUT",
@@ -71,6 +83,14 @@ client.mgmt("DELETE", f"/teams/{team_name}/workspaces/{workspace_id}/")
 
 ## Un-Hibernate A Workspace
 
+Un-hibernating may resume compute and incur runtime cost. Confirm the target `team_name`, workspace title, stable workspace `name`, hostname, and expected cost or availability effect before calling this endpoint.
+
+```bash
+curl -s -X PATCH \
+  -H "Authorization: Bearer $TOKEN" \
+  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_name}/un-hibernate/"
+```
+
 ```python
 workspace = client.mgmt(
     "PATCH",
@@ -78,13 +98,13 @@ workspace = client.mgmt(
 )["payload"]
 ```
 
-Use the stable workspace `name`, not the display title. Confirm the workspace title and name before calling this endpoint.
+Use the stable workspace `name`, not the display title.
 
 ## Workspace Membership Edge Cases
 
 The normal membership list and role-update examples live in `preset-workspaces`. These details are important for admin work:
 
-- `GET /teams/{team_name}/workspaces/{workspace_id_or_name}/memberships` accepts either a numeric workspace ID or `name-<workspace_name>`.
+- `GET /teams/{team_name}/workspaces/{workspace_id_or_name}/memberships/` accepts either a numeric workspace ID or `name-<workspace_name>`.
 - Use `user_name_or_email` to search members.
 - The response is paginated and returns `meta.count`.
 - `is_role_from_group` means the visible role is inherited from a group. Updating a direct user role may not change effective access.
@@ -92,7 +112,7 @@ The normal membership list and role-update examples live in `preset-workspaces`.
 ```python
 members = client.mgmt(
     "GET",
-    f"/teams/{team_name}/workspaces/name-{workspace_name}/memberships"
+    f"/teams/{team_name}/workspaces/name-{workspace_name}/memberships/"
     "?page_number=1&page_size=100"
     "&user_name_or_email=jdoe@example.com",
 )["payload"]
@@ -105,7 +125,7 @@ This read-only endpoint returns workspace access information suitable for non-ad
 ```python
 access = client.mgmt(
     "GET",
-    f"/teams/{team_name}/workspaces/{workspace_name}/user-access",
+    f"/teams/{team_name}/workspaces/{workspace_name}/user-access/",
 )["payload"]
 ```
 

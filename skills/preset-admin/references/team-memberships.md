@@ -69,7 +69,7 @@ limits = client.mgmt("GET", f"/teams/{team_name}/user-limit/")["payload"]
 print(limits)
 ```
 
-For invite links that are checked before login, Manager also exposes:
+For invite links that are checked before login, Manager also exposes this unauthenticated seat check:
 
 ```bash
 curl -s \
@@ -86,16 +86,17 @@ Confirmation summary should include:
 
 - team name
 - user ID and email
-- current team role
-- new numeric `team_role_id` and role name
+- `current_role`: current team role ID and role name
+- `new_role`: new numeric `team_role_id` and role name
 - whether the role came from a group
 
 ```bash
+TEAM_ROLE_ID="${PRESET_TEAM_ROLE_ID:?set PRESET_TEAM_ROLE_ID to the verified team role ID}"
 curl -s -X PATCH \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   "https://api.app.preset.io/v1/teams/{team_name}/memberships/{user_id}/" \
-  -d '{"team_role_id": 2}'
+  -d "{\"team_role_id\": $TEAM_ROLE_ID}"
 ```
 
 ```python

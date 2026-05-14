@@ -1,6 +1,6 @@
 # Preset Agent Skills
 
-Agent API guidance for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This repository packages skills for authenticating with Preset, discovering workspaces, and inspecting dashboards and datasets through public APIs.
+Agent API guidance for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This repository packages skills for authenticating with Preset, discovering workspaces, administering teams/workspaces, and inspecting dashboards and datasets through public APIs.
 
 ## Package Structure
 
@@ -8,6 +8,7 @@ Agent API guidance for [Preset](https://preset.io), a managed, cloud-hosted Apac
 skills/
   preset-api/SKILL.md
   preset-workspaces/SKILL.md
+  preset-admin/SKILL.md
   preset-dashboards/SKILL.md
   preset-datasets/SKILL.md
 ```
@@ -28,11 +29,12 @@ Each skill keeps the always-loaded instructions small and stores detailed API ex
 | Skill | Description |
 |---|---|
 | [preset-api](skills/preset-api/SKILL.md) | Authenticate with the Preset Management API. Covers credentials, JWT exchange, base URLs, pagination, Rison query parameters, response handling, and the shared safety policy. Required by all other skills. |
-| [preset-workspaces](skills/preset-workspaces/SKILL.md) | List and inspect teams and workspaces, resolve workspace hostnames, check workspace status, list members, invite users, and update workspace membership with explicit confirmation. |
+| [preset-workspaces](skills/preset-workspaces/SKILL.md) | List and inspect teams and workspaces, resolve workspace hostnames, check workspace status, and list workspace membership. |
+| [preset-admin](skills/preset-admin/SKILL.md) | Manage team memberships, workspace lifecycle, invite lifecycle, role identifiers, seat-limit checks, and audit logs with confirmation-gated mutations. |
 | [preset-dashboards](skills/preset-dashboards/SKILL.md) | Inspect dashboards, dashboard charts, and dashboard datasets in a workspace. Read-only. |
 | [preset-datasets](skills/preset-datasets/SKILL.md) | Inspect database connections, schemas, tables, datasets, columns, and metrics in a workspace. Read-only. |
 
-Broader user administration, RLS, guest-token, import/export, SQL execution, database changes, destructive operations, and other sensitive workflows require separate review before they are documented here. The workspace skill includes limited team-admin membership and invite examples; those require explicit confirmation and appropriate permissions.
+Broader user groups, SCIM, RLS, DAR/permission APIs, guest-token, import/export, SQL execution, database changes, API key CRUD, billing/payment, and other sensitive workflows require separate review before they are documented here. The admin skill includes team-admin membership, invite, workspace lifecycle, and audit examples; those require explicit confirmation and appropriate permissions.
 
 ## Quick Start
 
@@ -87,7 +89,8 @@ Use the returned hostname for workspace Superset API calls. Do not hard-code wor
 
 | Layer | Base URL |
 |---|---|
-| Preset Management API | `https://api.app.preset.io/v1/` |
+| Preset Management API v1 | `https://api.app.preset.io/v1/` |
+| Preset Management API v2 | `https://api.app.preset.io/v2/` |
 | Workspace Superset API | `https://{workspace_hostname}/api/v1/` |
 
 Full Superset workspace API documentation is available at [superset.apache.org/developer-docs/api](https://superset.apache.org/developer-docs/api/). Treat the Preset Management API examples in this repo as Preset-specific guidance.
@@ -104,7 +107,7 @@ The smoke test checks required skill folders, frontmatter, client manifests, Cop
 
 ## Safety Policy
 
-Agents should default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, SQL execution, role/RLS change, database connection change, dataset mutation, dashboard mutation, or guest-token creation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
+Agents should default to read-only calls. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, or guest-token creation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
 
 ## License
 

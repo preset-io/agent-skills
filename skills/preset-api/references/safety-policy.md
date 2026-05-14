@@ -2,7 +2,7 @@
 
 Default to read-only API calls.
 
-Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, SQL execution, role/RLS change, database connection change, dataset mutation, dashboard mutation, or guest-token creation:
+Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, or guest-token creation:
 
 1. Identify the exact team, workspace, dashboard, dataset, database, user, role, or SQL target.
 2. Summarize the endpoint, HTTP method, request body, and expected effect.

@@ -1,6 +1,6 @@
 # Team Memberships Reference
 
-Team membership endpoints require team-admin permissions for list, role-change, and removal workflows. API-key JWTs are accepted on the documented endpoints, but requests return `403` if the key owner lacks the required team permissions.
+Team membership endpoints require team-admin permissions for list, role-change, and removal workflows. API-key JWTs are accepted on the documented API-key endpoints, but requests return `403` if the key owner lacks the required team permissions. Some adjacent team-admin routes are session-only and are called out separately below.
 
 Changing a team role or removing a user changes access. Load the safety policy and get explicit confirmation before making `PATCH` or `DELETE` requests.
 
@@ -60,23 +60,21 @@ member = client.mgmt(
 Use this before creating invites or upgrading a viewer to a creator role.
 
 ```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/user-limit/" | jq '.payload'
-```
-
-```python
-limits = client.mgmt("GET", f"/teams/{team_name}/user-limit/")["payload"]
-print(limits)
-```
-
-For invite links that are checked before login, Manager also exposes this unauthenticated seat check:
-
-```bash
 curl -s \
   "https://api.app.preset.io/v1/teams/{team_name}/has-seats-remaining/" | jq '.payload'
 ```
 
-Enterprise teams split viewer and creator capacity. Treat missing or exhausted creator seats as a blocker before inviting or upgrading a user to a creator workspace role.
+```python
+seat_check = client.mgmt(
+    "GET",
+    f"/teams/{team_name}/has-seats-remaining/",
+)["payload"]
+print(seat_check)
+```
+
+Manager also exposes a more detailed `GET /teams/{team_name}/user-limit/` route, but live validation shows it is not API-key allowed. Treat detailed seat limits as a browser/session-backed admin check outside this API-key workflow.
+
+Enterprise teams split viewer and creator capacity. If the API-key-safe seat check reports no seats remaining, treat that as a blocker before inviting or upgrading a user to a creator workspace role.
 
 ## Update A Team Role
 
@@ -127,13 +125,6 @@ Manager rejects removing yourself from a team.
 
 ## Groups For A Member
 
-Use this read-only call when `is_role_from_group` is true or when a role appears inherited.
-
-```python
-groups = client.mgmt(
-    "GET",
-    f"/teams/{team_name}/memberships/{user_id}/groups/",
-)["payload"]
-```
+`GET /teams/{team_name}/memberships/{user_id}/groups/` is a read-only Manager route for inherited group details, but live validation shows it is not API-key allowed. Do not call it with the API-key JWT client from `preset-api`; use a browser/session-backed admin context or defer group analysis to a separate workflow.
 
 Group role assignment endpoints exist, but group and SCIM provisioning are intentionally deferred from this skill. See [deferrals.md](deferrals.md).

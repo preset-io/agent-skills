@@ -146,8 +146,8 @@ Before updating a member role:
 1. Load [role-identifiers.md](role-identifiers.md) and choose a default `role_identifier`.
 2. List the workspace memberships and resolve the target `user_id` from the API response.
 3. Check `is_role_from_group`. If it is true, the effective role is inherited from a group and a direct role update may not change access.
-4. For creator role upgrades on Enterprise teams, preflight seat limits with `GET /teams/{team_name}/user-limit/`.
-5. Confirm the target team, workspace ID, workspace title, user ID, email, current role, new role, group-derived role status, and seat-limit result.
+4. For creator role upgrades on Enterprise teams, preflight seat availability with `GET /teams/{team_name}/has-seats-remaining/`.
+5. Confirm the target team, workspace ID, workspace title, user ID, email, current role, new role, group-derived role status, and seat preflight result.
 
 ```python
 members = client.mgmt(
@@ -165,7 +165,9 @@ member = next(
 if member.get("is_role_from_group"):
     raise RuntimeError("Role is inherited from a group; confirm before direct update")
 
-limits = client.mgmt("GET", f"/teams/{team_name}/user-limit/")["payload"]
+seat_check = client.mgmt("GET", f"/teams/{team_name}/has-seats-remaining/")["payload"]
+if not seat_check.get("has_seats_remaining"):
+    raise RuntimeError("Team has no seats remaining")
 
 updated = client.mgmt(
     "PUT",

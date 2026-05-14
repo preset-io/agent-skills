@@ -30,7 +30,9 @@ Common response fields:
 Preflight seat limits first:
 
 ```python
-limits = client.mgmt("GET", f"/teams/{team_name}/user-limit/")["payload"]
+seat_check = client.mgmt("GET", f"/teams/{team_name}/has-seats-remaining/")["payload"]
+if not seat_check.get("has_seats_remaining"):
+    raise RuntimeError("Team has no seats remaining")
 ```
 
 Confirmation summary should include:
@@ -40,7 +42,7 @@ Confirmation summary should include:
 - numeric `team_role_id` and role name
 - workspace IDs and titles, if any
 - `workspace_role_identifier`
-- seat-limit preflight result
+- API-key-safe seat preflight result
 
 ```bash
 TEAM_ROLE_ID="${PRESET_TEAM_ROLE_ID:?set PRESET_TEAM_ROLE_ID to the verified team role ID}"

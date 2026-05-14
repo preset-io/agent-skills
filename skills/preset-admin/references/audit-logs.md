@@ -165,5 +165,5 @@ Download tokens are sensitive. They appear in URL query strings, so do not print
 | Status | Likely cause |
 |---|---|
 | `400` | invalid date range, unsupported `order_by`, page size over 500, too-large download, or invalid workspace filter |
-| `403` | API key owner is not a team admin or audit logs are not enabled for the team |
-| `404` | download token not found or team not found |
+| `403` | API key owner is not a team admin |
+| `404` | audit logs feature flag is disabled, download token not found, or team not found |

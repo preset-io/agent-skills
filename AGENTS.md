@@ -60,6 +60,7 @@ resp = requests.post(
         "secret": os.environ["PRESET_CLIENT_SECRET"],
     },
 )
+resp.raise_for_status()
 token = resp.json()["payload"]["access_token"]
 headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 ```

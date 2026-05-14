@@ -3,7 +3,10 @@
 Manage Preset teams and workspaces via the Management API.
 
 > **Prerequisite:** Complete authentication using the **preset-api** skill before calling any endpoint below.
+> **Scope:** This skill includes read-only team/workspace discovery plus limited membership and invite mutations. Membership changes and invitations require team-admin permissions and explicit user confirmation.
 > **Safety:** Membership changes and invitations mutate access. Confirm the exact user, team, workspace, and role with the user before making those calls.
+
+Production examples use `https://api.app.preset.io/v1`. For sandbox or staging environments, set `PRESET_API_BASE` as described in **preset-api** and use that base URL for Management API calls.
 
 ## Key concepts
 
@@ -134,10 +137,12 @@ members = client.mgmt(
 
 ### Invite a user to a team and workspace
 
-Invite requests require a numeric `team_role_id`. Do not call `GET /team-roles/` with the API-key JWT from **preset-api**; that endpoint is not available to user API keys. Resolve and verify the intended team role ID from an approved admin context before making the invite call.
+Invite requests require a numeric `team_role_id`. Do not call `GET /team-roles/` with the API-key JWT from **preset-api**; that endpoint is not available to user API keys. The value must be supplied out-of-band by an admin, for example through approved environment configuration or a ticket/comment from a team admin. Resolve and verify the intended team role ID before making the invite call.
 
 ```python
-team_role_id = verified_team_role_id
+import os
+
+team_role_id = int(os.environ["PRESET_TEAM_ROLE_ID"])
 ```
 
 ```bash

@@ -52,6 +52,8 @@ Use one of these sources instead:
 - an approved admin-provided value from a ticket, environment configuration, or runbook
 - a browser/session-backed admin context outside these API-key examples
 
+If no existing member has the intended role and no approved numeric ID is available, stop and ask a team admin for the numeric `team_role_id`. Do not guess from role names or attempt to discover team role IDs with the API-key JWT.
+
 Always state the numeric `team_role_id`, intended role name, target team, and target user before making a team role mutation.
 
 ## Custom Workspace Roles

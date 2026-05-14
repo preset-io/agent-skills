@@ -68,7 +68,7 @@ Use `workspace_ids` and `workspace_role_identifier` when granting workspace acce
 
 ## Create Many Invites
 
-Bulk invite requests use `POST /teams/{team_name}/invites/many/` and accept up to 50 invite entries per request.
+Bulk invite requests use `POST /teams/{team_name}/invites/many/`. Do not exceed the Manager bulk invite limit; Manager currently accepts up to 50 invite entries per request.
 
 ```python
 payload = {
@@ -88,12 +88,15 @@ payload = {
     ]
 }
 
-created = client.mgmt(
+response_payload = client.mgmt(
     "POST",
     f"/teams/{team_name}/invites/many/",
     json=payload,
 )["payload"]
+created_invites = response_payload["invites"]
 ```
+
+Bulk invite responses wrap created invite records in `payload["invites"]`, unlike the single-invite endpoint where `payload` is the invite record.
 
 Confirmation for bulk invites should summarize every email and role. Do not hide invite details behind "same as above" when asking for approval.
 

@@ -50,18 +50,14 @@ curl -s -X PUT \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/" \
-  -d '{"title":"Analytics","descr":"Production analytics workspace","color":"#00A5B5"}'
+  -d '{"title":"Analytics"}'
 ```
 
 ```python
 updated = client.mgmt(
     "PUT",
     f"/teams/{team_name}/workspaces/{workspace_id}/",
-    json={
-        "title": "Analytics",
-        "descr": "Production analytics workspace",
-        "color": "#00A5B5",
-    },
+    json={"title": "Analytics"},
 )["payload"]
 ```
 

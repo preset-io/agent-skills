@@ -106,6 +106,7 @@ download = client.mgmt_v2(
         "direction": "desc",
     },
 )
+token = download["payload"]["token"]
 ```
 
 When `via_email` is true, Manager returns `201` with a token and sends the actual download link later.
@@ -144,13 +145,20 @@ curl -sS "$DOWNLOAD_URL"
 ```
 
 ```python
-resp = client.mgmt_v2_response(
+import requests
+
+redirect_resp = client.mgmt_v2_response(
     "GET",
     f"/audit/teams/{team_name}/logs/downloads/?token={token}",
+    allow_redirects=False,
 )
+download_url = redirect_resp.headers["Location"]
+csv_resp = requests.get(download_url, timeout=60)
+csv_resp.raise_for_status()
+csv_bytes = csv_resp.content
 ```
 
-Download tokens are sensitive. Do not print them in logs, PR comments, or handoff notes.
+Download tokens are sensitive. They appear in URL query strings, so do not print them in logs, PR comments, CI output, shell history, proxy/access logs, or handoff notes.
 
 ## Common Failures
 

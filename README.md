@@ -19,6 +19,8 @@ skills/
 
 Each skill keeps the always-loaded instructions small and stores detailed API examples in `references/` files loaded on demand.
 
+Use `preset-api` first for authentication and safety rules, then `preset-workspaces` to resolve the team and workspace hostname. After that, load the smallest domain skill that matches the task, such as dashboards/charts, datasets/databases, SQL Lab, import/export, or embedding. For workspace Superset API work, use `preset-superset` to pin behavior to the target workspace's runtime version and OpenAPI contract before relying on broad public docs.
+
 ## Supported Clients
 
 | Client | Entry point |
@@ -115,9 +117,33 @@ Run the package shape smoke test before publishing changes:
 
 The smoke test checks required skill folders, frontmatter, client manifests, Copilot instructions, and removal of legacy `api/skills` paths.
 
+For live read-only validation against a workspace, use the live smoke script with API credentials:
+
+```bash
+PRESET_CLIENT_ID="..." \
+PRESET_CLIENT_SECRET="..." \
+PRESET_WORKSPACE_HOSTNAME="workspace.app.preset.io" \
+./scripts/live-workspace-smoke.sh
+```
+
+When `PRESET_WORKSPACE_HOSTNAME` is set, the script verifies the hostname against the Management API workspace list before sending the bearer token to the workspace. If the hostname is omitted, the script selects the first workspace returned by the Management API.
+
+Local dev shells such as `superset.local.preset.zone` are not returned by hosted workspace discovery. Use the local override only for local environments:
+
+```bash
+PRESET_API_BASE="http://manager.local.preset.zone/api/v1" \
+PRESET_WORKSPACE_HOSTNAME="superset.local.preset.zone" \
+PRESET_WORKSPACE_SCHEME="http" \
+PRESET_ALLOW_LOCAL_WORKSPACE_HOSTS="true" \
+PRESET_OPENAPI_EXPECTED_STATUSES="200,404" \
+./scripts/live-workspace-smoke.sh
+```
+
+The live smoke script skips SQL text-bearing query and saved-query endpoints by default. Set `PRESET_INCLUDE_SQL_TEXT_ENDPOINTS=true` only after confirming that the target, page size, and expected SQL-text exposure are acceptable.
+
 ## Safety Policy
 
-Agents should default to metadata reads. Some `GET` endpoints can expose customer data or database structure, including chart data, table samples, SQL Lab results, distinct values, and exports. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, SQL result retrieval, chart data retrieval, table sample retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
+Agents should default to metadata reads. Some `GET` endpoints can expose customer data, SQL text, or database structure, including chart data, table samples, SQL Lab results, query history, saved queries, distinct values, and exports. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, SQL result retrieval, chart data retrieval, table sample retrieval, query-history retrieval, saved-query retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
 
 ## License
 

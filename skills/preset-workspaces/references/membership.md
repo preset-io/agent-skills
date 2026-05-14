@@ -44,7 +44,7 @@ team_role_id = int(os.environ["PRESET_TEAM_ROLE_ID"])
 ```
 
 ```bash
-TEAM_ROLE_ID="<verified-team-role-id>"
+TEAM_ROLE_ID="${PRESET_TEAM_ROLE_ID:?set PRESET_TEAM_ROLE_ID to the verified team role ID}"
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -126,7 +126,7 @@ team_members = client.mgmt(
 ## Invite A User To A Team Only
 
 ```bash
-TEAM_ROLE_ID="<verified-team-role-id>"
+TEAM_ROLE_ID="${PRESET_TEAM_ROLE_ID:?set PRESET_TEAM_ROLE_ID to the verified team role ID}"
 curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \

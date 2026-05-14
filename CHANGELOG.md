@@ -14,6 +14,9 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 - Moved detailed API examples into on-demand `references/` files for each skill.
 - Added Codex and Claude plugin manifests alongside the existing Cursor manifest.
 - Added GitHub Copilot instructions and a local package smoke test.
+
+### Removed
+
 - Removed legacy `api/skills/*.md` paths.
 
 ## [v0.1.0] - 2026-05-14

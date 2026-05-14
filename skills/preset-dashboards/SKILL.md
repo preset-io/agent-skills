@@ -9,8 +9,8 @@ Use this skill for read-only dashboard inspection in a Preset workspace.
 
 ## Workflow
 
-1. Use `preset-api` to authenticate.
-2. Use `preset-workspaces` to resolve the workspace hostname.
+1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
+2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
 3. Load [references/read-only-examples.md](references/read-only-examples.md) for dashboard list/detail/chart/dataset examples.
 
 ## Scope

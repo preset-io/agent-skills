@@ -1,7 +1,7 @@
 {
   "name": "Preset Agent Skills",
   "version": "0.1.0",
-  "description": "AI agent skills for the Preset API — authenticate, discover workspaces, and inspect dashboards and datasets.",
+  "description": "AI agent skills for the Preset API: authenticate, discover workspaces, and inspect dashboards and datasets.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/preset-agent-skills",
   "skills": [

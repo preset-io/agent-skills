@@ -98,6 +98,8 @@ When a user specifies a particular team or workspace by name, filter listing res
 
 ## Iterate Across All Workspaces
 
+Use this fan-out pattern only for inventory or admin tasks. For single-target user requests, resolve the specific team and workspace by name instead of scanning every workspace.
+
 ```python
 teams = client.mgmt("GET", "/teams/")["payload"]
 for team in teams:

@@ -16,6 +16,8 @@ export PRESET_CLIENT_ID="your-api-token-name"
 export PRESET_CLIENT_SECRET="your-api-token-secret"
 ```
 
+Store long-lived API credentials in a secrets manager such as AWS Secrets Manager, HashiCorp Vault, GitHub Actions secrets, or the approved secret store for your environment. Rotate API keys periodically from the Preset management console and scope each key to the minimum permissions required.
+
 ## Token Exchange
 
 ```bash
@@ -69,6 +71,7 @@ import requests
 
 class PresetClient:
     MGMT_BASE = os.environ.get("PRESET_API_BASE", "https://api.app.preset.io/v1")
+    # Preset JWTs are valid for 5 hours by default; refresh early using the buffer.
     TOKEN_TTL_SECONDS = 5 * 3600
     TOKEN_EXPIRY_BUFFER_SECONDS = 5 * 60
 
@@ -95,12 +98,18 @@ class PresetClient:
 
     def _request_with_auth(self, method, url, **kwargs):
         self._ensure_token()
-        self._session.headers.update({"Authorization": f"Bearer {self._token}"})
+        headers = {
+            **kwargs.pop("headers", {}),
+            "Authorization": f"Bearer {self._token}",
+        }
+        if "json" in kwargs:
+            headers.setdefault("Content-Type", "application/json")
+        kwargs["headers"] = headers
         resp = self._session.request(method, url, **kwargs)
         if resp.status_code == 401:
             self._token_expiry = 0
             self._ensure_token()
-            self._session.headers.update({"Authorization": f"Bearer {self._token}"})
+            kwargs["headers"] = {**headers, "Authorization": f"Bearer {self._token}"}
             resp = self._session.request(method, url, **kwargs)
         resp.raise_for_status()
         return resp
@@ -110,7 +119,6 @@ class PresetClient:
         return resp.json()
 
     def workspace(self, method, workspace_hostname, path, **kwargs):
-        self._session.headers.update({"Content-Type": "application/json"})
         url = f"https://{workspace_hostname}/api/v1{path}"
         resp = self._request_with_auth(method, url, **kwargs)
         return resp.json()

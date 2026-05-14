@@ -121,7 +121,7 @@ validate_workspace_hostname() {
   validate_workspace_hostname_shape "$hostname"
   host_without_port="$(hostname_without_port "$hostname")"
 
-  if workspace_hostname_in_management_api "$hostname"; then
+  if workspace_hostname_in_management_api "$host_without_port"; then
     return 0
   fi
 

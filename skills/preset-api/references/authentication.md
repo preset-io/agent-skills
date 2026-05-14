@@ -21,6 +21,7 @@ Store long-lived API credentials in a secrets manager such as AWS Secrets Manage
 ## Token Exchange
 
 ```bash
+set -euo pipefail
 umask 077
 auth_response="$(mktemp)"
 auth_payload="$(mktemp)"
@@ -32,7 +33,7 @@ jq -nc \
   --rawfile secret "$auth_secret" \
   '{name: $name, secret: $secret}' > "$auth_payload"
 
-curl -s -X POST "https://api.app.preset.io/v1/auth/" \
+curl -fsS -X POST "https://api.app.preset.io/v1/auth/" \
   -H "Content-Type: application/json" \
   --data "@$auth_payload" \
   -o "$auth_response"

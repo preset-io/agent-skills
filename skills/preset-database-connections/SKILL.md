@@ -22,4 +22,3 @@ Use this skill for credential-bearing database connection reads and database con
 - Never print SQLAlchemy URIs, passwords, private keys, SSH tunnel passwords, server certificates, access tokens, or engine `extra` secrets.
 - Prefer metadata reads from `preset-datasets` before accessing connection configuration.
 - Do not test, validate, create, update, or delete database connections without explicit confirmation.
-

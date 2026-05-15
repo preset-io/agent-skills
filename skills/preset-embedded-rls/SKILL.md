@@ -21,4 +21,3 @@ Use this skill for embedded row-level security review before guest-token creatio
 - Treat RLS clauses as permission controls. Incorrect clauses can leak or hide customer data.
 - Confirm every clause and intended viewer population before token creation.
 - Do not validate RLS by running broad data-returning queries unless the user explicitly approves the target and limit.
-

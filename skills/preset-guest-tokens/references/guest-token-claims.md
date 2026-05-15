@@ -58,4 +58,3 @@ Never print signed guest tokens. Return them only through the approved delivery 
 If row-level security is required, prepare the `rls` entries with `preset-embedded-rls` first. Do not guess tenant, customer, account, or region filters.
 
 If the request does not include RLS, explicitly state that the embedded viewer may see all data allowed by the dashboard, datasets, and workspace permissions.
-

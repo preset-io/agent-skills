@@ -31,4 +31,3 @@ Wait for explicit confirmation.
 ## Validation Pattern
 
 Prefer OpenAPI checks and bundle inspection before live import. Do not live-test imports on customer workspaces. Use a staging/dev workspace first, and only after the destination, overwrite behavior, and rollback plan are confirmed.
-

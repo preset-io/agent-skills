@@ -29,4 +29,3 @@ Database create, update, delete, validation, OAuth, upload, sync permissions, an
 | Secret-bearing fields | password, SQLAlchemy URI, encrypted extra, SSH tunnel fields, private keys |
 
 Before mutating, summarize the target database, request body with secrets redacted, expected effect, rollback plan, and validation plan.
-

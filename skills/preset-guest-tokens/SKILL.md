@@ -23,4 +23,3 @@ Use this skill for security-sensitive guest-token creation and payload review.
 - Do not create guest tokens until the embedded dashboard UUID/resource, user identity claims, and RLS clauses are explicit.
 - Treat guest tokens as external access credentials, not harmless API responses.
 - Do not invent RLS clauses or trusted domains. Ask for missing authorization details.
-

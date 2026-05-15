@@ -22,4 +22,3 @@ Use this skill for SQL execution and result-handling workflows. SQL execution is
 - Do not assume SQL is read-only. Some engines allow side effects in statements that look harmless.
 - Do not fetch or export result sets unless the user confirms the target, size, and destination.
 - Do not stop a query unless the user confirms the target query/client ID and expected effect.
-

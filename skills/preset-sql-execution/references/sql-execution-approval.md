@@ -49,4 +49,3 @@ result = client.workspace(
 ```
 
 Keep limits narrow. If the SQL lacks a limit and the user only needs a sample, ask for approval to add one before execution.
-

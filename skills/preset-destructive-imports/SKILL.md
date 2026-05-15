@@ -22,4 +22,3 @@ Use this skill for import workflows that can overwrite, replace, or materially c
 - Never print import secrets or database passwords.
 - Treat overwrite and sparse-update imports as potentially destructive.
 - Confirm destination workspace and bundle contents before calling an import endpoint.
-

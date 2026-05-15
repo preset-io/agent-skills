@@ -28,4 +28,3 @@ Wait for explicit confirmation.
 ## Deferrals
 
 Do not improvise examples for SCIM provisioning, internal permission APIs, billing/payment access, DAR changes, or broad Superset security manager routes unless they are explicitly approved and validated against the source code/OpenAPI for the target version.
-

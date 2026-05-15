@@ -42,4 +42,3 @@ Before using these clauses in a guest token, summarize:
 6. Expected data visibility.
 
 If the user cannot confirm the clauses, stop and ask for the approved tenant or access-control rule.
-

@@ -16,6 +16,8 @@ Before calling this endpoint, summarize:
 4. Fields expected to be read.
 5. Redaction plan for any returned secrets.
 
+Wait for explicit confirmation.
+
 Do not paste raw responses into logs, Markdown, PR comments, or handoff notes.
 
 ## Mutations And Validation
@@ -29,3 +31,5 @@ Database create, update, delete, validation, OAuth, upload, sync permissions, an
 | Secret-bearing fields | password, SQLAlchemy URI, encrypted extra, SSH tunnel fields, private keys |
 
 Before mutating, summarize the target database, request body with secrets redacted, expected effect, rollback plan, and validation plan.
+
+Wait for explicit confirmation.

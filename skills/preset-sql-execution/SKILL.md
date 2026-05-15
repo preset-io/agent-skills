@@ -14,7 +14,7 @@ Use this skill for SQL execution, result-handling, saved-query mutation, and SQL
 3. Use `preset-superset` to capture workspace version/OpenAPI and current-user roles when permissions matter.
 4. Use `preset-sqllab` for SQL Lab bootstrap, query history, and saved-query context.
 5. Load [references/sql-execution-approval.md](references/sql-execution-approval.md) before any SQL execution, result retrieval, result export, query stop, saved-query mutation, or SQL Lab permalink creation.
-6. Load [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md), summarize the SQL, database, expected effect, expected row limit, and endpoints, then get explicit user confirmation.
+6. Load [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md), summarize the workspace, workflow type, SQL or payload, target database/saved query/permalink, expected effect, row/result handling, endpoints, and rollback path when applicable, then get explicit user confirmation.
 
 ## Guardrails
 

@@ -39,30 +39,3 @@ for path in sorted(paths):
 ```
 
 Use the OpenAPI response to verify that documented endpoints exist in the target workspace before writing or executing examples. If OpenAPI discovery returns `404` or is disabled in a local/dev shell, fall back to the pinned Superset source/routes for that workspace build and verify candidate endpoints with read-only metadata calls before using them.
-
-## Current User And Permissions
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/me/" | jq '.result'
-
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/me/roles/" | jq '.result'
-```
-
-```python
-me = client.workspace("GET", hostname, "/me/")["result"]
-roles = client.workspace("GET", hostname, "/me/roles/")["result"]
-print(me.get("username") or me.get("email"), roles)
-```
-
-Use these calls to troubleshoot `401` and `403` responses. Do not infer access from role names alone; verify the endpoint response.
-
-## Menu Capabilities
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/menu/" | jq '.result'
-```
-
-The menu response is useful for checking whether workspace UI features such as SQL Lab, charts, dashboards, reports, and admin views are visible to the authenticated user.

@@ -9,7 +9,7 @@ Use these references before mutating:
 - `preset-admin/references/role-identifiers.md` for team role IDs and workspace role identifiers.
 - `preset-admin/references/team-memberships.md` for team membership changes and seat preflights.
 - `preset-admin/references/workspace-management.md` for workspace membership role changes.
-- `preset-superset/references/version-openapi.md` for workspace current-user and role diagnostics.
+- `preset-superset/references/current-user-and-permissions.md` for workspace current-user and role diagnostics.
 
 ## Confirmation Required
 

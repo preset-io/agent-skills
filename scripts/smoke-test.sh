@@ -132,6 +132,8 @@ require_grep "/api/v1/sqllab/execute/" skills/preset-sql-execution/references/sq
 require_grep "/api/v1/saved_query/" skills/preset-sql-execution/references/sql-execution-approval.md
 require_grep "/api/v1/sqllab/permalink" skills/preset-sql-execution/references/sql-execution-approval.md
 require_grep "/api/v1/database/{pk}/connection" skills/preset-database-connections/references/connection-configuration.md
+require_grep "/api/v1/database/test_connection/" skills/preset-database-connections/references/connection-configuration.md
+require_grep "/api/v1/database/validate_parameters/" skills/preset-database-connections/references/connection-configuration.md
 require_grep "permission_write" skills/preset-roles-permissions/references/role-permission-changes.md
 require_grep "overwrite" skills/preset-destructive-imports/references/destructive-import-approval.md
 require_grep "Use \`preset-sql-execution\`" skills/preset-sqllab/references/guarded-sql-execution.md

@@ -17,6 +17,6 @@ Use this skill for dashboard and chart inspection in a Preset workspace.
 
 ## Scope
 
-Default to metadata reads. Chart data and exports can expose customer data, so treat them as data-returning reads that require target and limit confirmation.
+Default to metadata reads. Chart data and exports can expose customer data, so treat them as data-returning reads that require explicit confirmation after summarizing the target and limit where applicable.
 
 Do not create, update, import, export, embed, copy, favorite/unfavorite, warm cache, or issue guest tokens from this skill without explicit confirmation. For dashboard or chart mutations, summarize the target workspace, dashboard/chart IDs or UUIDs, request body, and expected effect before making the call.

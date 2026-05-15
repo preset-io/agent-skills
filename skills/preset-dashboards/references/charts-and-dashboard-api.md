@@ -40,7 +40,7 @@ Useful chart endpoints:
 
 ## Data-Returning Chart Reads
 
-Chart data calls can return customer data. Before calling them, summarize the workspace, chart ID, result format, result type, and expected data exposure.
+Chart data calls can return customer data. Before calling them, summarize the workspace, chart ID, result format, result type, and expected data exposure, then get explicit user confirmation.
 
 | Goal | Endpoint |
 |---|---|

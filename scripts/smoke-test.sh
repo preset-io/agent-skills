@@ -41,6 +41,12 @@ required_skills=(
   preset-sqllab
   preset-import-export
   preset-embedding
+  preset-guest-tokens
+  preset-embedded-rls
+  preset-sql-execution
+  preset-database-connections
+  preset-roles-permissions
+  preset-destructive-imports
 )
 
 for skill in "${required_skills[@]}"; do
@@ -63,9 +69,15 @@ require_jq '
     "skills/preset-admin/SKILL.md",
     "skills/preset-api/SKILL.md",
     "skills/preset-dashboards/SKILL.md",
+    "skills/preset-database-connections/SKILL.md",
     "skills/preset-datasets/SKILL.md",
+    "skills/preset-destructive-imports/SKILL.md",
+    "skills/preset-embedded-rls/SKILL.md",
     "skills/preset-embedding/SKILL.md",
+    "skills/preset-guest-tokens/SKILL.md",
     "skills/preset-import-export/SKILL.md",
+    "skills/preset-roles-permissions/SKILL.md",
+    "skills/preset-sql-execution/SKILL.md",
     "skills/preset-sqllab/SKILL.md",
     "skills/preset-superset/SKILL.md",
     "skills/preset-workspaces/SKILL.md"
@@ -87,6 +99,19 @@ for file in "${required_phase4_references[@]}"; do
   require_file "$file"
 done
 
+required_phase5_references=(
+  skills/preset-guest-tokens/references/guest-token-claims.md
+  skills/preset-embedded-rls/references/embedded-rls-rules.md
+  skills/preset-sql-execution/references/sql-execution-approval.md
+  skills/preset-database-connections/references/connection-configuration.md
+  skills/preset-roles-permissions/references/role-permission-changes.md
+  skills/preset-destructive-imports/references/destructive-import-approval.md
+)
+
+for file in "${required_phase5_references[@]}"; do
+  require_file "$file"
+done
+
 require_grep "/api/v1/_openapi" skills/preset-superset/references/version-openapi.md
 require_grep "/api/v1/me/roles/" skills/preset-superset/references/version-openapi.md
 require_grep "HTTP method alone is not enough" skills/preset-superset/references/workspace-api-safety.md
@@ -95,12 +120,32 @@ require_grep "/api/v1/chart/{pk}/data/" skills/preset-dashboards/references/char
 require_grep "/api/v1/dashboard/{id_or_slug}/tabs" skills/preset-dashboards/references/charts-and-dashboard-api.md
 require_grep "/api/v1/database/{pk}/table_metadata/" skills/preset-datasets/references/database-and-dataset-api.md
 require_grep "/api/v1/datasource/{datasource_type}/{datasource_id}/column/{column_name}/values/" skills/preset-datasets/references/database-and-dataset-api.md
+require_grep "Do not create, update, delete" skills/preset-datasets/SKILL.md
 require_grep "/api/v1/sqllab/execute/" skills/preset-sqllab/references/guarded-sql-execution.md
 require_grep "/api/v1/query/updated_since" skills/preset-sqllab/references/query-history.md
 require_grep "/api/v1/assets/export/" skills/preset-import-export/references/import-export.md
 require_grep "Never print import secrets" skills/preset-import-export/references/import-export.md
 require_grep "/api/v1/embedded_dashboard/{uuid}" skills/preset-embedding/references/embedded-dashboards.md
 require_grep "/api/v1/security/guest_token/" skills/preset-embedding/references/embedded-dashboards.md
+require_grep "Never print signed guest tokens" skills/preset-guest-tokens/references/guest-token-claims.md
+require_grep "rls_rules" skills/preset-embedded-rls/references/embedded-rls-rules.md
+require_grep "approved-tenant-id" skills/preset-embedded-rls/references/embedded-rls-rules.md
+require_grep "/api/v1/sqllab/execute/" skills/preset-sql-execution/references/sql-execution-approval.md
+require_grep "/api/v1/saved_query/" skills/preset-sql-execution/references/sql-execution-approval.md
+require_grep "/api/v1/sqllab/permalink" skills/preset-sql-execution/references/sql-execution-approval.md
+require_grep "Do not paste SQL text" skills/preset-sql-execution/references/sql-execution-approval.md
+require_grep "/api/v1/database/{pk}/connection" skills/preset-database-connections/references/connection-configuration.md
+require_grep "/api/v1/database/test_connection/" skills/preset-database-connections/references/connection-configuration.md
+require_grep "/api/v1/database/validate_parameters/" skills/preset-database-connections/references/connection-configuration.md
+require_grep "permission_write" skills/preset-roles-permissions/references/role-permission-changes.md
+require_grep "alongside \`preset-admin\`" skills/preset-roles-permissions/SKILL.md
+require_grep "overwrite" skills/preset-destructive-imports/references/destructive-import-approval.md
+require_grep "Never print import secrets" skills/preset-destructive-imports/references/destructive-import-approval.md
+require_grep "Use \`preset-sql-execution\`" skills/preset-sqllab/references/guarded-sql-execution.md
+require_grep "use \`preset-guest-tokens\`" skills/preset-embedding/references/embedded-dashboards.md
+require_grep "Use \`preset-destructive-imports\`" skills/preset-import-export/references/import-export.md
+require_grep "Use \`preset-database-connections\`" skills/preset-datasets/references/database-and-dataset-api.md
+require_grep "route to the focused Phase 5 skill" skills/preset-superset/references/workspace-api-safety.md
 
 required_admin_references=(
   skills/preset-admin/references/audit-logs.md

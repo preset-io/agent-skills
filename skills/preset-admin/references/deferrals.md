@@ -7,9 +7,9 @@ Phase 3 covers teams, workspaces, workspace memberships, invites, role identifie
 | Surface | Why deferred |
 |---|---|
 | User groups and SCIM provisioning | Group-derived roles can override direct user roles, and SCIM has separate auth and provisioning semantics. |
-| Permission, DAR, and RLS APIs | These are high-impact access-control APIs guarded by `PERMISSION_API_ENABLED`; they deserve a dedicated skill and review. |
-| Database connection creation, update, and tests | These affect credentials, network access, and workspace data plane behavior. |
-| Embedded guest tokens and access-token keys | These issue or manage embeddable access credentials. |
+| Permission, DAR, and RLS APIs | These are high-impact access-control APIs guarded by `PERMISSION_API_ENABLED`; route role/permission review through `preset-roles-permissions` and keep unsupported APIs deferred until separately reviewed. |
+| Database connection creation, update, and tests | These affect credentials, network access, and workspace data plane behavior; use `preset-database-connections` for documented workspace API flows. |
+| Embedded guest tokens and access-token keys | These issue or manage embeddable access credentials; use `preset-guest-tokens` for guest-token creation and keep access-token key lifecycle deferred until separately reviewed. |
 | Trusted domains | These affect embedding and external origins; use a separate embedded/admin workflow. |
 | Homepage settings | User-specific workspace UI state, not core team/workspace administration. |
 | API key and SCIM token CRUD | Credential lifecycle management needs separate secret-handling rules. |

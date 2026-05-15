@@ -15,9 +15,15 @@ skills/
   preset-sqllab/SKILL.md
   preset-import-export/SKILL.md
   preset-embedding/SKILL.md
+  preset-guest-tokens/SKILL.md
+  preset-embedded-rls/SKILL.md
+  preset-sql-execution/SKILL.md
+  preset-database-connections/SKILL.md
+  preset-roles-permissions/SKILL.md
+  preset-destructive-imports/SKILL.md
 ```
 
-Each `SKILL.md` stays small and always-loaded; detailed API examples live in `references/` files the agent loads on demand, so the always-on context budget stays tight.
+Each `SKILL.md` stays small and always-loaded; detailed API examples live in `references/` files the agent loads on demand, so the always-on context budget stays tight. References are context-loading boundaries after a domain skill has been selected. Phase 5 security-sensitive workflows are separate skills because they need independent routing, explicit confirmation templates, and secret-handling guardrails loaded by construction.
 
 ## Supported Clients
 
@@ -43,8 +49,14 @@ Claude Code uses the plugin manifest for package metadata and `CLAUDE.md` plus t
 | [preset-sqllab](skills/preset-sqllab/SKILL.md) | Inspect SQL Lab bootstrap, query history, saved queries, and SQL execution safety boundaries. |
 | [preset-import-export](skills/preset-import-export/SKILL.md) | Route Superset workspace import/export workflows with disclosure and mutation gates. |
 | [preset-embedding](skills/preset-embedding/SKILL.md) | Inspect embedded dashboard configuration and route guest-token/trusted-domain workflows to security-sensitive review. |
+| [preset-guest-tokens](skills/preset-guest-tokens/SKILL.md) | Create and route embedded dashboard guest-token workflows with explicit approval and token-handling guardrails. |
+| [preset-embedded-rls](skills/preset-embedded-rls/SKILL.md) | Review row-level security clauses for embedded analytics and guest-token workflows. |
+| [preset-sql-execution](skills/preset-sql-execution/SKILL.md) | Run or route SQL Lab execution, result retrieval, result export, query stop, saved-query mutation, and SQL Lab permalink creation with explicit approval. |
+| [preset-database-connections](skills/preset-database-connections/SKILL.md) | Inspect or route database connection configuration, validation, OAuth, upload, and mutation workflows with credential-aware approval. |
+| [preset-roles-permissions](skills/preset-roles-permissions/SKILL.md) | Review and route role, workspace membership, permission, and access-control changes with explicit approval. |
+| [preset-destructive-imports](skills/preset-destructive-imports/SKILL.md) | Review and route destructive or overwrite-capable import workflows with explicit approval. |
 
-Broader user groups, SCIM, RLS, DAR/permission APIs, guest-token creation, SQL execution, database changes, API key CRUD, billing/payment, and other sensitive workflows require separate review before they are documented here. The admin skill includes team-admin membership, invite, workspace lifecycle, and audit examples; those require explicit confirmation and appropriate permissions. Import/export workflows are documented with disclosure and mutation gates.
+Broader user groups, SCIM, unsupported DAR/permission APIs, API key CRUD, billing/payment, and other sensitive workflows still require separate review before they are documented here. The Phase 5 skills add explicit routing and loaded-by-construction guardrails for guest tokens, embedded RLS, SQL execution and saved-query workflows, database connections, role/permission changes, and destructive imports.
 
 ## How Skills Compose
 
@@ -57,6 +69,8 @@ For any workspace task, agents walk a fixed dependency chain:
 5. **Safety gate** — before any mutation, export, SQL execution, or data-returning read, load [`preset-api/references/safety-policy.md`](skills/preset-api/references/safety-policy.md), summarize target + payload + effect, and get explicit user confirmation.
 
 For Management API admin work (teams, invites, roles, audits, workspace lifecycle), substitute `preset-admin` for steps 3–4.
+
+For Phase 5 operations, use the focused security-sensitive skill directly after the foundational setup: `preset-guest-tokens`, `preset-embedded-rls`, `preset-sql-execution`, `preset-database-connections`, `preset-roles-permissions`, or `preset-destructive-imports`. These skills exist so risky workflows load their confirmation templates and secret-handling rules by construction.
 
 ## Quick Start
 

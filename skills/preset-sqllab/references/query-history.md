@@ -62,4 +62,4 @@ Useful saved query endpoints:
 | Read SQL Lab permalink | `GET /api/v1/sqllab/permalink/{key}` |
 | Create SQL Lab permalink | `POST /api/v1/sqllab/permalink` |
 
-Creating permalinks writes temporary state and requires explicit confirmation.
+Creating permalinks writes temporary state. Use `preset-sql-execution` before creating SQL Lab permalinks.

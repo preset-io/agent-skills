@@ -13,9 +13,10 @@ Use this skill for Superset workspace import/export workflows.
 2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
 3. Use `preset-superset` to capture the workspace version/OpenAPI before relying on an import/export endpoint.
 4. Load [references/import-export.md](references/import-export.md) for endpoint maps, secret-handling rules, and confirmation gates.
+5. Use `preset-destructive-imports` for overwrite, sparse-update, all-assets restore, database import, or secret-bearing import workflows.
 
 ## Scope
 
 Imports mutate workspace metadata and may create or change databases, datasets, charts, dashboards, saved queries, and themes. Exports can disclose SQL, dataset metadata, database metadata, tags, object UUIDs, and credential-bearing engine or `extra` fields.
 
-Do not import or export without explicit confirmation that names the workspace, endpoint, object IDs or bundle, and expected disclosure or mutation.
+Do not import or export without explicit confirmation that names the workspace, endpoint, object IDs or bundle, and expected disclosure or mutation. Route destructive or overwrite-capable imports through `preset-destructive-imports`.

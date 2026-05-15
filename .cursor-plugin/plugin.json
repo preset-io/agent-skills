@@ -1,7 +1,7 @@
 {
   "name": "Preset Agent Skills",
   "version": "0.1.0",
-  "description": "AI agent skills for the Preset API: authenticate, discover workspaces, administer teams/workspaces, and use Superset workspace APIs.",
+  "description": "AI agent skills for the Preset API: authenticate, discover workspaces, administer teams/workspaces, use Superset APIs, and handle sensitive workflows.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/preset-agent-skills",
   "skills": [
@@ -36,6 +36,21 @@
       "description": "Inspect databases, schemas, catalogs, tables, datasets, columns, metrics, table metadata, and data-returning dataset boundaries."
     },
     {
+      "name": "preset-database-connections",
+      "path": "skills/preset-database-connections/SKILL.md",
+      "description": "Inspect or route database connection configuration, validation, OAuth, upload, and mutation workflows with credential-aware approval."
+    },
+    {
+      "name": "preset-destructive-imports",
+      "path": "skills/preset-destructive-imports/SKILL.md",
+      "description": "Review and route destructive or overwrite-capable import workflows with explicit approval."
+    },
+    {
+      "name": "preset-embedded-rls",
+      "path": "skills/preset-embedded-rls/SKILL.md",
+      "description": "Review row-level security clauses for embedded analytics and guest-token workflows."
+    },
+    {
       "name": "preset-sqllab",
       "path": "skills/preset-sqllab/SKILL.md",
       "description": "Inspect SQL Lab bootstrap, query history, saved queries, and SQL execution safety boundaries."
@@ -49,6 +64,21 @@
       "name": "preset-embedding",
       "path": "skills/preset-embedding/SKILL.md",
       "description": "Inspect embedded dashboard configuration and route guest-token/trusted-domain workflows to security-sensitive review."
+    },
+    {
+      "name": "preset-guest-tokens",
+      "path": "skills/preset-guest-tokens/SKILL.md",
+      "description": "Create and route embedded dashboard guest-token workflows with explicit approval and token-handling guardrails."
+    },
+    {
+      "name": "preset-roles-permissions",
+      "path": "skills/preset-roles-permissions/SKILL.md",
+      "description": "Review and route role, workspace membership, permission, and access-control changes with explicit approval."
+    },
+    {
+      "name": "preset-sql-execution",
+      "path": "skills/preset-sql-execution/SKILL.md",
+      "description": "Run or route SQL Lab execution, result retrieval, exports, query stop, saved-query mutations, and SQL Lab permalink creation with explicit approval."
     }
   ]
 }

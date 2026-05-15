@@ -40,6 +40,8 @@ Before calling these endpoints, summarize the workspace, database ID, requested 
 
 Treat connection responses as credential-bearing. They can include SQLAlchemy URIs, `extra` JSON, server certificates, SSH tunnel configuration, or engine-specific connection fields. Do not print or paste these values into logs, examples, PR comments, or handoff notes.
 
+Use `preset-database-connections` before calling connection configuration, validation, OAuth, upload, create, update, or delete endpoints.
+
 ## Dataset Metadata Reads
 
 ```python

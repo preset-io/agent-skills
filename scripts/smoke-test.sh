@@ -120,6 +120,7 @@ require_grep "/api/v1/chart/{pk}/data/" skills/preset-dashboards/references/char
 require_grep "/api/v1/dashboard/{id_or_slug}/tabs" skills/preset-dashboards/references/charts-and-dashboard-api.md
 require_grep "/api/v1/database/{pk}/table_metadata/" skills/preset-datasets/references/database-and-dataset-api.md
 require_grep "/api/v1/datasource/{datasource_type}/{datasource_id}/column/{column_name}/values/" skills/preset-datasets/references/database-and-dataset-api.md
+require_grep "Do not create, update, delete" skills/preset-datasets/SKILL.md
 require_grep "/api/v1/sqllab/execute/" skills/preset-sqllab/references/guarded-sql-execution.md
 require_grep "/api/v1/query/updated_since" skills/preset-sqllab/references/query-history.md
 require_grep "/api/v1/assets/export/" skills/preset-import-export/references/import-export.md
@@ -137,6 +138,7 @@ require_grep "/api/v1/database/{pk}/connection" skills/preset-database-connectio
 require_grep "/api/v1/database/test_connection/" skills/preset-database-connections/references/connection-configuration.md
 require_grep "/api/v1/database/validate_parameters/" skills/preset-database-connections/references/connection-configuration.md
 require_grep "permission_write" skills/preset-roles-permissions/references/role-permission-changes.md
+require_grep "alongside \`preset-admin\`" skills/preset-roles-permissions/SKILL.md
 require_grep "overwrite" skills/preset-destructive-imports/references/destructive-import-approval.md
 require_grep "Never print import secrets" skills/preset-destructive-imports/references/destructive-import-approval.md
 require_grep "Use \`preset-sql-execution\`" skills/preset-sqllab/references/guarded-sql-execution.md

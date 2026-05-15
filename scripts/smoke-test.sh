@@ -129,6 +129,8 @@ require_grep "/api/v1/security/guest_token/" skills/preset-embedding/references/
 require_grep "Never print signed guest tokens" skills/preset-guest-tokens/references/guest-token-claims.md
 require_grep "rls_rules" skills/preset-embedded-rls/references/embedded-rls-rules.md
 require_grep "/api/v1/sqllab/execute/" skills/preset-sql-execution/references/sql-execution-approval.md
+require_grep "/api/v1/saved_query/" skills/preset-sql-execution/references/sql-execution-approval.md
+require_grep "/api/v1/sqllab/permalink" skills/preset-sql-execution/references/sql-execution-approval.md
 require_grep "/api/v1/database/{pk}/connection" skills/preset-database-connections/references/connection-configuration.md
 require_grep "permission_write" skills/preset-roles-permissions/references/role-permission-changes.md
 require_grep "overwrite" skills/preset-destructive-imports/references/destructive-import-approval.md

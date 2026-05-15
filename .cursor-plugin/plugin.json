@@ -78,7 +78,7 @@
     {
       "name": "preset-sql-execution",
       "path": "skills/preset-sql-execution/SKILL.md",
-      "description": "Run or route SQL Lab execution, result retrieval, exports, and query stop operations with explicit approval."
+      "description": "Run or route SQL Lab execution, result retrieval, exports, query stop, saved-query mutations, and SQL Lab permalink creation with explicit approval."
     }
   ]
 }

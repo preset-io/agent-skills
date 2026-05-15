@@ -51,12 +51,12 @@ Claude Code uses the plugin manifest for package metadata and `CLAUDE.md` plus t
 | [preset-embedding](skills/preset-embedding/SKILL.md) | Inspect embedded dashboard configuration and route guest-token/trusted-domain workflows to security-sensitive review. |
 | [preset-guest-tokens](skills/preset-guest-tokens/SKILL.md) | Create and route embedded dashboard guest-token workflows with explicit approval and token-handling guardrails. |
 | [preset-embedded-rls](skills/preset-embedded-rls/SKILL.md) | Review row-level security clauses for embedded analytics and guest-token workflows. |
-| [preset-sql-execution](skills/preset-sql-execution/SKILL.md) | Run or route SQL Lab execution, result retrieval, result export, and query stop operations with explicit approval. |
+| [preset-sql-execution](skills/preset-sql-execution/SKILL.md) | Run or route SQL Lab execution, result retrieval, result export, query stop, saved-query mutation, and SQL Lab permalink creation with explicit approval. |
 | [preset-database-connections](skills/preset-database-connections/SKILL.md) | Inspect or route database connection configuration, validation, OAuth, upload, and mutation workflows with credential-aware approval. |
 | [preset-roles-permissions](skills/preset-roles-permissions/SKILL.md) | Review and route role, workspace membership, permission, and access-control changes with explicit approval. |
 | [preset-destructive-imports](skills/preset-destructive-imports/SKILL.md) | Review and route destructive or overwrite-capable import workflows with explicit approval. |
 
-Broader user groups, SCIM, unsupported DAR/permission APIs, API key CRUD, billing/payment, and other sensitive workflows still require separate review before they are documented here. The Phase 5 skills add explicit routing and loaded-by-construction guardrails for guest tokens, embedded RLS, SQL execution, database connections, role/permission changes, and destructive imports.
+Broader user groups, SCIM, unsupported DAR/permission APIs, API key CRUD, billing/payment, and other sensitive workflows still require separate review before they are documented here. The Phase 5 skills add explicit routing and loaded-by-construction guardrails for guest tokens, embedded RLS, SQL execution and saved-query workflows, database connections, role/permission changes, and destructive imports.
 
 ## How Skills Compose
 

@@ -13,7 +13,7 @@ Use the skill files in this repository when helping with Preset API work:
 - `skills/preset-embedding/SKILL.md` for embedded dashboard configuration reads and guest-token/trusted-domain deferrals.
 - `skills/preset-guest-tokens/SKILL.md` for embedded dashboard guest-token workflows with explicit approval and token-handling guardrails.
 - `skills/preset-embedded-rls/SKILL.md` for embedded row-level security clause review before guest-token creation.
-- `skills/preset-sql-execution/SKILL.md` for SQL Lab execution, result retrieval, exports, and query stop operations.
+- `skills/preset-sql-execution/SKILL.md` for SQL Lab execution, result retrieval, exports, query stop, saved-query mutations, and SQL Lab permalink creation.
 - `skills/preset-database-connections/SKILL.md` for database connection configuration and mutation workflows.
 - `skills/preset-roles-permissions/SKILL.md` for role, workspace membership, permission, and access-control changes.
 - `skills/preset-destructive-imports/SKILL.md` for destructive or overwrite-capable import workflows.

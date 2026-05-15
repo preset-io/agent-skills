@@ -17,7 +17,7 @@ Use the `skills/*/SKILL.md` files as the canonical instructions:
 - `skills/preset-embedding/SKILL.md` - inspect embedded dashboard configuration and route guest-token/trusted-domain workflows to security-sensitive review.
 - `skills/preset-guest-tokens/SKILL.md` - create and route embedded dashboard guest-token workflows with explicit approval and token-handling guardrails.
 - `skills/preset-embedded-rls/SKILL.md` - review embedded row-level security clauses before guest-token creation.
-- `skills/preset-sql-execution/SKILL.md` - run or route SQL Lab execution, result retrieval, exports, and query stop operations with explicit approval.
+- `skills/preset-sql-execution/SKILL.md` - run or route SQL Lab execution, result retrieval, exports, query stop, saved-query mutations, and SQL Lab permalink creation with explicit approval.
 - `skills/preset-database-connections/SKILL.md` - inspect or route database connection configuration and mutations with credential-aware approval.
 - `skills/preset-roles-permissions/SKILL.md` - review and route role, workspace membership, permission, and access-control changes.
 - `skills/preset-destructive-imports/SKILL.md` - review and route destructive or overwrite-capable import workflows.

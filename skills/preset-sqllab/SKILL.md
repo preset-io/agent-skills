@@ -13,7 +13,7 @@ Use this skill for SQL Lab and query metadata workflows in a Preset workspace.
 2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
 3. Use `preset-superset` to capture workspace version/OpenAPI and current-user roles when endpoint drift or permissions matter.
 4. Load [references/query-history.md](references/query-history.md) for SQL Lab bootstrap, query history, saved query, and permalink examples.
-5. Use `preset-sql-execution` before any SQL execution, result retrieval, result export, query stop, or saved-query mutation.
+5. Use `preset-sql-execution` before any SQL execution, result retrieval, result export, query stop, saved-query mutation, or SQL Lab permalink creation.
 
 ## Scope
 

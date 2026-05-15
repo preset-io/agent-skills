@@ -1,7 +1,7 @@
 {
   "name": "preset-agent-skills",
   "version": "0.1.0",
-  "description": "Preset API skills for authentication, workspace discovery, team/workspace administration, and read-only dashboard and dataset inspection.",
+  "description": "Preset API skills for authentication, workspace discovery, team/workspace administration, and Superset workspace API workflows.",
   "author": {
     "name": "Preset",
     "url": "https://preset.io/"
@@ -15,6 +15,9 @@
     "api",
     "admin",
     "dashboards",
-    "datasets"
+    "datasets",
+    "sqllab",
+    "import-export",
+    "embedding"
   ]
 }

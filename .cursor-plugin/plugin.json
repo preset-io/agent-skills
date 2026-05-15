@@ -1,7 +1,7 @@
 {
   "name": "Preset Agent Skills",
   "version": "0.1.0",
-  "description": "AI agent skills for the Preset API: authenticate, discover workspaces, administer teams/workspaces, and inspect dashboards and datasets.",
+  "description": "AI agent skills for the Preset API: authenticate, discover workspaces, administer teams/workspaces, and use Superset workspace APIs.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/preset-agent-skills",
   "skills": [
@@ -21,14 +21,34 @@
       "description": "Manage Preset team memberships, workspace lifecycle, invites, role identifiers, and audit logs with confirmation."
     },
     {
+      "name": "preset-superset",
+      "path": "skills/preset-superset/SKILL.md",
+      "description": "Discover workspace Superset version, OpenAPI, current-user permissions, menu capabilities, and API safety classification."
+    },
+    {
       "name": "preset-dashboards",
       "path": "skills/preset-dashboards/SKILL.md",
-      "description": "Inspect dashboards, dashboard charts, and dashboard datasets."
+      "description": "Inspect dashboards, charts, dashboard tabs, screenshots, thumbnails, and chart data safety boundaries."
     },
     {
       "name": "preset-datasets",
       "path": "skills/preset-datasets/SKILL.md",
-      "description": "Inspect database connections, schemas, tables, datasets, columns, and metrics."
+      "description": "Inspect databases, schemas, catalogs, tables, datasets, columns, metrics, table metadata, and data-returning dataset boundaries."
+    },
+    {
+      "name": "preset-sqllab",
+      "path": "skills/preset-sqllab/SKILL.md",
+      "description": "Inspect SQL Lab bootstrap, query history, saved queries, and SQL execution safety boundaries."
+    },
+    {
+      "name": "preset-import-export",
+      "path": "skills/preset-import-export/SKILL.md",
+      "description": "Route Superset workspace import/export workflows with disclosure and mutation gates."
+    },
+    {
+      "name": "preset-embedding",
+      "path": "skills/preset-embedding/SKILL.md",
+      "description": "Inspect embedded dashboard configuration and route guest-token/trusted-domain workflows to security-sensitive review."
     }
   ]
 }

@@ -21,10 +21,25 @@ Store long-lived API credentials in a secrets manager such as AWS Secrets Manage
 ## Token Exchange
 
 ```bash
-curl -s -X POST "https://api.app.preset.io/v1/auth/" \
+set -euo pipefail
+umask 077
+auth_response="$(mktemp)"
+auth_payload="$(mktemp)"
+auth_secret="$(mktemp)"
+trap 'rm -f "$auth_response" "$auth_payload" "$auth_secret"' EXIT
+printf "%s" "$PRESET_CLIENT_SECRET" > "$auth_secret"
+jq -nc \
+  --arg name "$PRESET_CLIENT_ID" \
+  --rawfile secret "$auth_secret" \
+  '{name: $name, secret: $secret}' > "$auth_payload"
+
+curl -fsS -X POST "https://api.app.preset.io/v1/auth/" \
   -H "Content-Type: application/json" \
-  -d "{\"name\": \"$PRESET_CLIENT_ID\", \"secret\": \"$PRESET_CLIENT_SECRET\"}" \
-  | jq -r '.payload.access_token'
+  --data "@$auth_payload" \
+  -o "$auth_response"
+
+jq -e '.payload.access_token | strings | length > 0' "$auth_response" >/dev/null
+TOKEN="$(jq -r '.payload.access_token' "$auth_response")"
 ```
 
 ```python
@@ -127,10 +142,22 @@ class PresetClient:
         return resp.json()
 
     def workspace(self, method, workspace_hostname, path, **kwargs):
+        # Resolve workspace_hostname via the Management API before calling this method.
         url = f"https://{workspace_hostname}/api/v1{path}"
         resp = self._request_with_auth(method, url, **kwargs)
+        return resp.json()
+
+    def workspace_root_response(self, method, workspace_hostname, path, **kwargs):
+        # Resolve workspace_hostname via the Management API before calling this method.
+        url = f"https://{workspace_hostname}{path}"
+        return self._request_with_auth(method, url, **kwargs)
+
+    def workspace_root(self, method, workspace_hostname, path, **kwargs):
+        resp = self.workspace_root_response(method, workspace_hostname, path, **kwargs)
         return resp.json()
 
 
 client = PresetClient()
 ```
+
+Use `workspace_root_response()` instead of `workspace_root()` when the caller needs response status codes, headers, redirects, or non-JSON bodies from server-root endpoints.

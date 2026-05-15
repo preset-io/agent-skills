@@ -12,6 +12,11 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 - **preset-admin** skill - Team membership management, workspace lifecycle operations, invite lifecycle workflows, role identifier guidance, seat-limit preflights, audit log queries, and confirmation-gated audit downloads.
 - Management API v2 conventions and reusable client support for audit log endpoints.
+- **preset-superset** skill - Workspace Superset version/OpenAPI discovery, current-user permission checks, menu inspection, and workspace API safety classification.
+- Expanded **preset-dashboards** and **preset-datasets** skills for Phase 4 Superset workspace API domains, including charts, table metadata, datasource values, screenshots/thumbnails, and data-returning read guardrails.
+- **preset-sqllab** skill - SQL Lab bootstrap, query history, saved query inspection, permalink routing, and SQL execution guardrails.
+- **preset-import-export** skill - Import/export endpoint inventory with disclosure and mutation gates.
+- **preset-embedding** skill - Embedded dashboard configuration reads and security-sensitive guest-token/trusted-domain deferrals.
 
 ### Changed
 

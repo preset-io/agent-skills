@@ -128,9 +128,11 @@ require_grep "/api/v1/embedded_dashboard/{uuid}" skills/preset-embedding/referen
 require_grep "/api/v1/security/guest_token/" skills/preset-embedding/references/embedded-dashboards.md
 require_grep "Never print signed guest tokens" skills/preset-guest-tokens/references/guest-token-claims.md
 require_grep "rls_rules" skills/preset-embedded-rls/references/embedded-rls-rules.md
+require_grep "approved-tenant-id" skills/preset-embedded-rls/references/embedded-rls-rules.md
 require_grep "/api/v1/sqllab/execute/" skills/preset-sql-execution/references/sql-execution-approval.md
 require_grep "/api/v1/saved_query/" skills/preset-sql-execution/references/sql-execution-approval.md
 require_grep "/api/v1/sqllab/permalink" skills/preset-sql-execution/references/sql-execution-approval.md
+require_grep "Do not paste SQL text" skills/preset-sql-execution/references/sql-execution-approval.md
 require_grep "/api/v1/database/{pk}/connection" skills/preset-database-connections/references/connection-configuration.md
 require_grep "/api/v1/database/test_connection/" skills/preset-database-connections/references/connection-configuration.md
 require_grep "/api/v1/database/validate_parameters/" skills/preset-database-connections/references/connection-configuration.md

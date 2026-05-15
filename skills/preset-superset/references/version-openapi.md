@@ -13,6 +13,8 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 version = client.workspace_root("GET", hostname, "/version")
 ```
 
+`workspace_root()` is for Superset endpoints that sit at the server root, such as `/version` or `/healthcheck`. Use `workspace()` for all `/api/v1/...` paths.
+
 Useful fields, when present:
 
 | Field | Description |

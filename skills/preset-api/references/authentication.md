@@ -159,3 +159,5 @@ class PresetClient:
 
 client = PresetClient()
 ```
+
+Use `workspace_root_response()` instead of `workspace_root()` when the caller needs response status codes, headers, redirects, or non-JSON bodies from server-root endpoints.

@@ -64,6 +64,7 @@ Thumbnail and screenshot endpoints depend on workspace feature flags and backgro
 | Dashboard thumbnail | `GET /api/v1/dashboard/{pk}/thumbnail/{digest}/` |
 
 Cache creation can enqueue work, so confirm before calling cache endpoints.
+`cache_screenshot` is a `GET` endpoint but still triggers background work; treat it as confirmation-gated.
 
 ## Confirmation-Gated Dashboard And Chart Operations
 
@@ -76,4 +77,4 @@ Do not run these without explicit confirmation:
 | Copies and imports | dashboard copy, dashboard/chart import |
 | Exports | dashboard/chart export, export as example |
 | Favorites | favorite create/delete changes user state |
-| Cache warmup | chart warm up cache |
+| Cache and screenshot generation | chart warm up cache, chart `cache_screenshot`, dashboard `cache_dashboard_screenshot` |

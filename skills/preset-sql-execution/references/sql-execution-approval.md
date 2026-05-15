@@ -6,7 +6,7 @@ SQL execution can expose customer data, run expensive warehouse work, or create 
 
 Before calling SQL execution, result, export, stop, saved-query mutation, or SQL Lab permalink endpoints, summarize:
 
-1. Workspace hostname.
+1. Workspace hostname and workflow type: SQL execution, result handling, saved-query mutation, or SQL Lab permalink creation.
 2. Database ID and database name, if known.
 3. Exact SQL text, or an approved redacted summary if the SQL contains sensitive values.
 4. Expected result size or row limit.

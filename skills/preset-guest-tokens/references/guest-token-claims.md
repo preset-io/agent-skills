@@ -39,7 +39,7 @@ payload = {
         {"type": "dashboard", "id": embedded_dashboard_uuid},
     ],
     "rls": [
-        {"clause": "customer_id = 123"},
+        {"clause": "tenant_id = 'approved-tenant-id'"},
     ],
 }
 

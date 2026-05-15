@@ -18,6 +18,8 @@ Before calling SQL execution, result, export, stop, saved-query mutation, or SQL
 
 Wait for explicit confirmation.
 
+Do not paste SQL text, result rows, exported files, saved-query contents, or permalink payloads into logs, PR comments, or handoff notes unless the user explicitly approves that disclosure channel.
+
 ## Endpoints
 
 | Goal | Endpoint |

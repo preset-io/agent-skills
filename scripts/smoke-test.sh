@@ -136,6 +136,7 @@ require_grep "/api/v1/database/test_connection/" skills/preset-database-connecti
 require_grep "/api/v1/database/validate_parameters/" skills/preset-database-connections/references/connection-configuration.md
 require_grep "permission_write" skills/preset-roles-permissions/references/role-permission-changes.md
 require_grep "overwrite" skills/preset-destructive-imports/references/destructive-import-approval.md
+require_grep "Never print import secrets" skills/preset-destructive-imports/references/destructive-import-approval.md
 require_grep "Use \`preset-sql-execution\`" skills/preset-sqllab/references/guarded-sql-execution.md
 require_grep "use \`preset-guest-tokens\`" skills/preset-embedding/references/embedded-dashboards.md
 require_grep "Use \`preset-destructive-imports\`" skills/preset-import-export/references/import-export.md

@@ -16,6 +16,8 @@ Before running any import that uses `overwrite`, sparse update, all-assets resto
 
 Wait for explicit confirmation.
 
+Never print import secrets, database passwords, SSH tunnel passwords, private keys, private key passwords, or encrypted extra values in logs, examples, PR comments, or handoff notes.
+
 ## Endpoints
 
 | Surface | Endpoint |

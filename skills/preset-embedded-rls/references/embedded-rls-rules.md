@@ -20,7 +20,7 @@ Prepare `rls_rules` as reviewed clauses, then map them to the guest-token payloa
 
 ```python
 rls_rules = [
-    {"clause": "customer_id = 123"},
+    {"clause": "tenant_id = 'approved-tenant-id'"},
 ]
 
 payload = {

@@ -11,8 +11,11 @@ Use this skill to prepare safe, version-aware Superset workspace API access.
 
 1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
 2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
-3. Load [references/version-openapi.md](references/version-openapi.md) to capture `/version`, `/api/v1/_openapi`, `/api/v1/me/`, `/api/v1/me/roles/`, and `/api/v1/menu/`.
-4. Load [references/workspace-api-safety.md](references/workspace-api-safety.md) before calling endpoints that return customer data, exports, credentials, or execution results.
+3. Load the focused reference for the task:
+   - [references/version-and-openapi.md](references/version-and-openapi.md) to capture `/version` and `/api/v1/_openapi`.
+   - [references/current-user-and-permissions.md](references/current-user-and-permissions.md) to inspect `/api/v1/me/` and `/api/v1/me/roles/`.
+   - [references/menu-and-feature-discovery.md](references/menu-and-feature-discovery.md) to inspect `/api/v1/menu/` and visible workspace capabilities.
+   - [references/workspace-api-safety.md](references/workspace-api-safety.md) before calling endpoints that return customer data, exports, credentials, or execution results.
 
 Only send bearer tokens to workspace hostnames resolved from the Preset Management API, except for explicit local-dev smoke validation against known local hosts.
 

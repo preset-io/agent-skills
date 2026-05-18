@@ -22,7 +22,7 @@ Use the `skills/*/SKILL.md` files as the canonical instructions:
 - `skills/preset-roles-permissions/SKILL.md` - review and route role, workspace membership, permission, and access-control changes.
 - `skills/preset-destructive-imports/SKILL.md` - review and route destructive or overwrite-capable import workflows.
 
-Detailed examples live in each skill's `references/` directory. Load only the reference files needed for the user's task.
+Detailed examples live in each skill's `references/` directory. Load only the reference files needed for the user's task. Broad `SKILL.md` files are routing and discovery boundaries; focused references are task/risk context-loading boundaries.
 
 ## Client Entry Points
 

@@ -23,7 +23,7 @@ skills/
   preset-destructive-imports/SKILL.md
 ```
 
-Each `SKILL.md` stays small and always-loaded; detailed API examples live in `references/` files the agent loads on demand, so the always-on context budget stays tight. References are context-loading boundaries after a domain skill has been selected. Phase 5 security-sensitive workflows are separate skills because they need independent routing, explicit confirmation templates, and secret-handling guardrails loaded by construction.
+Each `SKILL.md` stays small and always-loaded; detailed API examples live in `references/` files the agent loads on demand, so the always-on context budget stays tight. References are context-loading boundaries after a domain skill has been selected. Phase 6 decomposes dense domain references by task and risk so agents load dashboard metadata, chart data, table samples, SQL results, imports, exports, or embedding changes only when the user request needs that surface. Phase 5 security-sensitive workflows remain separate skills because they need independent routing, explicit confirmation templates, and secret-handling guardrails loaded by construction.
 
 ## Supported Clients
 
@@ -65,7 +65,7 @@ For any workspace task, agents walk a fixed dependency chain:
 1. **`preset-api`** — exchange `PRESET_CLIENT_ID` / `PRESET_CLIENT_SECRET` for a JWT and build a reusable client.
 2. **`preset-workspaces`** — list teams and workspaces; resolve the workspace hostname from the API (never hard-coded).
 3. **`preset-superset`** — pin examples to the workspace's actual Superset build via `/version` and `/api/v1/_openapi`; check `/me/roles/` if permissions are uncertain.
-4. **Domain skill** — load the focused `references/` file for the operation: `preset-dashboards`, `preset-datasets`, `preset-sqllab`, `preset-import-export`, or `preset-embedding`.
+4. **Domain skill** — load the focused task/risk `references/` file for the operation: `preset-dashboards`, `preset-datasets`, `preset-sqllab`, `preset-import-export`, or `preset-embedding`.
 5. **Safety gate** — before any mutation, export, SQL execution, or data-returning read, load [`preset-api/references/safety-policy.md`](skills/preset-api/references/safety-policy.md), summarize target + payload + effect, and get explicit user confirmation.
 
 For Management API admin work (teams, invites, roles, audits, workspace lifecycle), substitute `preset-admin` for steps 3–4.

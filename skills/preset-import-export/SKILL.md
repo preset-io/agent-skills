@@ -12,7 +12,11 @@ Use this skill for Superset workspace import/export workflows.
 1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
 2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
 3. Use `preset-superset` to capture the workspace version/OpenAPI before relying on an import/export endpoint.
-4. Load [references/import-export.md](references/import-export.md) for endpoint maps, secret-handling rules, and confirmation gates.
+4. Load the focused reference for the task:
+   - [references/export-workflows.md](references/export-workflows.md) for export endpoint maps and approval details.
+   - [references/import-workflows.md](references/import-workflows.md) for import endpoint maps and mutation routing.
+   - [references/bundle-secrets-and-disclosure.md](references/bundle-secrets-and-disclosure.md) for export bundle disclosure and secret redaction rules.
+   - [references/validation-and-smoke.md](references/validation-and-smoke.md) for OpenAPI checks and safe smoke-validation patterns.
 5. Use `preset-destructive-imports` for overwrite, sparse-update, all-assets restore, database import, or secret-bearing import workflows.
 
 ## Scope

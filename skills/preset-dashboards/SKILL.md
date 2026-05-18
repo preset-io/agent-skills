@@ -12,8 +12,13 @@ Use this skill for dashboard and chart inspection in a Preset workspace.
 1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
 2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
 3. Use `preset-superset` to capture the workspace version/OpenAPI when endpoint drift matters.
-4. Load [references/read-only-examples.md](references/read-only-examples.md) for basic dashboard list/detail/chart/dataset examples.
-5. Load [references/charts-and-dashboard-api.md](references/charts-and-dashboard-api.md) for the fuller dashboard/chart API map, chart data warnings, screenshots, thumbnails, exports, imports, and mutation routing.
+4. Load the focused reference for the task:
+   - [references/dashboard-metadata.md](references/dashboard-metadata.md) for dashboard list/detail and favorite-status reads.
+   - [references/chart-metadata.md](references/chart-metadata.md) for chart list/detail and related-field reads.
+   - [references/dashboard-composition.md](references/dashboard-composition.md) for dashboard charts, datasets, and tabs.
+   - [references/chart-data.md](references/chart-data.md) for chart data endpoints that can expose customer data.
+   - [references/screenshots-and-thumbnails.md](references/screenshots-and-thumbnails.md) for screenshot, thumbnail, and cache-enqueue behavior.
+   - [references/dashboard-chart-mutations.md](references/dashboard-chart-mutations.md) for dashboard/chart mutation, import/export, favorite, and cache-warmup routing.
 
 ## Scope
 

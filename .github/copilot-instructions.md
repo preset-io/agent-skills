@@ -19,3 +19,5 @@ Use the skill files in this repository when helping with Preset API work:
 - `skills/preset-destructive-imports/SKILL.md` for destructive or overwrite-capable import workflows.
 
 Default to metadata reads. Some `GET` endpoints can expose customer data, SQL text, database connection configuration, or database structure, including chart data, table samples, SQL Lab results, query history, saved queries, distinct values, and exports. Before any mutation, data-returning read, SQL text read, database connection configuration read, audit download, SQL execution, import, export, role/RLS change, database connection change, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation.
+
+Treat broad `SKILL.md` files as routing boundaries and focused `references/` files as task/risk context-loading boundaries. Load only the reference needed for the user request.

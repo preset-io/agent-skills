@@ -1,4 +1,6 @@
-# Embedded Dashboards
+# Embedded Configuration Reads
+
+Use this reference for embedded dashboard configuration reads.
 
 Embedding endpoints depend on workspace feature flags and permissions. If embedding is disabled, embedded endpoints can return `404`.
 
@@ -32,17 +34,4 @@ embedded = client.workspace("GET", hostname, f"/embedded_dashboard/{embedded_uui
 
 Optional query parameters include `uiConfig`, `show_filters`, `expand_filters`, `native_filters_key`, and `permalink_key`.
 
-## Confirmation-Gated Embedding Operations
-
-Do not run these without explicit confirmation:
-
-| Surface | Endpoint |
-|---|---|
-| Set embedded config | `POST /api/v1/dashboard/{id_or_slug}/embedded` |
-| Update embedded config | `PUT /api/v1/dashboard/{id_or_slug}/embedded` |
-| Delete embedded config | `DELETE /api/v1/dashboard/{id_or_slug}/embedded` |
-| Guest token | `POST /api/v1/security/guest_token/` |
-
-Before mutating embedded configuration, summarize the dashboard, allowed domains, expected origin behavior, and rollback path.
-
-Before guest-token creation, use `preset-guest-tokens`. For embedded RLS clauses, use `preset-embedded-rls`. Guest tokens are signed credentials and must never be printed in logs, examples, PR comments, or handoff notes.
+For allowed-domain interpretation, load [trusted-domains-and-origins.md](trusted-domains-and-origins.md).

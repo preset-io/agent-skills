@@ -84,19 +84,57 @@ require_jq '
   ]
 ' .cursor-plugin/plugin.json
 
-required_phase4_references=(
-  skills/preset-superset/references/version-openapi.md
+required_workspace_references=(
+  skills/preset-superset/references/version-and-openapi.md
+  skills/preset-superset/references/current-user-and-permissions.md
+  skills/preset-superset/references/menu-and-feature-discovery.md
   skills/preset-superset/references/workspace-api-safety.md
-  skills/preset-dashboards/references/charts-and-dashboard-api.md
-  skills/preset-datasets/references/database-and-dataset-api.md
+  skills/preset-dashboards/references/dashboard-metadata.md
+  skills/preset-dashboards/references/chart-metadata.md
+  skills/preset-dashboards/references/dashboard-composition.md
+  skills/preset-dashboards/references/chart-data.md
+  skills/preset-dashboards/references/screenshots-and-thumbnails.md
+  skills/preset-dashboards/references/dashboard-chart-mutations.md
+  skills/preset-datasets/references/database-metadata.md
+  skills/preset-datasets/references/dataset-metadata.md
+  skills/preset-datasets/references/table-and-schema-metadata.md
+  skills/preset-datasets/references/data-returning-reads.md
+  skills/preset-datasets/references/connection-configuration.md
+  skills/preset-datasets/references/dataset-database-mutations.md
+  skills/preset-sqllab/references/sqllab-bootstrap.md
   skills/preset-sqllab/references/query-history.md
+  skills/preset-sqllab/references/saved-queries.md
+  skills/preset-sqllab/references/sql-execution.md
+  skills/preset-sqllab/references/query-results-and-exports.md
+  skills/preset-sqllab/references/query-control.md
+  skills/preset-import-export/references/export-workflows.md
+  skills/preset-import-export/references/import-workflows.md
+  skills/preset-import-export/references/bundle-secrets-and-disclosure.md
+  skills/preset-import-export/references/validation-and-smoke.md
+  skills/preset-embedding/references/embedded-config-reads.md
+  skills/preset-embedding/references/embedded-config-mutations.md
+  skills/preset-embedding/references/trusted-domains-and-origins.md
+  skills/preset-embedding/references/guest-tokens.md
+  skills/preset-embedding/references/embedded-rls.md
+)
+
+for file in "${required_workspace_references[@]}"; do
+  require_file "$file"
+done
+
+removed_broad_references=(
+  skills/preset-superset/references/version-openapi.md
+  skills/preset-dashboards/references/charts-and-dashboard-api.md
+  skills/preset-dashboards/references/read-only-examples.md
+  skills/preset-datasets/references/database-and-dataset-api.md
+  skills/preset-datasets/references/read-only-examples.md
   skills/preset-sqllab/references/guarded-sql-execution.md
   skills/preset-import-export/references/import-export.md
   skills/preset-embedding/references/embedded-dashboards.md
 )
 
-for file in "${required_phase4_references[@]}"; do
-  require_file "$file"
+for file in "${removed_broad_references[@]}"; do
+  test ! -f "$file" || fail "legacy broad reference should be removed: $file"
 done
 
 required_phase5_references=(
@@ -112,21 +150,36 @@ for file in "${required_phase5_references[@]}"; do
   require_file "$file"
 done
 
-require_grep "/api/v1/_openapi" skills/preset-superset/references/version-openapi.md
-require_grep "/api/v1/me/roles/" skills/preset-superset/references/version-openapi.md
+require_grep "/api/v1/_openapi" skills/preset-superset/references/version-and-openapi.md
+require_grep "/api/v1/me/roles/" skills/preset-superset/references/current-user-and-permissions.md
+require_grep "/api/v1/menu/" skills/preset-superset/references/menu-and-feature-discovery.md
 require_grep "HTTP method alone is not enough" skills/preset-superset/references/workspace-api-safety.md
 require_grep "chart data retrieval" skills/preset-api/references/safety-policy.md
-require_grep "/api/v1/chart/{pk}/data/" skills/preset-dashboards/references/charts-and-dashboard-api.md
-require_grep "/api/v1/dashboard/{id_or_slug}/tabs" skills/preset-dashboards/references/charts-and-dashboard-api.md
-require_grep "/api/v1/database/{pk}/table_metadata/" skills/preset-datasets/references/database-and-dataset-api.md
-require_grep "/api/v1/datasource/{datasource_type}/{datasource_id}/column/{column_name}/values/" skills/preset-datasets/references/database-and-dataset-api.md
+require_grep "/api/v1/chart/{pk}/data/" skills/preset-dashboards/references/chart-data.md
+require_grep "/api/v1/dashboard/{id_or_slug}/tabs" skills/preset-dashboards/references/dashboard-composition.md
+require_grep "/api/v1/dashboard/{pk}/cache_dashboard_screenshot/" skills/preset-dashboards/references/screenshots-and-thumbnails.md
+require_grep "Use this reference for dashboard metadata reads" skills/preset-dashboards/references/dashboard-metadata.md
+require_grep "Use this reference for chart metadata reads" skills/preset-dashboards/references/chart-metadata.md
+require_grep "Use this reference for dashboard/chart operations" skills/preset-dashboards/references/dashboard-chart-mutations.md
+require_grep "/api/v1/database/{pk}/table_metadata/" skills/preset-datasets/references/table-and-schema-metadata.md
+require_grep "/api/v1/datasource/{datasource_type}/{datasource_id}/column/{column_name}/values/" skills/preset-datasets/references/data-returning-reads.md
+require_grep "/api/v1/database/{pk}/connection" skills/preset-datasets/references/connection-configuration.md
+require_grep "Route credential-bearing connection workflows" skills/preset-datasets/references/dataset-database-mutations.md
 require_grep "Do not create, update, delete" skills/preset-datasets/SKILL.md
-require_grep "/api/v1/sqllab/execute/" skills/preset-sqllab/references/guarded-sql-execution.md
+require_grep "/api/v1/sqllab/execute/" skills/preset-sqllab/references/sql-execution.md
 require_grep "/api/v1/query/updated_since" skills/preset-sqllab/references/query-history.md
-require_grep "/api/v1/assets/export/" skills/preset-import-export/references/import-export.md
-require_grep "Never print import secrets" skills/preset-import-export/references/import-export.md
-require_grep "/api/v1/embedded_dashboard/{uuid}" skills/preset-embedding/references/embedded-dashboards.md
-require_grep "/api/v1/security/guest_token/" skills/preset-embedding/references/embedded-dashboards.md
+require_grep "/api/v1/saved_query/{pk}" skills/preset-sqllab/references/saved-queries.md
+require_grep "/api/v1/sqllab/results/" skills/preset-sqllab/references/query-results-and-exports.md
+require_grep "/api/v1/query/stop" skills/preset-sqllab/references/query-control.md
+require_grep "/api/v1/assets/export/" skills/preset-import-export/references/export-workflows.md
+require_grep "Never print import secrets" skills/preset-import-export/references/import-workflows.md
+require_grep "SQLAlchemy URIs" skills/preset-import-export/references/bundle-secrets-and-disclosure.md
+require_grep "Do not live-test imports" skills/preset-import-export/references/validation-and-smoke.md
+require_grep "/api/v1/embedded_dashboard/{uuid}" skills/preset-embedding/references/embedded-config-reads.md
+require_grep "POST /api/v1/dashboard/{id_or_slug}/embedded" skills/preset-embedding/references/embedded-config-mutations.md
+require_grep "allowed-domain" skills/preset-embedding/references/trusted-domains-and-origins.md
+require_grep "/api/v1/security/guest_token/" skills/preset-embedding/references/guest-tokens.md
+require_grep "rls_rules" skills/preset-embedding/references/embedded-rls.md
 require_grep "Never print signed guest tokens" skills/preset-guest-tokens/references/guest-token-claims.md
 require_grep "rls_rules" skills/preset-embedded-rls/references/embedded-rls-rules.md
 require_grep "approved-tenant-id" skills/preset-embedded-rls/references/embedded-rls-rules.md
@@ -141,10 +194,10 @@ require_grep "permission_write" skills/preset-roles-permissions/references/role-
 require_grep "alongside \`preset-admin\`" skills/preset-roles-permissions/SKILL.md
 require_grep "overwrite" skills/preset-destructive-imports/references/destructive-import-approval.md
 require_grep "Never print import secrets" skills/preset-destructive-imports/references/destructive-import-approval.md
-require_grep "Use \`preset-sql-execution\`" skills/preset-sqllab/references/guarded-sql-execution.md
-require_grep "use \`preset-guest-tokens\`" skills/preset-embedding/references/embedded-dashboards.md
-require_grep "Use \`preset-destructive-imports\`" skills/preset-import-export/references/import-export.md
-require_grep "Use \`preset-database-connections\`" skills/preset-datasets/references/database-and-dataset-api.md
+require_grep "Use \`preset-sql-execution\`" skills/preset-sqllab/references/sql-execution.md
+require_grep "use \`preset-guest-tokens\`" skills/preset-embedding/references/guest-tokens.md
+require_grep "Use \`preset-destructive-imports\`" skills/preset-import-export/references/import-workflows.md
+require_grep "Use \`preset-database-connections\`" skills/preset-datasets/references/connection-configuration.md
 require_grep "route to the focused Phase 5 skill" skills/preset-superset/references/workspace-api-safety.md
 
 required_admin_references=(

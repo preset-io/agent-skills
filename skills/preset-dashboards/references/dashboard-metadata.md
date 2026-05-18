@@ -1,10 +1,8 @@
-# Read-Only Dashboard Examples
+# Dashboard Metadata
 
-All Superset API calls use the workspace hostname returned by the Management API:
+Use this reference for dashboard metadata reads that do not return chart result data.
 
-```text
-https://{workspace_hostname}/api/v1/dashboard/
-```
+All examples use the workspace hostname resolved by `preset-workspaces`.
 
 ## Key Concepts
 
@@ -74,28 +72,12 @@ Common response fields:
 | `charts` | Chart summaries included in the dashboard |
 | `owners` | Owner objects with `id`, `first_name`, and `last_name` |
 
-## Get Dashboard Charts
+## Favorite Status
 
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/dashboard/{id}/charts" | jq '.result'
-```
+Favorite status is user-state metadata for the authenticated user.
 
-```python
-charts = client.workspace("GET", hostname, f"/dashboard/{dashboard_id}/charts")["result"]
-for chart in charts:
-    print(chart["id"], chart["slice_name"], chart["viz_type"])
-```
+| Goal | Endpoint |
+|---|---|
+| Dashboard favorite status | `GET /api/v1/dashboard/favorite_status/` |
 
-## Get Dashboard Datasets
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/dashboard/{id}/datasets" | jq '.result'
-```
-
-```python
-datasets = client.workspace("GET", hostname, f"/dashboard/{dashboard_id}/datasets")["result"]
-for dataset in datasets:
-    print(dataset["id"], dataset["table_name"])
-```
+Creating or deleting favorites changes user state. Load [dashboard-chart-mutations.md](dashboard-chart-mutations.md) before changing favorites.

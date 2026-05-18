@@ -1,4 +1,6 @@
-# Read-Only Dataset And Database Examples
+# Dataset Metadata
+
+Use this reference for dataset metadata reads.
 
 ## Key Concepts
 
@@ -9,69 +11,6 @@
 | Database | A database connection configured in Superset |
 | Schema | The database schema that contains the dataset table |
 
-## List Database Connections
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/database/?q=(page:0,page_size:50)" | jq '.result'
-```
-
-```python
-import rison
-
-q = rison.dumps({"page": 0, "page_size": 50})
-dbs = client.workspace("GET", hostname, f"/database/?q={q}")["result"]
-for db in dbs:
-    print(db["id"], db["database_name"], db["backend"])
-```
-
-Common database fields:
-
-| Field | Description |
-|---|---|
-| `id` | Numeric database ID |
-| `database_name` | Human-readable connection name |
-| `backend` | Database engine, such as `snowflake`, `bigquery`, or `postgresql` |
-| `expose_in_sqllab` | Whether the connection is available in SQL Lab |
-| `allow_run_async` | Whether async query execution is enabled |
-
-## Get A Database Connection
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/database/{id}" | jq '.result'
-```
-
-```python
-db = client.workspace("GET", hostname, f"/database/{db_id}")["result"]
-print(db["database_name"], db["backend"])
-```
-
-## List Schemas For A Database
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/database/{id}/schemas/?q=(force:!f)" | jq '.result'
-```
-
-```python
-q = rison.dumps({"force": False})
-schemas = client.workspace("GET", hostname, f"/database/{db_id}/schemas/?q={q}")["result"]
-```
-
-## List Tables In A Schema
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://{workspace_hostname}/api/v1/database/{id}/tables/?q=(schema_name:public,force:!f)" \
-  | jq '.result'
-```
-
-```python
-q = rison.dumps({"schema_name": "public", "force": False})
-tables = client.workspace("GET", hostname, f"/database/{db_id}/tables/?q={q}")["result"]
-```
-
 ## List Datasets
 
 ```bash
@@ -80,6 +19,8 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 ```
 
 ```python
+import rison
+
 q = rison.dumps({"page": 0, "page_size": 25})
 datasets = client.workspace("GET", hostname, f"/dataset/?q={q}")["result"]
 for dataset in datasets:
@@ -119,3 +60,15 @@ Common dataset fields:
 | `metrics` | Metric definitions |
 | `database.id` | ID of the parent database connection |
 | `owners` | Owner objects |
+
+Useful dataset endpoints:
+
+| Goal | Endpoint |
+|---|---|
+| List datasets | `GET /api/v1/dataset/` |
+| Get dataset detail | `GET /api/v1/dataset/{id_or_uuid}` |
+| Related charts/dashboards | `GET /api/v1/dataset/{id_or_uuid}/related_objects` |
+| Drill info | `GET /api/v1/dataset/{pk}/drill_info/` |
+| Related fields | `GET /api/v1/dataset/related/{column_name}` |
+
+Virtual dataset metadata can include SQL text. If the user asks to list or print SQL-bearing fields, summarize the expected exposure and get confirmation first.

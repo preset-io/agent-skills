@@ -4,7 +4,7 @@ Use this reference when a SQL Lab workflow reaches SQL execution or cost estimat
 
 SQL execution is high impact even when the SQL is read-only. It can expose customer data, run expensive warehouse work, or create side effects in engines that allow non-read statements.
 
-Use `preset-sql-execution` for SQL execution, result retrieval, result export, query stop, saved-query mutation, and SQL Lab permalink creation workflows. This reference remains as the SQL Lab endpoint map; the focused Phase 5 skill owns the approval template.
+Use `preset-sql-execution` for SQL execution, result retrieval, result export, query stop, saved-query mutation, and SQL Lab permalink creation workflows. This reference maps only SQL execution and formatting endpoints; adjacent result, export, query-control, saved-query, and permalink surfaces live in the focused SQL Lab references. The focused Phase 5 skill owns the approval template.
 
 ## SQL Execution Endpoints
 

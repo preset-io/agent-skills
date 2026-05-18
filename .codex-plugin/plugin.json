@@ -1,7 +1,7 @@
 {
   "name": "preset-agent-skills",
   "version": "0.1.0",
-  "description": "Preset API skills for authentication, workspace discovery, administration, Superset workspace APIs, and security-sensitive workflows.",
+  "description": "Preset API skills for authentication, workspace discovery, administration, Superset workspace APIs, Snowflake Cortex Agents, and security-sensitive workflows.",
   "author": {
     "name": "Preset",
     "url": "https://preset.io/"
@@ -21,13 +21,15 @@
     "embedding",
     "guest-tokens",
     "rls",
-    "security"
+    "security",
+    "snowflake",
+    "cortex"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Preset Agent Skills",
-    "shortDescription": "Authenticate with Preset, administer teams/workspaces, use Superset APIs, and handle sensitive workflows.",
-    "longDescription": "Markdown skills for agents using the public Preset Management API and workspace Superset APIs. Includes guarded authentication guidance, workspace discovery, admin workflows for memberships, invites, roles, audits, version-aware Superset OpenAPI discovery, dashboard/chart, dataset/database, SQL Lab, import/export, embedding, guest-token, RLS, database-connection, role/permission, and destructive-import guidance.",
+    "shortDescription": "Authenticate with Preset, administer teams/workspaces, use Superset APIs, Snowflake Cortex Agents, and sensitive workflows.",
+    "longDescription": "Markdown skills for agents using the public Preset Management API, workspace Superset APIs, and Snowflake Cortex Agent APIs. Includes guarded authentication guidance, workspace discovery, admin workflows for memberships, invites, roles, audits, version-aware Superset OpenAPI discovery, dashboard/chart, dataset/database, SQL Lab, import/export, embedding, guest-token, RLS, database-connection, role/permission, destructive-import, and Cortex Agent guidance.",
     "developerName": "Preset",
     "category": "Coding",
     "capabilities": [
@@ -42,7 +44,8 @@
       "List dashboards in a Preset workspace",
       "Inspect SQL Lab query history",
       "Review a Preset guest-token request",
-      "Review a Preset SQL execution request"
+      "Review a Preset SQL execution request",
+      "Run a Snowflake Cortex Agent safely"
     ],
     "brandColor": "#00A5B5"
   }

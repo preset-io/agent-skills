@@ -1,6 +1,6 @@
 # Preset Agent Skills
 
-Agent API guidance for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform. This repository packages skills for authenticating with Preset, discovering workspaces, administering teams/workspaces, and using version-aware Superset workspace APIs through public APIs.
+Agent API guidance for [Preset](https://preset.io), a managed, cloud-hosted Apache Superset platform, plus adjacent Snowflake Cortex Agent workflows. This repository packages skills for authenticating with Preset, discovering workspaces, administering teams/workspaces, using version-aware Superset workspace APIs, and safely routing Cortex Agent API work.
 
 ## Package Structure
 
@@ -21,6 +21,8 @@ skills/
   preset-database-connections/SKILL.md
   preset-roles-permissions/SKILL.md
   preset-destructive-imports/SKILL.md
+  preset-snowflake-cortex/SKILL.md
+  preset-cortex-agents/SKILL.md
 ```
 
 Each `SKILL.md` stays small and always-loaded; detailed API examples live in `references/` files the agent loads on demand, so the always-on context budget stays tight. References are context-loading boundaries after a domain skill has been selected. Phase 6 decomposes dense domain references by task and risk so agents load dashboard metadata, chart data, table samples, SQL results, imports, exports, or embedding changes only when the user request needs that surface. Phase 5 security-sensitive workflows remain separate skills because they need independent routing, explicit confirmation templates, and secret-handling guardrails loaded by construction.
@@ -55,8 +57,10 @@ Claude Code uses the plugin manifest for package metadata and `CLAUDE.md` plus t
 | [preset-database-connections](skills/preset-database-connections/SKILL.md) | Inspect or route database connection configuration, validation, OAuth, upload, and mutation workflows with credential-aware approval. |
 | [preset-roles-permissions](skills/preset-roles-permissions/SKILL.md) | Review and route role, workspace membership, permission, and access-control changes with explicit approval. |
 | [preset-destructive-imports](skills/preset-destructive-imports/SKILL.md) | Review and route destructive or overwrite-capable import workflows with explicit approval. |
+| [preset-snowflake-cortex](skills/preset-snowflake-cortex/SKILL.md) | Prepare Snowflake Cortex account, authentication, role, warehouse, and safety context before Cortex Agent workflows. |
+| [preset-cortex-agents](skills/preset-cortex-agents/SKILL.md) | List, describe, create, update, delete, and run Snowflake Cortex Agents through REST, SQL DDL, or SQL wrapper APIs with explicit approval. |
 
-Broader user groups, SCIM, unsupported DAR/permission APIs, API key CRUD, billing/payment, and other sensitive workflows still require separate review before they are documented here. The Phase 5 skills add explicit routing and loaded-by-construction guardrails for guest tokens, embedded RLS, SQL execution and saved-query workflows, database connections, role/permission changes, and destructive imports.
+Broader user groups, SCIM, unsupported DAR/permission APIs, API key CRUD, billing/payment, and other sensitive workflows still require separate review before they are documented here. The Phase 5 skills add explicit routing and loaded-by-construction guardrails for guest tokens, embedded RLS, SQL execution and saved-query workflows, database connections, role/permission changes, and destructive imports. The Cortex skills are Snowflake API/operator guidance and are not Preset embedded-chatbot runtime instructions.
 
 ## How Skills Compose
 
@@ -71,6 +75,8 @@ For any workspace task, agents walk a fixed dependency chain:
 For Management API admin work (teams, invites, roles, audits, workspace lifecycle), substitute `preset-admin` for steps 3–4.
 
 For Phase 5 operations, use the focused security-sensitive skill directly after the foundational setup: `preset-guest-tokens`, `preset-embedded-rls`, `preset-sql-execution`, `preset-database-connections`, `preset-roles-permissions`, or `preset-destructive-imports`. These skills exist so risky workflows load their confirmation templates and secret-handling rules by construction.
+
+For Snowflake Cortex Agent work, use `preset-snowflake-cortex` first to establish Snowflake account, authentication, role, warehouse, region/cross-region inference, and safety context. Then use `preset-cortex-agents` for Cortex Agent object discovery, object management through REST or SQL DDL, REST runs, streaming response handling, or the `SNOWFLAKE.CORTEX.DATA_AGENT_RUN` SQL wrapper. Cortex Agent execution is confirmation-gated because it can invoke tools, use warehouses, consume model budget, and expose governed Snowflake data.
 
 ## Quick Start
 
@@ -128,6 +134,7 @@ Use the returned hostname for workspace Superset API calls. Do not hard-code wor
 | Preset Management API v1 | `https://api.app.preset.io/v1/` |
 | Preset Management API v2 | `https://api.app.preset.io/v2/` |
 | Workspace Superset API | `https://{workspace_hostname}/api/v1/` |
+| Snowflake Cortex REST API | `https://<account_identifier>.snowflakecomputing.com/api/v2/` |
 
 Full Superset workspace API documentation is available at [superset.apache.org/developer-docs/api](https://superset.apache.org/developer-docs/api/). Treat the Preset Management API examples in this repo as Preset-specific guidance.
 
@@ -169,7 +176,7 @@ The live smoke script skips SQL text-bearing query and saved-query endpoints by 
 
 ## Safety Policy
 
-Agents should default to metadata reads. Some `GET` endpoints can expose customer data, SQL text, database connection configuration, or database structure, including chart data, table samples, SQL Lab results, query history, saved queries, distinct values, and exports. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, SQL result retrieval, chart data retrieval, table sample retrieval, query-history retrieval, saved-query retrieval, database connection configuration retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
+Agents should default to metadata reads. Some `GET` endpoints can expose customer data, SQL text, database connection configuration, or database structure, including chart data, table samples, SQL Lab results, query history, saved queries, distinct values, and exports. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, Cortex Agent execution, SQL result retrieval, chart data retrieval, table sample retrieval, query-history retrieval, saved-query retrieval, database connection configuration retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation. These Markdown skills call public APIs directly and do not automatically apply MCP runtime guardrails.
 
 ## License
 

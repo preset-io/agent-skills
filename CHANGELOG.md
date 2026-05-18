@@ -18,6 +18,7 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 - **preset-import-export** skill - Import/export endpoint inventory with disclosure and mutation gates.
 - **preset-embedding** skill - Embedded dashboard configuration reads and security-sensitive guest-token/trusted-domain deferrals.
 - Phase 5 security-sensitive skills for guest tokens, embedded RLS, SQL execution, database connections, role/permission changes, and destructive imports.
+- **preset-snowflake-cortex** and **preset-cortex-agents** skills - Snowflake Cortex account/auth context, Cortex Agent management, run workflows, SQL DDL and wrapper guidance, and confirmation-gated execution safety.
 
 ### Changed
 

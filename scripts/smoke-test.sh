@@ -47,6 +47,8 @@ required_skills=(
   preset-database-connections
   preset-roles-permissions
   preset-destructive-imports
+  preset-snowflake-cortex
+  preset-cortex-agents
 )
 
 for skill in "${required_skills[@]}"; do
@@ -68,6 +70,7 @@ require_jq '
   [.skills[].path] | sort == [
     "skills/preset-admin/SKILL.md",
     "skills/preset-api/SKILL.md",
+    "skills/preset-cortex-agents/SKILL.md",
     "skills/preset-dashboards/SKILL.md",
     "skills/preset-database-connections/SKILL.md",
     "skills/preset-datasets/SKILL.md",
@@ -77,6 +80,7 @@ require_jq '
     "skills/preset-guest-tokens/SKILL.md",
     "skills/preset-import-export/SKILL.md",
     "skills/preset-roles-permissions/SKILL.md",
+    "skills/preset-snowflake-cortex/SKILL.md",
     "skills/preset-sql-execution/SKILL.md",
     "skills/preset-sqllab/SKILL.md",
     "skills/preset-superset/SKILL.md",
@@ -199,6 +203,32 @@ require_grep "use \`preset-guest-tokens\`" skills/preset-embedding/references/gu
 require_grep "Use \`preset-destructive-imports\`" skills/preset-import-export/references/import-workflows.md
 require_grep "Use \`preset-database-connections\`" skills/preset-datasets/references/connection-configuration.md
 require_grep "route to the focused Phase 5 skill" skills/preset-superset/references/workspace-api-safety.md
+
+required_cortex_references=(
+  skills/preset-snowflake-cortex/references/authentication-and-context.md
+  skills/preset-snowflake-cortex/references/cortex-safety.md
+  skills/preset-cortex-agents/references/agent-runs.md
+  skills/preset-cortex-agents/references/agent-management.md
+  skills/preset-cortex-agents/references/sql-agent-ddl.md
+  skills/preset-cortex-agents/references/sql-wrapper.md
+)
+
+for file in "${required_cortex_references[@]}"; do
+  require_file "$file"
+done
+
+require_grep "SNOWFLAKE.CORTEX_USER" skills/preset-snowflake-cortex/references/authentication-and-context.md
+require_grep "SNOWFLAKE.CORTEX_AGENT_USER" skills/preset-snowflake-cortex/references/authentication-and-context.md
+require_grep "Wait for explicit confirmation" skills/preset-snowflake-cortex/references/cortex-safety.md
+require_grep "/api/v2/databases/{database}/schemas/{schema}/agents/{name}:run" skills/preset-cortex-agents/references/agent-runs.md
+require_grep "/api/v2/cortex/agent:run" skills/preset-cortex-agents/references/agent-runs.md
+require_grep "unknown event types" skills/preset-cortex-agents/references/agent-runs.md
+require_grep "DELETE /api/v2/databases/{database}/schemas/{schema}/agents/{name}" skills/preset-cortex-agents/references/agent-management.md
+require_grep "CREATE AGENT" skills/preset-cortex-agents/references/sql-agent-ddl.md
+require_grep "DROP AGENT" skills/preset-cortex-agents/references/sql-agent-ddl.md
+require_grep "CORTEX_ENABLED_CROSS_REGION" skills/preset-snowflake-cortex/references/authentication-and-context.md
+require_grep "SNOWFLAKE.CORTEX.DATA_AGENT_RUN" skills/preset-cortex-agents/references/sql-wrapper.md
+require_grep "not Preset chatbot runtime instructions" skills/preset-snowflake-cortex/SKILL.md
 
 required_admin_references=(
   skills/preset-admin/references/audit-logs.md

@@ -1,7 +1,7 @@
 {
   "name": "Preset Agent Skills",
   "version": "0.1.0",
-  "description": "AI agent skills for the Preset API: authenticate, discover workspaces, administer teams/workspaces, use Superset APIs, and handle sensitive workflows.",
+  "description": "AI agent skills for the Preset API, Superset workspace APIs, Snowflake Cortex Agents, and sensitive workflow guardrails.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/preset-agent-skills",
   "skills": [
@@ -44,6 +44,16 @@
       "name": "preset-destructive-imports",
       "path": "skills/preset-destructive-imports/SKILL.md",
       "description": "Review and route destructive or overwrite-capable import workflows with explicit approval."
+    },
+    {
+      "name": "preset-snowflake-cortex",
+      "path": "skills/preset-snowflake-cortex/SKILL.md",
+      "description": "Prepare Snowflake Cortex account, authentication, role, warehouse, and safety context."
+    },
+    {
+      "name": "preset-cortex-agents",
+      "path": "skills/preset-cortex-agents/SKILL.md",
+      "description": "List, describe, create, update, delete, and run Snowflake Cortex Agents with explicit approval."
     },
     {
       "name": "preset-embedded-rls",

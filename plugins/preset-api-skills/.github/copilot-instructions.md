@@ -1,6 +1,6 @@
 # Preset Agent Skills
 
-Use the skill files in this repository when helping with Preset API work:
+Use the skill files in this package when helping with direct Preset API work. If the user is working through Preset/Superset MCP tools, use the separate `preset-mcp-skills` package instead and do not switch to direct API calls unless the user explicitly approves changing surfaces.
 
 - `skills/preset-api/SKILL.md` for authentication, API conventions, pagination, Rison, and safety policy.
 - `skills/preset-workspaces/SKILL.md` for read-only team and workspace discovery, hostname resolution, and workspace membership listing.

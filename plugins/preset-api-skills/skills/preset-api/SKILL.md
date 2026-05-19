@@ -1,11 +1,11 @@
 ---
 name: preset-api
-description: Authenticate with the Preset Management API and prepare safe direct API access for Preset tasks. Use when a user needs Preset API credentials, JWT bearer token exchange, base URLs, pagination, Rison query parameters, rate limits, response handling, Superset OpenAPI routing, or the required API setup for any other preset-* skill.
+description: Authenticate with the Preset Management API and prepare safe direct API access for Preset tasks. Use when a user needs Preset API credentials, JWT bearer token exchange, base URLs, pagination, Rison query parameters, rate limits, response handling, Superset OpenAPI routing, or the required API setup for another direct API skill in this package.
 ---
 
 # preset-api
 
-Use this skill as the prerequisite for all other Preset API skills.
+Use this skill as the prerequisite for all other Preset API skills. These skills are for direct API workflows only. If the user is working through Preset/Superset MCP tools, stay on the MCP surface and use `preset-mcp-skills`; do not switch to direct API calls unless the user explicitly approves changing surfaces.
 
 ## Workflow
 

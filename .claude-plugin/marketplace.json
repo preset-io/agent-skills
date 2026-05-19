@@ -1,0 +1,33 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "preset-agent-skills",
+  "description": "Preset agent skill packages for direct API and MCP workflows.",
+  "owner": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "plugins": [
+    {
+      "name": "preset-api-skills",
+      "description": "Preset API skills for authentication, workspace discovery, administration, Superset workspace APIs, Snowflake Cortex Agents, and security-sensitive direct API workflows.",
+      "author": {
+        "name": "Preset",
+        "url": "https://preset.io/"
+      },
+      "category": "development",
+      "source": "./plugins/preset-api-skills",
+      "homepage": "https://github.com/preset-io/preset-agent-skills/tree/main/plugins/preset-api-skills"
+    },
+    {
+      "name": "preset-mcp-skills",
+      "description": "Preset/Superset MCP skills for deterministic tool discovery, safe MCP workflows, and MCP-only surface routing.",
+      "author": {
+        "name": "Preset",
+        "url": "https://preset.io/"
+      },
+      "category": "development",
+      "source": "./plugins/preset-mcp-skills",
+      "homepage": "https://github.com/preset-io/preset-agent-skills/tree/main/plugins/preset-mcp-skills"
+    }
+  ]
+}

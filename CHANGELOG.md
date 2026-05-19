@@ -10,6 +10,10 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ### Added
 
+- Split installable packages under `plugins/`: `preset-api-skills` for direct API workflows and `preset-mcp-skills` for MCP-only workflows.
+- Added a minimal **preset-mcp** skill with deterministic MCP discovery order and explicit surface-switch guardrails.
+- Added a placeholder `preset-cli-skills` directory for future CLI workflow skills.
+- Added Codex and Claude marketplace metadata for the installable API and MCP packages.
 - **preset-admin** skill - Team membership management, workspace lifecycle operations, invite lifecycle workflows, role identifier guidance, seat-limit preflights, audit log queries, and confirmation-gated audit downloads.
 - Management API v2 conventions and reusable client support for audit log endpoints.
 - **preset-superset** skill - Workspace Superset version/OpenAPI discovery, current-user permission checks, menu inspection, and workspace API safety classification.
@@ -22,7 +26,8 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ### Changed
 
-- Converted the seed API guidance into a skill-package layout under `skills/*/SKILL.md`.
+- Moved the existing API skills, client manifests, and API live smoke script into `plugins/preset-api-skills`.
+- Converted the seed API guidance into a skill-package layout under `plugins/preset-api-skills/skills/*/SKILL.md`.
 - Moved detailed API examples into on-demand `references/` files for each skill.
 - Added Codex and Claude plugin manifests alongside the existing Cursor manifest.
 - Added GitHub Copilot instructions and a local package smoke test.

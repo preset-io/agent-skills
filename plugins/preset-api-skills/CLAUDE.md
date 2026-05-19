@@ -1,6 +1,8 @@
 # Preset Agent Skills
 
-This repository contains installable Preset API skills for Claude Code and other agent clients.
+This package contains installable Preset API skills for Claude Code and other agent clients.
+
+Use these skills only for direct Preset Management API, Superset workspace API, and Snowflake Cortex API workflows. If the user is working through Preset/Superset MCP tools, use the separate `preset-mcp-skills` package instead. Do not switch from MCP tools to direct API calls unless the user explicitly approves changing surfaces.
 
 ## Skill Routing
 

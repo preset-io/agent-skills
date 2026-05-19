@@ -1,0 +1,43 @@
+{
+  "name": "preset-mcp-skills",
+  "version": "0.1.0",
+  "description": "Preset/Superset MCP skills for deterministic tool discovery, safe MCP workflows, and MCP-only surface routing.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/preset-agent-skills",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "superset",
+    "mcp",
+    "model-context-protocol",
+    "copilot",
+    "dashboards",
+    "charts",
+    "datasets",
+    "sqllab"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Preset MCP Skills",
+    "shortDescription": "Use Preset/Superset MCP tools through deterministic discovery and safety boundaries.",
+    "longDescription": "Markdown skills for agents using Preset/Superset Model Context Protocol tools. Includes MCP-only routing, deterministic discovery order, data-returning and mutating tool guardrails, and explicit approval before switching to direct API surfaces.",
+    "developerName": "Preset",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://preset.io/",
+    "defaultPrompt": [
+      "Use Superset MCP tools safely",
+      "Discover dashboards through MCP",
+      "Discover datasets through MCP",
+      "Create a chart through MCP",
+      "Run SQL through MCP with approval"
+    ],
+    "brandColor": "#00A5B5"
+  }
+}

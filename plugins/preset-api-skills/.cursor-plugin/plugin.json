@@ -1,7 +1,7 @@
 {
-  "name": "Preset Agent Skills",
+  "name": "Preset API Skills",
   "version": "0.1.0",
-  "description": "AI agent skills for the Preset API, Superset workspace APIs, Snowflake Cortex Agents, and sensitive workflow guardrails.",
+  "description": "AI agent skills for the Preset API, Superset workspace APIs, Snowflake Cortex Agents, and sensitive direct API workflow guardrails.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/preset-agent-skills",
   "skills": [

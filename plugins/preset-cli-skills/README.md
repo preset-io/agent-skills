@@ -10,3 +10,5 @@ It is intentionally not an installable plugin yet:
 - no `skills/` directory
 
 CLI skill design and packaging will be handled in a separate task or PR.
+
+This placeholder should only be promoted to an installable plugin after the CLI workflow boundaries, skill routing rules, and client manifests are designed together.

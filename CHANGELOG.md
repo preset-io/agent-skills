@@ -10,6 +10,7 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ### Added
 
+- Added a root `CLAUDE.md` that redirects direct Claude Code repository users to the appropriate plugin package.
 - Split installable packages under `plugins/`: `preset-api-skills` for direct API workflows and `preset-mcp-skills` for MCP-only workflows.
 - Added a minimal **preset-mcp** skill with deterministic MCP discovery order and explicit surface-switch guardrails.
 - Added a placeholder `preset-cli-skills` directory for future CLI workflow skills.
@@ -35,7 +36,7 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ### Removed
 
-- Removed legacy `api/skills/*.md` paths.
+- Removed legacy root `skills/*` paths and root client manifests from the installable package surface.
 
 ## [v0.1.0] - 2026-05-14
 

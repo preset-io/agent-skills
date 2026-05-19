@@ -68,6 +68,7 @@ required_api_skills=(
 )
 
 require_file README.md
+require_file CLAUDE.md
 require_file CHANGELOG.md
 require_file LICENSE
 require_file .agents/plugins/marketplace.json
@@ -90,6 +91,10 @@ require_grep ".claude-plugin/marketplace.json" README.md
 require_grep "not from the repository root" README.md
 require_grep "MCP intent wins" README.md
 require_grep "Do not use API skills as a fallback for MCP-only work" README.md
+require_grep "root is not itself an installable plugin" CLAUDE.md
+require_grep "plugins/preset-api-skills/CLAUDE.md" CLAUDE.md
+require_grep "plugins/preset-mcp-skills/CLAUDE.md" CLAUDE.md
+require_grep "MCP intent wins" CLAUDE.md
 
 require_jq '.name == "preset-agent-skills"' .agents/plugins/marketplace.json
 require_jq '.interface.displayName == "Preset Agent Skills"' .agents/plugins/marketplace.json
@@ -420,6 +425,7 @@ reject_grep "preset-api-skills" "$MCP_ROOT"
 
 require_file "$CLI_ROOT/README.md"
 require_grep "intentionally not an installable plugin yet" "$CLI_ROOT/README.md"
+require_grep "only be promoted to an installable plugin after the CLI workflow boundaries" "$CLI_ROOT/README.md"
 reject_file "$CLI_ROOT/.codex-plugin"
 reject_file "$CLI_ROOT/.claude-plugin"
 reject_file "$CLI_ROOT/.cursor-plugin"

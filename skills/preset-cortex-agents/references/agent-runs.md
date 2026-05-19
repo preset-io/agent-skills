@@ -21,9 +21,9 @@ Common request fields include:
 
 | Field | Notes |
 |---|---|
-| `thread_id` | Conversation thread ID. If used, also pass `parent_message_id`. |
-| `parent_message_id` | Parent message ID. Use `0` for the first message when needed. |
-| `messages` | Chronological user and assistant messages. |
+| `thread_id` | Existing conversation thread ID. If used, also pass `parent_message_id`; do not invent `0` as a thread ID. |
+| `parent_message_id` | Parent message ID. Use `0` only for the first message in an existing newly created thread. |
+| `messages` | Chronological user and assistant messages. For a first-turn non-threaded call, omit thread fields and include the complete history/current user message here. |
 | `stream` | Defaults to streaming. Set `false` for a single JSON response. |
 | `tool_choice` | Controls automatic, required, or named tool use. |
 

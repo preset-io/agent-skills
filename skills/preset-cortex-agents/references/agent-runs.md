@@ -5,6 +5,8 @@ Use this reference for Cortex Agent execution through REST.
 Official docs:
 
 - <https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-run>
+- <https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-threads>
+- <https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-threads-rest-api>
 
 ## Endpoints
 
@@ -12,6 +14,9 @@ Official docs:
 |---|---|
 | Run an existing agent object | `POST /api/v2/databases/{database}/schemas/{schema}/agents/{name}:run` |
 | Run an ad hoc agent | `POST /api/v2/cortex/agent:run` |
+| Create a thread for threaded runs | `POST /api/v2/cortex/threads` |
+| Describe a thread and message history | `GET /api/v2/cortex/threads/{id}` |
+| List threads for the current user | `GET /api/v2/cortex/threads` |
 
 Requests to the Cortex Agent REST API time out after 15 minutes.
 
@@ -30,11 +35,29 @@ Common request fields include:
 Ad hoc runs can also include model, instruction, orchestration, tool, and
 tool-resource configuration in the request body.
 
+## Threaded REST Runs
+
+For a threaded REST conversation, create a thread first with
+`POST /api/v2/cortex/threads`, then pass the returned `thread_id` to
+`agent:run`.
+
+- Starting a newly created thread: pass the returned `thread_id`,
+  `parent_message_id: 0`, and exactly one user message.
+- Continuing a thread: use the assistant `message_id` from a prior streamed
+  `metadata` event, or from `GET /api/v2/cortex/threads/{id}`, as the next
+  `parent_message_id`.
+- Non-threaded first turns should omit `thread_id` and `parent_message_id` and
+  send the conversation history/current user message in `messages`.
+- Do not copy examples that use `thread_id: 0` as a placeholder. Use only a
+  real thread ID returned by Snowflake.
+
 ## Streaming Handling
 
 Use `Accept: text/event-stream` for streaming responses or `Accept:
-application/json` for non-streaming responses. The final streamed `response`
-event contains the aggregated agent output. Clients should tolerate unknown event types.
+application/json` with `stream: false` for non-streaming responses. The final
+streamed `response` event contains the aggregated agent output. Clients should
+tolerate unknown event types. Track `metadata` events because assistant
+`message_id` values are needed for follow-up threaded requests.
 
 ## SQL Execution Blocks
 

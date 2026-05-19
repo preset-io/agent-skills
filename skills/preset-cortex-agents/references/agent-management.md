@@ -16,12 +16,21 @@ Official docs:
 | Update agent | `PUT /api/v2/databases/{database}/schemas/{schema}/agents/{name}` |
 | Delete agent | `DELETE /api/v2/databases/{database}/schemas/{schema}/agents/{name}` |
 
+Useful query parameters:
+
+| Endpoint | Parameters |
+|---|---|
+| List agents | `like`, `fromName`, `showLimit` |
+| Create agent | `createMode`: `errorIfExists`, `orReplace`, or `ifNotExists` |
+| Delete agent | `ifExists`: `true` or `false` |
+
 ## Read-Only Discovery
 
 For list and describe, summarize the account, role, database, schema, and agent
-name. Keep returned specifications narrow; agent specs can reveal tool names,
-semantic model references, warehouses, instructions, search filters, and
-function identifiers.
+name. For list pagination, preserve Snowflake `Link` response headers when a
+follow-up page is needed. Keep returned specifications narrow; agent specs can
+reveal tool names, semantic model references, warehouses, instructions, search
+filters, and function identifiers.
 
 ## Mutations
 

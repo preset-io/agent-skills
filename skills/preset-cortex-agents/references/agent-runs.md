@@ -17,6 +17,8 @@ Official docs:
 | Create a thread for threaded runs | `POST /api/v2/cortex/threads` |
 | Describe a thread and message history | `GET /api/v2/cortex/threads/{id}` |
 | List threads for the current user | `GET /api/v2/cortex/threads` |
+| Rename a thread | `POST /api/v2/cortex/threads/{id}` |
+| Delete a thread | `DELETE /api/v2/cortex/threads/{id}` |
 
 Requests to the Cortex Agent REST API time out after 15 minutes.
 
@@ -46,6 +48,9 @@ For a threaded REST conversation, create a thread first with
 - Continuing a thread: use the assistant `message_id` from a prior streamed
   `metadata` event, or from `GET /api/v2/cortex/threads/{id}`, as the next
   `parent_message_id`.
+- The `parent_message_id` for follow-up requests must be an assistant message
+  ID, not a user message ID. If assistant metadata is missing after a failed
+  turn, continue from the last successful assistant message ID.
 - Non-threaded first turns should omit `thread_id` and `parent_message_id` and
   send the conversation history/current user message in `messages`.
 - Do not copy examples that use `thread_id: 0` as a placeholder. Use only a

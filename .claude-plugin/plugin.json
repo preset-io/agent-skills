@@ -1,7 +1,7 @@
 {
   "name": "preset-agent-skills",
   "version": "0.1.0",
-  "description": "Preset API skills for authentication, workspace discovery, administration, Superset workspace APIs, and security-sensitive workflows.",
+  "description": "Preset API skills for authentication, workspace discovery, administration, Superset workspace APIs, Snowflake Cortex Agents, and security-sensitive workflows.",
   "author": {
     "name": "Preset",
     "url": "https://preset.io/"
@@ -21,6 +21,8 @@
     "embedding",
     "guest-tokens",
     "rls",
-    "security"
+    "security",
+    "snowflake",
+    "cortex"
   ]
 }

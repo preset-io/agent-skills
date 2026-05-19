@@ -21,6 +21,8 @@ Use the `skills/*/SKILL.md` files as the canonical instructions:
 - `skills/preset-database-connections/SKILL.md` - inspect or route database connection configuration and mutations with credential-aware approval.
 - `skills/preset-roles-permissions/SKILL.md` - review and route role, workspace membership, permission, and access-control changes.
 - `skills/preset-destructive-imports/SKILL.md` - review and route destructive or overwrite-capable import workflows.
+- `skills/preset-snowflake-cortex/SKILL.md` - prepare Snowflake Cortex account/auth/role context and route Cortex Agent workflows.
+- `skills/preset-cortex-agents/SKILL.md` - list, describe, create, update, delete, and run Snowflake Cortex Agents with guarded execution.
 
 Detailed examples live in each skill's `references/` directory. Load only the reference files needed for the user's task. Broad `SKILL.md` files are routing and discovery boundaries; focused references are task/risk context-loading boundaries.
 
@@ -33,6 +35,6 @@ Detailed examples live in each skill's `references/` directory. Load only the re
 
 ## Safety Policy
 
-Default to metadata reads. Some `GET` endpoints can expose customer data, SQL text, database connection configuration, or database structure, including chart data, table samples, SQL Lab results, query history, saved queries, distinct values, and exports. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, SQL result retrieval, chart data retrieval, table sample retrieval, query-history retrieval, saved-query retrieval, database connection configuration retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation.
+Default to metadata reads. Some `GET` endpoints can expose customer data, SQL text, database connection configuration, or database structure, including chart data, table samples, SQL Lab results, query history, saved queries, distinct values, and exports. Before any `POST`, `PUT`, `PATCH`, `DELETE`, import, export, audit download, SQL execution, Cortex Agent execution, SQL result retrieval, chart data retrieval, table sample retrieval, query-history retrieval, saved-query retrieval, database connection configuration retrieval, distinct-value retrieval, role/RLS change, database connection change, dataset mutation, dashboard mutation, workspace lifecycle action, invite action, member removal, guest-token creation, cache invalidation, query stop, or task cancellation, summarize the exact target, payload, and expected effect, then get explicit user confirmation.
 
 Do not expose credentials, client secrets, bearer tokens, database passwords, SQLAlchemy URIs, access tokens, refresh tokens, or signed guest tokens.

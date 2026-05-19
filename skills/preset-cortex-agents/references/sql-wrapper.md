@@ -11,6 +11,23 @@ Official docs:
 Run API. Snowflake recommends the streaming REST API for most application
 integrations. The SQL function returns a non-streaming JSON string.
 
+## Session Requirements
+
+Run the wrapper in a Snowflake session with `AUTOCOMMIT=TRUE`. Cortex Agent
+tools that execute generated SQL use Snowflake's SQL API internally, and that
+API rejects sessions where autocommit is false. In SQLAlchemy or application
+frameworks that wrap statements in transactions, check the session parameter
+before blaming the semantic view or generated SQL.
+
+```sql
+SHOW PARAMETERS LIKE 'AUTOCOMMIT' IN SESSION;
+```
+
+If the wrapper response contains a `system_execute_sql` error like HTTP 400,
+or error code `391913` with `AUTOCOMMIT is expected to be true`, rerun from an
+autocommit Snowflake connector/session or configure the caller to avoid a
+transaction around `DATA_AGENT_RUN`.
+
 ## First-Turn Pattern
 
 For a one-off or first-turn SQL wrapper call, do not invent a `thread_id`.

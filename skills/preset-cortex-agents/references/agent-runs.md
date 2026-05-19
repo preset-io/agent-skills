@@ -36,5 +36,15 @@ Use `Accept: text/event-stream` for streaming responses or `Accept:
 application/json` for non-streaming responses. The final streamed `response`
 event contains the aggregated agent output. Clients should tolerate unknown event types.
 
+## SQL Execution Blocks
+
+Cortex Agents that use Cortex Analyst semantic views may return
+`system_execute_sql` tool blocks. A successful block includes a generated SQL
+statement, query ID, result set, and final SQL. If the block fails with HTTP 400
+from Snowflake SQL API while the generated SQL runs manually, check the caller's
+session settings first. SQL-backed agent execution requires an autocommit
+Snowflake session; application sessions with `AUTOCOMMIT=FALSE` can cause
+`AUTOCOMMIT is expected to be true` errors.
+
 Before running, confirm the query, tools, warehouse-backed resources, budget,
 streaming mode, and output destination.

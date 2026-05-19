@@ -5,8 +5,8 @@ description: Prepare safe Snowflake Cortex API access for Cortex Agent workflows
 
 # preset-snowflake-cortex
 
-Use this skill as the Snowflake Cortex routing and safety boundary. These skills
-are for API/operator workflows and are not Preset chatbot runtime instructions.
+Use this skill as the Snowflake Cortex routing and safety boundary. This skill
+is for API/operator workflows and is not Preset chatbot runtime instructions.
 
 ## Workflow
 

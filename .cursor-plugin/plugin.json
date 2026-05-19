@@ -46,16 +46,6 @@
       "description": "Review and route destructive or overwrite-capable import workflows with explicit approval."
     },
     {
-      "name": "preset-snowflake-cortex",
-      "path": "skills/preset-snowflake-cortex/SKILL.md",
-      "description": "Prepare Snowflake Cortex account, authentication, role, warehouse, and safety context."
-    },
-    {
-      "name": "preset-cortex-agents",
-      "path": "skills/preset-cortex-agents/SKILL.md",
-      "description": "List, describe, create, update, delete, and run Snowflake Cortex Agents with explicit approval."
-    },
-    {
       "name": "preset-embedded-rls",
       "path": "skills/preset-embedded-rls/SKILL.md",
       "description": "Review row-level security clauses for embedded analytics and guest-token workflows."
@@ -89,6 +79,16 @@
       "name": "preset-sql-execution",
       "path": "skills/preset-sql-execution/SKILL.md",
       "description": "Run or route SQL Lab execution, result retrieval, exports, query stop, saved-query mutations, and SQL Lab permalink creation with explicit approval."
+    },
+    {
+      "name": "preset-snowflake-cortex",
+      "path": "skills/preset-snowflake-cortex/SKILL.md",
+      "description": "Prepare Snowflake Cortex account, authentication, role, warehouse, and safety context."
+    },
+    {
+      "name": "preset-cortex-agents",
+      "path": "skills/preset-cortex-agents/SKILL.md",
+      "description": "List, describe, create, update, delete, and run Snowflake Cortex Agents with explicit approval."
     }
   ]
 }

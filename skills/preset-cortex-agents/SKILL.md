@@ -22,5 +22,5 @@ Use this skill for Snowflake Cortex Agent object and run workflows.
 - Prefer read-only list/describe calls before mutations.
 - Do not run agents without explicit confirmation of the query, role, tools, budget, and output handling.
 - Do not create, update, replace, or delete agent objects without a rollback plan.
-- Do not assume old `agent:run` schemas are current; Snowflake changed the request and response schemas before September 1, 2025.
+- Do not assume old `agent:run` schemas are current; Snowflake updated the request and response schemas in 2025, so do not rely on pre-2025 documentation or examples.
 - Treat streamed events as potentially sensitive. Store only redacted summaries unless the user approves raw output handling.

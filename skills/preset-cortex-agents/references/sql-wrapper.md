@@ -57,7 +57,8 @@ SELECT TRY_PARSE_JSON(
 
 When using a persisted thread, create the thread first, pass the returned
 `thread_id`, and use `parent_message_id: 0` only for the first message in that
-existing thread.
+existing thread. Snowflake currently documents `thread_id` as an integer; pass
+the value exactly as returned by Snowflake.
 
 ```sql
 SELECT TRY_PARSE_JSON(

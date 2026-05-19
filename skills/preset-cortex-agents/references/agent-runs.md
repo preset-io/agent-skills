@@ -20,6 +20,10 @@ Official docs:
 | Rename a thread | `POST /api/v2/cortex/threads/{id}` |
 | Delete a thread | `DELETE /api/v2/cortex/threads/{id}` |
 
+Snowflake documents thread rename as an update operation that uses `POST
+/api/v2/cortex/threads/{id}` with a `thread_name` request body. Do not change it
+to `PATCH` unless Snowflake updates the Threads API docs.
+
 Requests to the Cortex Agent REST API time out after 15 minutes.
 
 ## Request Shape

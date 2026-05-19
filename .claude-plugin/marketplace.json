@@ -1,0 +1,33 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "preset-agent-skills",
+  "description": "Preset agent skill packages split by surface: direct API workflows and MCP-only tool workflows.",
+  "owner": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "plugins": [
+    {
+      "name": "preset-api-skills",
+      "description": "Preset API skills for explicit direct API workflows only. Do not use for MCP-only work; install preset-mcp-skills for MCP tool workflows.",
+      "author": {
+        "name": "Preset",
+        "url": "https://preset.io/"
+      },
+      "category": "development",
+      "source": "./plugins/preset-api-skills",
+      "homepage": "https://github.com/preset-io/preset-agent-skills/tree/main/plugins/preset-api-skills"
+    },
+    {
+      "name": "preset-mcp-skills",
+      "description": "Preset/Superset MCP skills for deterministic MCP tool discovery, safe MCP workflows, and MCP-only surface routing. Ask before switching to direct API.",
+      "author": {
+        "name": "Preset",
+        "url": "https://preset.io/"
+      },
+      "category": "development",
+      "source": "./plugins/preset-mcp-skills",
+      "homepage": "https://github.com/preset-io/preset-agent-skills/tree/main/plugins/preset-mcp-skills"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "preset-api-skills",
+  "version": "0.1.0",
+  "description": "Preset API skills for explicit direct API workflows only. Do not use for MCP-only work; use preset-mcp-skills when the user asks for MCP tools or MCP clients.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/preset-agent-skills",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "superset",
+    "api",
+    "admin",
+    "dashboards",
+    "datasets",
+    "sqllab",
+    "import-export",
+    "embedding",
+    "guest-tokens",
+    "rls",
+    "security",
+    "snowflake",
+    "cortex"
+  ]
+}

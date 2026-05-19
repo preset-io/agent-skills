@@ -1,0 +1,94 @@
+{
+  "name": "Preset API Skills",
+  "version": "0.1.0",
+  "description": "AI agent skills for explicit direct API workflows only. Do not use for MCP-only work; use preset-mcp-skills for MCP tools or MCP clients.",
+  "publisher": "preset-io",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "skills": [
+    {
+      "name": "preset-api",
+      "path": "skills/preset-api/SKILL.md",
+      "description": "Authenticate with the Preset Management API for direct API workflows. Required by the other direct API skills. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-workspaces",
+      "path": "skills/preset-workspaces/SKILL.md",
+      "description": "List Preset teams and workspaces through direct API calls. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-admin",
+      "path": "skills/preset-admin/SKILL.md",
+      "description": "Manage Preset team memberships, workspace lifecycle, invites, role identifiers, and audit logs through direct API calls. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-superset",
+      "path": "skills/preset-superset/SKILL.md",
+      "description": "Discover workspace Superset version, OpenAPI, permissions, menu capabilities, and direct API safety classification. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-dashboards",
+      "path": "skills/preset-dashboards/SKILL.md",
+      "description": "Inspect dashboards, charts, tabs, screenshots, thumbnails, and chart data through direct Superset API calls. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-datasets",
+      "path": "skills/preset-datasets/SKILL.md",
+      "description": "Inspect databases, schemas, tables, datasets, columns, metrics, and table metadata through direct Superset API calls. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-database-connections",
+      "path": "skills/preset-database-connections/SKILL.md",
+      "description": "Inspect or route database connection workflows through direct Superset API calls with credential-aware approval. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-destructive-imports",
+      "path": "skills/preset-destructive-imports/SKILL.md",
+      "description": "Review and route destructive or overwrite-capable direct API import workflows with explicit approval. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-embedded-rls",
+      "path": "skills/preset-embedded-rls/SKILL.md",
+      "description": "Review row-level security clauses for direct API embedded analytics and guest-token workflows. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-sqllab",
+      "path": "skills/preset-sqllab/SKILL.md",
+      "description": "Inspect SQL Lab bootstrap, query history, saved queries, and SQL execution through direct Superset API calls. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-import-export",
+      "path": "skills/preset-import-export/SKILL.md",
+      "description": "Route direct Superset API import/export workflows with disclosure and mutation gates. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-embedding",
+      "path": "skills/preset-embedding/SKILL.md",
+      "description": "Inspect embedded dashboard configuration and route guest-token/trusted-domain direct API workflows. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-guest-tokens",
+      "path": "skills/preset-guest-tokens/SKILL.md",
+      "description": "Create and route embedded dashboard guest-token workflows through direct Superset API calls. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-roles-permissions",
+      "path": "skills/preset-roles-permissions/SKILL.md",
+      "description": "Review and route role, workspace membership, permission, and access-control changes through direct API calls. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-sql-execution",
+      "path": "skills/preset-sql-execution/SKILL.md",
+      "description": "Run or route SQL Lab execution, result retrieval, exports, query stop, saved-query mutations, and permalinks through direct Superset API calls. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-snowflake-cortex",
+      "path": "skills/preset-snowflake-cortex/SKILL.md",
+      "description": "Prepare Snowflake Cortex direct API account, authentication, role, warehouse, and safety context. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-cortex-agents",
+      "path": "skills/preset-cortex-agents/SKILL.md",
+      "description": "List, describe, create, update, delete, and run Snowflake Cortex Agents through direct API/SQL workflows. Do not use for MCP-only work."
+    }
+  ]
+}

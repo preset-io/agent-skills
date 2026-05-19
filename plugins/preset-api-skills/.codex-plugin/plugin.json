@@ -1,0 +1,52 @@
+{
+  "name": "preset-api-skills",
+  "version": "0.1.0",
+  "description": "Preset API skills for explicit direct API workflows only. Do not use for MCP-only work; use preset-mcp-skills when the user asks for MCP tools or MCP clients.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/preset-agent-skills",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "superset",
+    "api",
+    "admin",
+    "dashboards",
+    "datasets",
+    "sqllab",
+    "import-export",
+    "embedding",
+    "guest-tokens",
+    "rls",
+    "security",
+    "snowflake",
+    "cortex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Preset API Skills",
+    "shortDescription": "Direct API-only Preset skills. Use preset-mcp-skills instead for MCP-only work.",
+    "longDescription": "Markdown skills for agents using the public Preset Management API, workspace Superset APIs, and Snowflake Cortex Agent APIs. Use only when the user explicitly asks for direct API access, API credentials, REST endpoints, curl/Python requests, Superset workspace API inspection, or Snowflake Cortex API/operator workflows. Do not use for MCP-only work or as a fallback from MCP tools; MCP tool workflows are intentionally handled by the separate preset-mcp-skills package.",
+    "developerName": "Preset",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://preset.io/",
+    "defaultPrompt": [
+      "Authenticate with the Preset API",
+      "Find my Preset workspace hostname",
+      "Check my workspace Superset OpenAPI",
+      "List audit logs for my Preset team",
+      "List dashboards in a Preset workspace",
+      "Inspect SQL Lab query history",
+      "Review a Preset guest-token request",
+      "Review a Preset SQL execution request",
+      "Run a Snowflake Cortex Agent safely"
+    ],
+    "brandColor": "#00A5B5"
+  }
+}

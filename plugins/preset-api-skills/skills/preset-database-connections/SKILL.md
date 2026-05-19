@@ -1,6 +1,6 @@
 ---
 name: preset-database-connections
-description: Inspect or route Preset workspace database connection configuration, validation, OAuth, upload, and mutation workflows with credential-aware approval. Use when a user asks for database connection details, SQLAlchemy URIs, engine parameters, SSH tunnel settings, connection tests, OAuth, or database create/update/delete.
+description: Inspect or route Preset workspace database connection configuration, validation, OAuth, upload, and mutation workflows through direct Superset API calls with credential-aware approval. Use only for direct API workflows when a user asks for database connection details, SQLAlchemy URIs, engine parameters, SSH tunnel settings, connection tests, OAuth, or database create/update/delete. Do not use for MCP-only work.
 ---
 
 # preset-database-connections

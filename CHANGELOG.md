@@ -14,6 +14,7 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 - Added a minimal **preset-mcp** skill with deterministic MCP discovery order and explicit surface-switch guardrails.
 - Added a placeholder `preset-cli-skills` directory for future CLI workflow skills.
 - Added Codex and Claude marketplace metadata for the installable API and MCP packages.
+- Hardened plugin and skill routing metadata so MCP-intent tasks prefer `preset-mcp-skills` even when both API and MCP plugins are installed.
 - **preset-admin** skill - Team membership management, workspace lifecycle operations, invite lifecycle workflows, role identifier guidance, seat-limit preflights, audit log queries, and confirmation-gated audit downloads.
 - Management API v2 conventions and reusable client support for audit log endpoints.
 - **preset-superset** skill - Workspace Superset version/OpenAPI discovery, current-user permission checks, menu inspection, and workspace API safety classification.

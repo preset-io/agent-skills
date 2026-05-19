@@ -15,6 +15,7 @@ Codex package discovery metadata lives in [`.agents/plugins/marketplace.json`](.
 ## Surface Boundaries
 
 - Install or load a package from its package directory under `plugins/`, not from the repository root.
+- If both installable plugins are present, route by the user's requested surface, not by resource type. MCP intent wins and uses `preset-mcp-skills`; explicit direct API intent uses `preset-api-skills`.
 - Use `preset-api-skills` when the user asks for direct API calls, API credentials, workspace API inspection, or Snowflake Cortex API/operator workflows.
 - Use `preset-mcp-skills` when the user asks to use Preset/Superset MCP, MCP tools, MCP clients, Copilot/MCP behavior, or deterministic MCP discovery flows.
 - Do not use API skills as a fallback for MCP-only work. If MCP lacks the needed capability, stop and ask whether to switch to the API surface.

@@ -1,6 +1,6 @@
 ---
 name: preset-admin
-description: Manage Preset teams, workspaces, memberships, invites, role identifiers, and audit logs through the Preset Management API with confirmation-gated mutations. Use when a user needs team membership changes, workspace lifecycle operations, invite lifecycle management, role lookup, seat-limit checks, or audit log queries/downloads.
+description: Manage Preset teams, workspaces, memberships, invites, role identifiers, and audit logs through direct Preset Management API calls with confirmation-gated mutations. Use only for direct API workflows when a user needs team membership changes, workspace lifecycle operations, invite lifecycle management, role lookup, seat-limit checks, or audit log queries/downloads. Do not use for MCP-only work.
 ---
 
 # preset-admin

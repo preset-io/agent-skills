@@ -1,6 +1,6 @@
 ---
 name: preset-destructive-imports
-description: Review and route destructive or overwrite-capable Preset import workflows with explicit approval. Use when a user asks to import assets with overwrite, sparse update, database passwords, replacement bundles, destructive changes, or all-assets restore workflows.
+description: Review and route destructive or overwrite-capable Preset import workflows through direct Superset API calls with explicit approval. Use only for direct API workflows when a user asks to import assets with overwrite, sparse update, database passwords, replacement bundles, destructive changes, or all-assets restore workflows. Do not use for MCP-only work.
 ---
 
 # preset-destructive-imports

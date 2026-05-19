@@ -1,6 +1,6 @@
 ---
 name: preset-cortex-agents
-description: Use Snowflake Cortex Agent REST and SQL APIs. Use when a user asks to list, describe, create, update, delete, or run Cortex Agent objects; call ad hoc agent:run; handle streaming Cortex Agent responses; or use the SNOWFLAKE.CORTEX.DATA_AGENT_RUN SQL wrapper.
+description: Use Snowflake Cortex Agent REST and SQL APIs through direct API/operator workflows. Use only for direct API workflows when a user asks to list, describe, create, update, delete, or run Cortex Agent objects; call ad hoc agent:run; handle streaming Cortex Agent responses; or use the SNOWFLAKE.CORTEX.DATA_AGENT_RUN SQL wrapper. Do not use for MCP-only work.
 ---
 
 # preset-cortex-agents

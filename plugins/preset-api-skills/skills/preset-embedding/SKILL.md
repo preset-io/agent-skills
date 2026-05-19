@@ -1,6 +1,6 @@
 ---
 name: preset-embedding
-description: Inspect embedded dashboard configuration in a Preset workspace through Superset API calls. Use when a user needs embedded dashboard read paths, feature-flag behavior, allowed domain inspection, or guest-token routing after resolving a workspace hostname.
+description: Inspect embedded dashboard configuration in a Preset workspace through direct Superset API calls. Use only for direct API workflows when a user needs embedded dashboard read paths, feature-flag behavior, allowed domain inspection, or guest-token routing after resolving a workspace hostname. Do not use for MCP-only work.
 ---
 
 # preset-embedding

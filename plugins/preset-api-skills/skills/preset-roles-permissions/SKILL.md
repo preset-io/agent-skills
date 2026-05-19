@@ -1,6 +1,6 @@
 ---
 name: preset-roles-permissions
-description: Review and route Preset role, workspace membership, permission, and access-control changes with explicit approval. Use when a user asks to change team roles, workspace roles, role identifiers, permission grants, DAR/RLS-adjacent access, or effective access.
+description: Review and route Preset role, workspace membership, permission, and access-control changes through direct API calls with explicit approval. Use only for direct API workflows when a user asks to change team roles, workspace roles, role identifiers, permission grants, DAR/RLS-adjacent access, or effective access. Do not use for MCP-only work.
 ---
 
 # preset-roles-permissions

@@ -8,6 +8,8 @@ Use `skills/preset-mcp/SKILL.md` when the user is working through a Preset or Su
 
 Stay on the MCP tool surface. Do not load direct Preset API, Superset REST API, Snowflake Cortex API, or CLI skills as a fallback. If MCP tools do not provide the needed capability, stop and ask whether the user wants to switch surfaces before using direct API guidance.
 
+If both API and MCP plugins are installed, MCP intent wins over resource type. A dashboard, chart, dataset, or SQL Lab request should still use MCP guidance when the user asked for MCP.
+
 ## Client Entry Points
 
 - OpenAI Codex: `.codex-plugin/plugin.json` plus this `AGENTS.md`.

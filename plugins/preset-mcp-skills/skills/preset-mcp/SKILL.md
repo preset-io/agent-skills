@@ -1,6 +1,6 @@
 ---
 name: preset-mcp
-description: Use Preset/Superset MCP tools deterministically. Use when a user asks to work through a Preset or Superset MCP server, MCP tools, MCP clients, Copilot/MCP behavior, or MCP-based dashboard, chart, dataset, SQL Lab, or discovery workflows.
+description: Use Preset/Superset MCP tools deterministically. Use when a user asks to work through a Preset or Superset MCP server, MCP tools, MCP clients, Copilot/MCP behavior, or MCP-based dashboard, chart, dataset, SQL Lab, or discovery workflows. If both API and MCP plugins are installed, MCP intent wins; ask before switching to direct API.
 ---
 
 # preset-mcp

@@ -1,6 +1,13 @@
 # Preset Agent Skills
 
-Use the skill files in this package when helping with direct Preset API work. If the user is working through Preset/Superset MCP tools, use the separate `preset-mcp-skills` package instead and do not switch to direct API calls unless the user explicitly approves changing surfaces.
+Use the skill files in this package when helping with explicit direct Preset API work. If the user is working through Preset/Superset MCP tools, use the separate `preset-mcp-skills` package instead and do not switch to direct API calls unless the user explicitly approves changing surfaces.
+
+Surface selection:
+
+- If the user mentions MCP, MCP tools, MCP clients, Superset MCP, Preset MCP, or Copilot/MCP behavior, do not use this package. Route to `preset-mcp-skills`.
+- If both API and MCP plugins are installed, MCP intent wins over resource type. A dashboard, chart, dataset, or SQL Lab request should still use MCP guidance when the user asked for MCP.
+- Use this package only when the user asks for direct API calls, API credentials, REST endpoints, curl/Python requests, Superset workspace API inspection, or Snowflake Cortex API/operator workflows.
+- If an MCP workflow lacks the needed capability, stop and ask whether to switch to direct API. Do not silently escalate.
 
 - `skills/preset-api/SKILL.md` for authentication, API conventions, pagination, Rison, and safety policy.
 - `skills/preset-workspaces/SKILL.md` for read-only team and workspace discovery, hostname resolution, and workspace membership listing.

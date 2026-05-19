@@ -1,6 +1,6 @@
 ---
 name: preset-sqllab
-description: Inspect SQL Lab and query-history metadata in a Preset workspace through Superset API calls. Use when a user needs SQL Lab bootstrap data, query history, saved query metadata, SQL Lab permalink routing, or SQL execution safety guidance after resolving a workspace hostname.
+description: Inspect SQL Lab and query-history metadata in a Preset workspace through direct Superset API calls. Use only for direct API workflows when a user needs SQL Lab bootstrap data, query history, saved query metadata, SQL Lab permalink routing, or SQL execution safety guidance after resolving a workspace hostname. Do not use for MCP-only work.
 ---
 
 # preset-sqllab

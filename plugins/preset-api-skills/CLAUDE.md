@@ -2,7 +2,14 @@
 
 This package contains installable Preset API skills for Claude Code and other agent clients.
 
-Use these skills only for direct Preset Management API, Superset workspace API, and Snowflake Cortex API workflows. If the user is working through Preset/Superset MCP tools, use the separate `preset-mcp-skills` package instead. Do not switch from MCP tools to direct API calls unless the user explicitly approves changing surfaces.
+Use these skills only for explicit direct Preset Management API, Superset workspace API, and Snowflake Cortex API workflows. If the user is working through Preset/Superset MCP tools, use the separate `preset-mcp-skills` package instead. Do not switch from MCP tools to direct API calls unless the user explicitly approves changing surfaces.
+
+## Surface Selection
+
+- If the user mentions MCP, MCP tools, MCP clients, Superset MCP, Preset MCP, or Copilot/MCP behavior, do not use this package. Route to `preset-mcp-skills`.
+- If both API and MCP plugins are installed, MCP intent wins over resource type. A dashboard, chart, dataset, or SQL Lab request should still use MCP guidance when the user asked for MCP.
+- Use this package only when the user asks for direct API calls, API credentials, REST endpoints, curl/Python requests, Superset workspace API inspection, or Snowflake Cortex API/operator workflows.
+- If an MCP workflow lacks the needed capability, stop and ask whether to switch to direct API. Do not silently escalate.
 
 ## Skill Routing
 

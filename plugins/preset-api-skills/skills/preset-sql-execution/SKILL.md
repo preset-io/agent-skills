@@ -1,6 +1,6 @@
 ---
 name: preset-sql-execution
-description: Run or route SQL Lab execution, result retrieval, exports, query stop operations, saved-query mutations, and SQL Lab permalink creation in a Preset workspace with explicit approval. Use when a user asks to execute SQL, fetch SQL results, export query results, estimate SQL cost, format SQL, stop a running query, create/update/delete/import saved queries, or create SQL Lab permalinks.
+description: Run or route SQL Lab execution, result retrieval, exports, query stop operations, saved-query mutations, and SQL Lab permalink creation in a Preset workspace through direct Superset API calls with explicit approval. Use only for direct API workflows when a user asks to execute SQL, fetch SQL results, export query results, estimate SQL cost, format SQL, stop a running query, create/update/delete/import saved queries, or create SQL Lab permalinks. Do not use for MCP-only work.
 ---
 
 # preset-sql-execution

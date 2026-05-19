@@ -1,6 +1,6 @@
 ---
 name: preset-datasets
-description: Inspect datasets, database metadata, table metadata, datasource values, and database/dataset operation routing in a Preset workspace through Superset API calls after resolving a workspace hostname.
+description: Inspect datasets, database metadata, table metadata, datasource values, and database/dataset operation routing in a Preset workspace through direct Superset API calls after resolving a workspace hostname. Use only for direct API workflows. Do not use for MCP-only work.
 ---
 
 # preset-datasets

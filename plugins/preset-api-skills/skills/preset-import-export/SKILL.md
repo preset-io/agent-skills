@@ -1,6 +1,6 @@
 ---
 name: preset-import-export
-description: Inspect and route Superset workspace import/export workflows in Preset. Use when a user needs asset export/import endpoint guidance for dashboards, charts, datasets, databases, saved queries, themes, or all-assets bundles after resolving a workspace hostname.
+description: Inspect and route direct Superset workspace import/export API workflows in Preset. Use only for direct API workflows when a user needs asset export/import endpoint guidance for dashboards, charts, datasets, databases, saved queries, themes, or all-assets bundles after resolving a workspace hostname. Do not use for MCP-only work.
 ---
 
 # preset-import-export

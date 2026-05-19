@@ -1,6 +1,6 @@
 ---
 name: preset-guest-tokens
-description: Create and route Preset embedded dashboard guest-token workflows with explicit approval. Use when a user asks for guest tokens, embedded signed access, external embedded users, guest-token payloads, or embedded resource/RLS claims.
+description: Create and route Preset embedded dashboard guest-token workflows through direct Superset API calls with explicit approval. Use only for direct API workflows when a user asks for guest tokens, embedded signed access, external embedded users, guest-token payloads, or embedded resource/RLS claims. Do not use for MCP-only work.
 ---
 
 # preset-guest-tokens

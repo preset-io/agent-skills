@@ -1,6 +1,6 @@
 ---
 name: preset-workspaces
-description: List, inspect, and resolve Preset teams and workspaces through the Preset Management API, including workspace hostnames and read-only workspace membership listing. Use when a user needs team discovery, workspace lookup, workspace health/status, or member lists.
+description: List, inspect, and resolve Preset teams and workspaces through direct Preset Management API calls, including workspace hostnames and read-only workspace membership listing. Use only for direct API workflows when a user needs team discovery, workspace lookup, workspace health/status, or member lists. Do not use for MCP-only work.
 ---
 
 # preset-workspaces

@@ -1,6 +1,6 @@
 ---
 name: preset-embedded-rls
-description: Review and prepare row-level security clauses for Preset embedded analytics and guest-token workflows. Use when a user asks for embedded RLS, tenant filters, guest-token RLS rules, or external viewer data isolation.
+description: Review and prepare row-level security clauses for direct API Preset embedded analytics and guest-token workflows. Use only for direct API workflows when a user asks for embedded RLS, tenant filters, guest-token RLS rules, or external viewer data isolation. Do not use for MCP-only work.
 ---
 
 # preset-embedded-rls

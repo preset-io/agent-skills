@@ -1,7 +1,7 @@
 {
   "name": "preset-api-skills",
   "version": "0.1.0",
-  "description": "Preset API skills for authentication, workspace discovery, administration, Superset workspace APIs, Snowflake Cortex Agents, and security-sensitive direct API workflows.",
+  "description": "Preset API skills for explicit direct API workflows only. Do not use for MCP-only work; use preset-mcp-skills when the user asks for MCP tools or MCP clients.",
   "author": {
     "name": "Preset",
     "url": "https://preset.io/"
@@ -28,8 +28,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Preset API Skills",
-    "shortDescription": "Authenticate with Preset, administer teams/workspaces, use Superset APIs, Snowflake Cortex Agents, and sensitive direct API workflows.",
-    "longDescription": "Markdown skills for agents using the public Preset Management API, workspace Superset APIs, and Snowflake Cortex Agent APIs. Includes guarded authentication guidance, workspace discovery, admin workflows for memberships, invites, roles, audits, version-aware Superset OpenAPI discovery, dashboard/chart, dataset/database, SQL Lab, import/export, embedding, guest-token, RLS, database-connection, role/permission, destructive-import, and Cortex Agent guidance. MCP tool workflows are intentionally handled by the separate preset-mcp-skills package.",
+    "shortDescription": "Direct API-only Preset skills. Use preset-mcp-skills instead for MCP-only work.",
+    "longDescription": "Markdown skills for agents using the public Preset Management API, workspace Superset APIs, and Snowflake Cortex Agent APIs. Use only when the user explicitly asks for direct API access, API credentials, REST endpoints, curl/Python requests, Superset workspace API inspection, or Snowflake Cortex API/operator workflows. Do not use for MCP-only work or as a fallback from MCP tools; MCP tool workflows are intentionally handled by the separate preset-mcp-skills package.",
     "developerName": "Preset",
     "category": "Coding",
     "capabilities": [

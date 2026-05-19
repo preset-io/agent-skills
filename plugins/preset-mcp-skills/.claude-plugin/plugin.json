@@ -1,7 +1,7 @@
 {
   "name": "preset-mcp-skills",
   "version": "0.1.0",
-  "description": "Preset/Superset MCP skills for deterministic tool discovery, safe MCP workflows, and MCP-only surface routing.",
+  "description": "Preset/Superset MCP skills for deterministic MCP tool discovery, safe MCP workflows, and MCP-only surface routing. Ask before switching to direct API.",
   "author": {
     "name": "Preset",
     "url": "https://preset.io/"

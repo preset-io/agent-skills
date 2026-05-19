@@ -1,6 +1,6 @@
 ---
 name: preset-dashboards
-description: Inspect dashboards and charts in a Preset workspace through Superset API calls. Use when a user needs dashboard metadata, chart metadata, dashboard charts/datasets/tabs, chart data safety guidance, or dashboard/chart operation routing after resolving a workspace hostname.
+description: Inspect dashboards and charts in a Preset workspace through direct Superset API calls. Use only for direct API workflows when a user needs dashboard metadata, chart metadata, dashboard charts/datasets/tabs, chart data safety guidance, or dashboard/chart operation routing after resolving a workspace hostname. Do not use for MCP-only work.
 ---
 
 # preset-dashboards

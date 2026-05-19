@@ -15,6 +15,8 @@ skills/
 
 MCP workflows must stay on MCP tools unless the user explicitly approves changing surfaces. Do not load direct API skills or call Preset Management API, Superset REST API, or Snowflake Cortex API endpoints as an implicit fallback.
 
+If both API and MCP plugins are installed, MCP intent wins over resource type. A dashboard, chart, dataset, or SQL Lab request should still use MCP guidance when the user asked for MCP.
+
 If MCP lacks the needed capability, explain the limitation and ask whether the user wants to switch to the API surface.
 
 ## Supported Clients

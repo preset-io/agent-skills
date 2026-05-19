@@ -1,6 +1,6 @@
 ---
 name: preset-snowflake-cortex
-description: Prepare safe Snowflake Cortex API access for Cortex Agent workflows. Use when a user asks to authenticate to Snowflake Cortex, choose account/role/warehouse context, check Cortex Agent privileges, or route Snowflake Cortex Agent tasks before calling Cortex REST or SQL APIs.
+description: Prepare safe Snowflake Cortex direct API access for Cortex Agent workflows. Use only for direct API workflows when a user asks to authenticate to Snowflake Cortex, choose account/role/warehouse context, check Cortex Agent privileges, or route Snowflake Cortex Agent tasks before calling Cortex REST or SQL APIs. Do not use for MCP-only work.
 ---
 
 # preset-snowflake-cortex

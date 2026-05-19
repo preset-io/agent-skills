@@ -1,6 +1,6 @@
 ---
 name: preset-superset
-description: Discover and validate the Superset workspace API surface for a Preset workspace. Use before domain-specific workspace API skills when a user needs workspace version, OpenAPI, current-user permissions, menu capabilities, or API safety classification.
+description: Discover and validate the direct Superset workspace API surface for a Preset workspace. Use only for direct API workflows before domain-specific workspace API skills when a user needs workspace version, OpenAPI, current-user permissions, menu capabilities, or API safety classification. Do not use for MCP-only work.
 ---
 
 # preset-superset

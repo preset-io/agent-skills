@@ -13,7 +13,7 @@ If both API and MCP plugins are installed, MCP intent wins over resource type. A
 ## Client Entry Points
 
 - OpenAI Codex: `.codex-plugin/plugin.json` plus this `AGENTS.md`.
-- Claude Code: `.claude-plugin/plugin.json` plus `CLAUDE.md`.
+- Claude Code: `.claude-plugin/plugin.json` plus `skills/*/SKILL.md`; `CLAUDE.md` mirrors this package guidance for direct repository readers, but it is not plugin-loaded context.
 - Cursor: `.cursor-plugin/plugin.json`.
 - GitHub Copilot: `.github/copilot-instructions.md`.
 

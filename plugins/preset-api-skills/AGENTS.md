@@ -38,7 +38,7 @@ Detailed examples live in each skill's `references/` directory. Load only the re
 ## Client Entry Points
 
 - OpenAI Codex: `.codex-plugin/plugin.json` plus this `AGENTS.md`.
-- Claude Code: `.claude-plugin/plugin.json` plus `CLAUDE.md`.
+- Claude Code: `.claude-plugin/plugin.json` plus `skills/*/SKILL.md`; `CLAUDE.md` mirrors this package guidance for direct repository readers, but it is not plugin-loaded context.
 - Cursor: `.cursor-plugin/plugin.json`.
 - GitHub Copilot: `.github/copilot-instructions.md`.
 

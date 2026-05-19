@@ -24,9 +24,11 @@ If MCP lacks the needed capability, explain the limitation and ask whether the u
 | Client | Entry point |
 |---|---|
 | OpenAI Codex | `.codex-plugin/plugin.json` and `AGENTS.md` |
-| Claude Code | `.claude-plugin/plugin.json` and `CLAUDE.md` |
+| Claude Code | `.claude-plugin/plugin.json` and `skills/*/SKILL.md` |
 | Cursor | `.cursor-plugin/plugin.json` |
 | GitHub Copilot | `.github/copilot-instructions.md` |
+
+Claude Code uses the plugin manifest for package metadata and the `skills/` directory for skill discovery. `CLAUDE.md` mirrors package-level routing guidance for direct repository readers, but it is not plugin-loaded context.
 
 ## Validation
 

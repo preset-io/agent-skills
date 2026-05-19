@@ -41,11 +41,11 @@ Each `SKILL.md` stays small and always-loaded; detailed API examples live in `re
 | Client | Entry point |
 |---|---|
 | OpenAI Codex | `.codex-plugin/plugin.json` and `AGENTS.md` |
-| Claude Code | `.claude-plugin/plugin.json` and `CLAUDE.md` |
+| Claude Code | `.claude-plugin/plugin.json` and `skills/*/SKILL.md` |
 | Cursor | `.cursor-plugin/plugin.json` |
 | GitHub Copilot | `.github/copilot-instructions.md` |
 
-Claude Code uses the plugin manifest for package metadata and `CLAUDE.md` plus the `skills/` directory for convention-based skill discovery. Cursor enumerates skill files directly in `.cursor-plugin/plugin.json`; Codex points at the `skills/` directory through `.codex-plugin/plugin.json`.
+Claude Code uses the plugin manifest for package metadata and the `skills/` directory for skill discovery. `CLAUDE.md` mirrors package-level routing guidance for direct repository readers, but it is not plugin-loaded context. Cursor enumerates skill files directly in `.cursor-plugin/plugin.json`; Codex points at the `skills/` directory through `.codex-plugin/plugin.json`.
 
 ## Skills
 

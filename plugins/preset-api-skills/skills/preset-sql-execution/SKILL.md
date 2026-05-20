@@ -17,16 +17,16 @@ Use for high-impact SQL execution and SQL Lab mutation workflows. SQL can read c
 ## Decision Rules
 
 - Distinguish SQL Lab metadata from query execution.
-- Classify SQL execution as approval-gated data-returning read or mutation risk.
+- Classify SQL execution, result handling, query stop, saved-query mutation, and permalink creation as approval-gated.
 - Require query, target, row limit, result handling, endpoint, and no-mutation summary.
-- Stop before running SQL.
+- Stop before any SQL execution, result retrieval/export, query stop, saved-query mutation, or permalink creation.
 
 ## Workflow Order
 
 1. Inspect SQL Lab bootstrap metadata.
-2. Prepare query approval summary.
+2. Prepare approval summary for execution, result handling, stop, saved-query, or permalink workflow.
 3. Request explicit approval.
-4. Stop before SQL execution.
+4. Stop before SQL execution, result retrieval/export, query stop, saved-query mutation, or permalink creation.
 
 ## Retrieve
 

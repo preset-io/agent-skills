@@ -16,7 +16,7 @@ Use for workspace asset import/export endpoint selection and disclosure review.
 
 ## Decision Rules
 
-- Distinguish safe export from import mutation.
+- Distinguish export disclosure from import mutation.
 - Classify overwrite imports as destructive.
 - Disclose bundle secret handling.
 - Require validation before import.
@@ -25,8 +25,8 @@ Use for workspace asset import/export endpoint selection and disclosure review.
 
 1. Inspect request and bundle metadata.
 2. Choose export or import path.
-3. Prepare destructive approval when needed.
-4. Stop before import execution.
+3. Prepare disclosure or mutation approval summary.
+4. Stop before export or import execution.
 
 ## Retrieve
 

@@ -32,6 +32,9 @@ Use as the Snowflake Cortex routing and safety boundary before Cortex Agent REST
 
 ## Retrieve
 
-- Authentication, account context, request setup: [references/authentication-and-context.md](references/authentication-and-context.md)
+- Authentication/context routing: [references/authentication-and-context.md](references/authentication-and-context.md)
+- Account, role, warehouse, database/schema, REST headers: [references/account-auth-context.md](references/account-auth-context.md)
+- OAuth-only setup checks: [references/oauth-context.md](references/oauth-context.md)
+- Cortex privileges and cross-region readiness: [references/agent-access-and-region.md](references/agent-access-and-region.md)
 - Cortex Agent safety, disclosure, approvals: [references/cortex-safety.md](references/cortex-safety.md)
 - Agent object/runs/SQL workflows: use `preset-cortex-agents`

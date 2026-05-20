@@ -16,6 +16,20 @@ Use for dataset and database metadata inspection in a resolved Preset workspace.
 - Require confirmation before dataset/database mutations, uploads, cache changes, imports, exports, validation, or SQL execution.
 - Do not create, update, delete, duplicate, import, export, refresh schemas, upload files, test databases, validate SQL, or run SQL Lab queries from this skill without confirmation and focused routing.
 
+## Decision Rules
+
+- Treat schema, table, dataset, column, and metric inspection as read-only metadata.
+- Distinguish metadata inspection from data-returning reads.
+- Use database identity from discovered environment facts or API results.
+- Avoid credential-bearing connection fields; route those to `preset-database-connections`.
+
+## Workflow Order
+
+1. Resolve database connection.
+2. Inspect schemas, tables, datasets, columns, and metrics metadata.
+3. Prepare approval before sample, distinct value, datasource value, or data reads.
+4. Redact connection secrets and route credential-bearing work away from this skill.
+
 ## Retrieve
 
 - Database list/detail and available database metadata: [references/database-metadata.md](references/database-metadata.md)

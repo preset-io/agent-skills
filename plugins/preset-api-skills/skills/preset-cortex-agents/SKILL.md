@@ -16,6 +16,20 @@ Use for Snowflake Cortex Agent object management and run workflows.
 - Treat streamed events as sensitive; store redacted summaries unless raw output handling is approved.
 - Do not rely on pre-2025 Cortex Agent schemas.
 
+## Decision Rules
+
+- Distinguish list and describe from run, create, update, and drop operations.
+- Require approval for data-returning agent runs and mutations.
+- Preserve streaming output handling and redaction.
+- Require AUTOCOMMIT for SQL DDL workflows.
+
+## Workflow Order
+
+1. Verify Snowflake Cortex account, auth, role, warehouse, database, schema, and privilege context.
+2. List or describe agents first.
+3. Prepare run or mutation approval summary with tools, query, budget, and output handling.
+4. Stop before run, create, update, replace, or drop until approved.
+
 ## Retrieve
 
 - Object-based or ad hoc `agent:run`: [references/agent-runs.md](references/agent-runs.md)

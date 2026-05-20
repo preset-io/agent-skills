@@ -16,6 +16,20 @@ Use as the approval and access-review gate for permission-sensitive workflows.
 - Do not guess role IDs or custom role identifiers.
 - Require confirmation of target principal, current access, new access, seat impact, and rollback path.
 
+## Decision Rules
+
+- Classify role and permission changes as access mutations.
+- Resolve role identifiers before effect summary.
+- Require approval with target and effect.
+- Avoid applying role or permission changes until approval is explicit.
+
+## Workflow Order
+
+1. Inspect membership roles and permissions.
+2. Resolve target and role identifiers.
+3. Summarize access effect, seat impact, and rollback path.
+4. Stop before role or permission change.
+
 ## Retrieve
 
 - Role/permission mutation guidance and approval checks: [references/role-permission-changes.md](references/role-permission-changes.md)

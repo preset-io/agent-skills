@@ -16,6 +16,20 @@ Use as the Snowflake Cortex routing and safety boundary before Cortex Agent REST
 - Treat Cortex Agent execution as high impact because it can call tools, use warehouses, and expose governed Snowflake data.
 - Re-check Snowflake docs for implementation work because Cortex schemas are evolving.
 
+## Decision Rules
+
+- Classify Cortex readiness checks as read-only.
+- Use configured Snowflake account and auth context.
+- Verify role, warehouse, database, schema, Cortex privileges, and cross-region setting.
+- Redact Snowflake secrets.
+
+## Workflow Order
+
+1. Resolve account and auth context.
+2. Inspect role, warehouse, database, and schema.
+3. Check Cortex privileges and cross-region setting.
+4. Report readiness without mutation.
+
 ## Retrieve
 
 - Authentication, account context, request setup: [references/authentication-and-context.md](references/authentication-and-context.md)

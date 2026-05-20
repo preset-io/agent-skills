@@ -14,6 +14,20 @@ Use for imports that can overwrite, replace, or materially change workspace asse
 - Never print import secrets or database passwords.
 - Confirm destination workspace, bundle contents, overwrite behavior, secrets, expected changes, and rollback plan before live testing or import calls.
 
+## Decision Rules
+
+- Classify overwrite-capable, sparse-update, all-assets restore, database import, and secret-bearing import as destructive.
+- Require destructive approval wording before import.
+- Require backup or rollback plan.
+- Inspect bundle metadata without applying changes.
+
+## Workflow Order
+
+1. Inspect bundle metadata.
+2. Classify destructive impact.
+3. Prepare backup, rollback, secret-handling, and approval summary.
+4. Stop before import execution.
+
 ## Retrieve
 
 - Destructive import review and approval checklist: [references/destructive-import-approval.md](references/destructive-import-approval.md)

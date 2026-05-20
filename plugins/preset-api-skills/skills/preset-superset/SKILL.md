@@ -14,6 +14,20 @@ Use before domain-specific workspace API calls when endpoint drift, permissions,
 - Prefer the workspace `/api/v1/_openapi` and `/version` over generic Superset docs.
 - Keep this skill read-only discovery.
 
+## Decision Rules
+
+- Use discovered workspace host and API facts.
+- Classify version, OpenAPI, current-user, permissions, and menu calls as read-only discovery.
+- Identify follow-up calls that need confirmation.
+- Avoid assuming endpoints before discovery.
+
+## Workflow Order
+
+1. Resolve workspace hostname.
+2. Read version, OpenAPI, current-user, permissions, and menu capabilities.
+3. Classify follow-up risk.
+4. Redact credentials and tokens.
+
 ## Retrieve
 
 - Version and OpenAPI: [references/version-and-openapi.md](references/version-and-openapi.md)

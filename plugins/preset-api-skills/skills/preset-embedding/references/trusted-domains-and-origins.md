@@ -11,7 +11,7 @@ Before creating or changing trusted domains, confirm:
 1. The exact dashboard ID or slug.
 2. The application origins that should embed the dashboard.
 3. Whether wildcard domains are allowed by policy.
-4. Whether staging, production, and localhost origins should differ.
+4. Whether staging, production, and other non-production origins should differ.
 5. The rollback plan if an origin is too broad or breaks embedding.
 
 ## Troubleshooting

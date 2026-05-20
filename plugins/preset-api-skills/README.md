@@ -38,7 +38,8 @@ skills/
 
 Each skill is split into a small routing card and optional task references:
 
-- `SKILL.md` is the always-loaded card. Keep it focused on when to use the skill, what prerequisites or safety gates always apply, and which references to retrieve for specific work.
+- `SKILL.md` is the always-loaded card. Keep it focused on when to use the skill, what prerequisites or safety gates always apply, durable decision rules, ordered workflow stop points, and which references to retrieve for specific work.
+- Use `Always` for invariant prerequisites and safety boundaries, `Decision Rules` for classification/approval/routing decisions, `Workflow Order` for concise ordered steps and stop-before points, and `Retrieve` for focused references.
 - `references/*.md` files hold endpoint details, examples, approval templates, and risk-specific notes. Agents should load only the reference files needed for the current request after the right skill has been selected.
 - Cross-skill dependencies should be named in `SKILL.md` rather than copied. For example, workspace API skills should point back to `preset-api`, `preset-workspaces`, and `preset-superset` instead of repeating authentication, hostname discovery, or OpenAPI guidance.
 - Security-sensitive workflows stay in separate skills when they need independent routing and loaded-by-construction guardrails, such as guest tokens, embedded RLS, SQL execution, database connection configuration, role changes, destructive imports, and Cortex Agent execution.
@@ -178,17 +179,6 @@ PRESET_WORKSPACE_HOSTNAME="workspace.app.preset.io" \
 ```
 
 When `PRESET_WORKSPACE_HOSTNAME` is set, the script verifies the hostname against the Management API workspace list before sending the bearer token to the workspace. If the hostname is omitted, the script selects the first READY workspace returned by the Management API.
-
-Local dev shells such as `superset.local.preset.zone` are not returned by hosted workspace discovery. Use the local override only for local environments:
-
-```bash
-PRESET_API_BASE="http://manager.local.preset.zone/api/v1" \
-PRESET_WORKSPACE_HOSTNAME="superset.local.preset.zone" \
-PRESET_WORKSPACE_SCHEME="http" \
-PRESET_ALLOW_LOCAL_WORKSPACE_HOSTS="true" \
-PRESET_OPENAPI_EXPECTED_STATUSES="200,404" \
-./plugins/preset-api-skills/scripts/live-workspace-smoke.sh
-```
 
 The live smoke script skips SQL text-bearing query and saved-query endpoints by default. Set `PRESET_INCLUDE_SQL_TEXT_ENDPOINTS=true` only after confirming that the target, page size, and expected SQL-text exposure are acceptable.
 

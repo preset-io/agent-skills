@@ -14,6 +14,20 @@ Use for high-impact SQL execution and SQL Lab mutation workflows. SQL can read c
 - Require explicit confirmation of exact SQL text or payload, target workspace/database/object, expected effect, row/result handling, endpoints, and rollback when applicable.
 - Do not assume SQL is read-only.
 
+## Decision Rules
+
+- Distinguish SQL Lab metadata from query execution.
+- Classify SQL execution as approval-gated data-returning read or mutation risk.
+- Require query, target, row limit, result handling, endpoint, and no-mutation summary.
+- Stop before running SQL.
+
+## Workflow Order
+
+1. Inspect SQL Lab bootstrap metadata.
+2. Prepare query approval summary.
+3. Request explicit approval.
+4. Stop before SQL execution.
+
 ## Retrieve
 
 - Approval gates and endpoint-specific guidance: [references/sql-execution-approval.md](references/sql-execution-approval.md)

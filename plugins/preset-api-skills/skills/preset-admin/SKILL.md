@@ -15,6 +15,20 @@ Use for Preset Management API administration beyond read-only workspace discover
 - Get explicit confirmation before role changes, invites, member removals, workspace lifecycle actions, audit downloads, or any write.
 - Use `preset-roles-permissions` for permission-sensitive role/access changes.
 
+## Decision Rules
+
+- Classify membership role and invite changes as approval-gated mutations.
+- Use metadata reads for membership, role, invite, and audit inspection.
+- Require target and effect summary before any access change.
+- Avoid applying invite or member role changes until approval is explicit.
+
+## Workflow Order
+
+1. Identify team, workspace, user, invite, member, and role identifiers.
+2. Inspect membership, role, invite, and audit metadata.
+3. Prepare approval summary with target and expected effect.
+4. Stop before invite, member role, removal, or workspace change.
+
 ## Retrieve
 
 - Team users, role changes, removals, seats: [references/team-memberships.md](references/team-memberships.md)

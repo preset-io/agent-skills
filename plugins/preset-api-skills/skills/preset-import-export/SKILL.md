@@ -14,6 +14,20 @@ Use for workspace asset import/export endpoint selection and disclosure review.
 - Require confirmation naming workspace, endpoint, object IDs or bundle, and expected disclosure or mutation.
 - Route overwrite, sparse-update, all-assets restore, database import, and secret-bearing import to `preset-destructive-imports`.
 
+## Decision Rules
+
+- Distinguish safe export from import mutation.
+- Classify overwrite imports as destructive.
+- Disclose bundle secret handling.
+- Require validation before import.
+
+## Workflow Order
+
+1. Inspect request and bundle metadata.
+2. Choose export or import path.
+3. Prepare destructive approval when needed.
+4. Stop before import execution.
+
 ## Retrieve
 
 - Export endpoints and approvals: [references/export-workflows.md](references/export-workflows.md)

@@ -14,6 +14,20 @@ Use for SQL Lab capability and query metadata workflows in a resolved Preset wor
 - Query history and saved-query reads can expose SQL text; get confirmation before listing or retrieving them.
 - Route execution, result retrieval/export, query stop, saved-query mutation, and permalinks to `preset-sql-execution`.
 
+## Decision Rules
+
+- Distinguish query history metadata from SQL text, result retrieval, and execution.
+- Require approval before reading SQL text, retrieving results, exporting results, stopping queries, or executing SQL.
+- Route saved query, history, result, stop, permalink, and execution requests separately.
+- Avoid SQL execution from this skill.
+
+## Workflow Order
+
+1. Inspect SQL Lab bootstrap state.
+2. Route history, saved query, result, stop, permalink, and execution request.
+3. Prepare approval for sensitive read or execution.
+4. Stop before SQL text, result retrieval, export, stop, permalink, saved-query mutation, or execution.
+
 ## Retrieve
 
 - SQL Lab availability, database options, UI defaults: [references/sqllab-bootstrap.md](references/sqllab-bootstrap.md)

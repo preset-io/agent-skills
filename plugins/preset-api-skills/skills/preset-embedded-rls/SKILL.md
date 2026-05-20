@@ -15,6 +15,20 @@ Use before guest-token creation when embedded viewers need row-level security.
 - Confirm every clause and intended viewer population before token creation.
 - Do not validate with broad data-returning queries unless the user approves target and limit.
 
+## Decision Rules
+
+- Classify embedded RLS review as plan-only safety work.
+- Identify tenant and user filter safety issues.
+- Require approval before clauses are used in token claims.
+- Avoid mutating embedded RLS configuration.
+
+## Workflow Order
+
+1. Inspect embedded RLS clauses.
+2. Flag unsafe tenant and user filters.
+3. Summarize approval requirements.
+4. Stop before using clauses in tokens.
+
 ## Retrieve
 
 - Embedded RLS rule design and review: [references/embedded-rls-rules.md](references/embedded-rls-rules.md)

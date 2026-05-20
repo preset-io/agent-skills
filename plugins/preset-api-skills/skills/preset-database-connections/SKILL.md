@@ -15,6 +15,20 @@ Use for credential-bearing database connection reads and database connection cha
 - Get explicit confirmation before configuration reads, validation, OAuth, upload, create, update, or delete.
 - Redact SQLAlchemy URIs, passwords, private keys, SSH tunnel passwords, server certificates, access tokens, and engine `extra` secrets.
 
+## Decision Rules
+
+- Classify connection configuration as credential-bearing.
+- Permit metadata summary only unless the user approves a credential-bearing read.
+- Require approval before data-returning reads, validation, OAuth, upload, create, update, or delete.
+- Forbid printing URI, password, private key, token, certificate, SSH password, or engine extras.
+
+## Workflow Order
+
+1. Resolve database connection metadata.
+2. Identify credential-bearing fields and endpoint risk.
+3. Summarize safe non-secret configuration.
+4. Redact URI, password, private key, token, certificate, SSH password, and engine extras.
+
 ## Retrieve
 
 - Connection configuration, redaction, validation, OAuth, upload, create/update/delete: [references/connection-configuration.md](references/connection-configuration.md)

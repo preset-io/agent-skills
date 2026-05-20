@@ -14,6 +14,20 @@ Use for dashboard and chart inspection in a resolved Preset workspace.
 - Treat chart data, screenshots, thumbnails, exports, cache warmups, favorite changes, and dashboard/chart mutations as confirmation-gated.
 - Summarize workspace, dashboard/chart IDs or UUIDs, request body, and expected effect before writes.
 
+## Decision Rules
+
+- Separate dashboard metadata, chart metadata, and composition reads from chart data retrieval.
+- Require approval before chart data rows, screenshots, thumbnails, exports, cache warmups, favorites, or mutations.
+- Apply row limits for any data-returning read.
+- Redact sensitive fields from dashboard and chart output.
+
+## Workflow Order
+
+1. Identify workspace, dashboard, chart, dataset, and request identifiers.
+2. Inspect metadata and composition first.
+3. Prepare chart data approval with target, row limit, and expected disclosure.
+4. Stop before chart data retrieval, export, screenshot, thumbnail, cache, favorite, or mutation calls.
+
 ## Retrieve
 
 - Dashboard list/detail and favorite reads: [references/dashboard-metadata.md](references/dashboard-metadata.md)

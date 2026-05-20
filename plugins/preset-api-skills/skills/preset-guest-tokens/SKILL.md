@@ -15,6 +15,20 @@ Use for security-sensitive guest-token payload review and creation.
 - Confirm dashboard/resource UUID, user claims, RLS clauses, token handling, and expiration expectations.
 - Never print signed guest tokens in logs, examples, PR comments, or handoff notes.
 
+## Decision Rules
+
+- Classify guest token creation as token issuance.
+- Require approval summary with dashboard, resource, user, RLS, audience, expiration, and handling.
+- Never create or print a signed token before approval.
+- Separate embedded config reads from token creation.
+
+## Workflow Order
+
+1. Inspect dashboard and embedded config metadata.
+2. Summarize token claims, resources, user payload, RLS, audience, and handling.
+3. Request explicit approval.
+4. Stop before creating or printing token.
+
 ## Retrieve
 
 - Guest-token claims, resources, user payload, RLS, token handling: [references/guest-token-claims.md](references/guest-token-claims.md)

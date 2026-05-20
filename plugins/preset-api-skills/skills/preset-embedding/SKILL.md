@@ -15,6 +15,20 @@ Use for embedded dashboard configuration reads and security-sensitive routing.
 - Route embedded RLS design/review to `preset-embedded-rls`.
 - Require explicit confirmation before embedded config mutations, guest tokens, trusted domain changes, or access-token key changes.
 
+## Decision Rules
+
+- Distinguish config reads from trusted-domain mutations, guest-token issuance, and RLS changes.
+- Require approval before broadening domains or issuing tokens.
+- Route domain, token, and RLS requests to the correct guardrail.
+- Avoid mutating embedded configuration.
+
+## Workflow Order
+
+1. Inspect embedded dashboard configuration.
+2. Classify domain, token, and RLS request type.
+3. Prepare approval summary for mutation or token issuance.
+4. Stop before broadening domains, mutating config, or issuing tokens.
+
 ## Retrieve
 
 - Embedded dashboard configuration reads: [references/embedded-config-reads.md](references/embedded-config-reads.md)

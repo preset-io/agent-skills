@@ -13,6 +13,7 @@ Use for security-sensitive guest-token payload review and creation.
 - Use `preset-embedded-rls` when row-level security clauses are present.
 - Require explicit confirmation before `POST /api/v1/security/guest_token/`.
 - Confirm dashboard/resource UUID, user claims, RLS clauses, token handling, and expiration expectations.
+- Do not invent RLS clauses, trusted domains, or authorization details; ask for missing authorization details.
 - Never print signed guest tokens in logs, examples, PR comments, or handoff notes.
 
 ## Decision Rules

@@ -8,6 +8,18 @@ Official docs:
 - <https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-threads>
 - <https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-threads-rest-api>
 
+## Run Workflow Essentials
+
+For Cortex Agent run workflows, plan the target endpoint, streaming-output
+handling, and AUTOCOMMIT requirements before preparing the execution summary.
+Existing agent objects run through
+`POST /api/v2/databases/{database}/schemas/{schema}/agents/{name}:run`; ad hoc
+agents use `POST /api/v2/cortex/agent:run`. Use `Accept: text/event-stream` for
+streaming and track `metadata` events because assistant `message_id` values are
+needed for threaded follow-ups. The final streamed `response` event contains the
+aggregated agent output. If the agent returns `system_execute_sql` blocks,
+preserve query IDs and verify the Snowflake session has `AUTOCOMMIT=TRUE`.
+
 ## Endpoints
 
 | Goal | Endpoint |

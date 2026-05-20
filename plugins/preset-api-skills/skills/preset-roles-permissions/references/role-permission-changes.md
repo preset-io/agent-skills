@@ -2,6 +2,10 @@
 
 Role and permission changes can grant or revoke access to customer data, workspace assets, and administration workflows. Treat them as `permission_write`.
 
+## Planning Essentials
+
+For role or permission change review, first inspect membership roles and permissions. Resolve the target principal, dynamic workspace role identifier, and numeric `team_role_id` source before summarizing impact. Summarize current access, requested access, customer-data/admin effect, creator-seat risk, endpoint/body, and rollback path. Require explicit approval and stop before any role or permission mutation. Do not guess role IDs.
+
 ## Sources Of Truth
 
 Use these references before mutating:

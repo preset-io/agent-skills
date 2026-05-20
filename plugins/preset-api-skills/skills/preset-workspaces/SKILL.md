@@ -1,23 +1,35 @@
 ---
 name: preset-workspaces
-description: List, inspect, and resolve Preset teams and workspaces through direct Preset Management API calls, including workspace hostnames and read-only workspace membership listing. Use only for direct API workflows when a user needs team discovery, workspace lookup, workspace health/status, or member lists. Do not use for MCP-only work.
+description: Discover Preset teams and workspaces through direct Management API calls, including workspace lookup, hostnames, health/status, and read-only memberships. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-workspaces
 
-Use this skill for Preset Management API discovery involving teams, workspaces, and workspace membership. Use `preset-admin` for team membership mutations, workspace lifecycle operations, invite lifecycle management, role identifiers, seat-limit checks, and audit logs.
+Use for read-only team, workspace, hostname, health, and workspace membership discovery.
 
-## Workflow
+## Always
 
-1. Use `preset-api` first: load its authentication reference, create the reusable Python client as `client`, and configure request conventions.
-2. Load [references/discovery.md](references/discovery.md) for read-only team and workspace listing, lookup, hostname resolution, and workspace health checks.
-3. Load [references/membership.md](references/membership.md) for workspace membership listing.
-4. For administration workflows, route to `preset-admin` and load its focused references.
+- Use `preset-api` first for auth/client setup.
+- Resolve workspace hostnames from Management API responses; never assume or hard-code them.
+- Keep this skill read-only.
+- Route team membership mutations, invites, roles, seat-limit checks, audit logs, and workspace lifecycle work to `preset-admin`.
 
-## Guardrails
+## Decision Rules
 
-- Production Management API examples use `https://api.app.preset.io/v1`. For sandbox or staging environments, set `PRESET_API_BASE` as described in `preset-api`.
-- Resolve workspace hostnames from `GET /teams/{team_name}/workspaces/`; never assume or hard-code a hostname.
-- Treat workspace membership changes and team invitations as access-control mutations handled by `preset-admin`.
-- Do not call `GET /team-roles/` with an API-key JWT; route role and invite workflows to `preset-admin`.
-- Use `preset-admin` for Phase 3 admin workflows so role, seat-limit, audit, and deferral guidance is loaded.
+- Treat Management API team/workspace discovery as read-only.
+- Distinguish membership listing from access change.
+- Use discovered workspace hostname and status.
+- Avoid changing access.
+
+## Workflow Order
+
+1. List teams and workspaces.
+2. Resolve workspace hostname and status.
+3. Describe membership boundaries.
+4. Stop before access changes.
+
+## Retrieve
+
+- Team/workspace listing, lookup, hostname resolution, health: [references/discovery.md](references/discovery.md)
+- Workspace membership listing: [references/membership.md](references/membership.md)
+- API conventions and environment base URLs: [../preset-api/references/api-conventions.md](../preset-api/references/api-conventions.md)

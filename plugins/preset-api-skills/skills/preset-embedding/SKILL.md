@@ -1,27 +1,38 @@
 ---
 name: preset-embedding
-description: Inspect embedded dashboard configuration in a Preset workspace through direct Superset API calls. Use only for direct API workflows when a user needs embedded dashboard read paths, feature-flag behavior, allowed domain inspection, or guest-token routing after resolving a workspace hostname. Do not use for MCP-only work.
+description: Inspect embedded dashboard configuration, trusted domains, origins, guest-token routing, and embedded RLS routing through direct Superset API calls. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-embedding
 
-Use this skill for embedded dashboard inspection and routing.
+Use for embedded dashboard configuration reads and security-sensitive routing.
 
-## Workflow
+## Always
 
-1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
-2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
-3. Use `preset-superset` to capture workspace version/OpenAPI and current-user roles when permissions matter.
-4. Load the focused reference for the task:
-   - [references/embedded-config-reads.md](references/embedded-config-reads.md) for embedded dashboard configuration reads.
-   - [references/embedded-config-mutations.md](references/embedded-config-mutations.md) for embedded dashboard configuration create/update/delete routing.
-   - [references/trusted-domains-and-origins.md](references/trusted-domains-and-origins.md) for allowed-domain and origin behavior.
-   - [references/guest-tokens.md](references/guest-tokens.md) for guest-token routing to `preset-guest-tokens`.
-   - [references/embedded-rls.md](references/embedded-rls.md) for embedded RLS routing to `preset-embedded-rls`.
-5. Use `preset-guest-tokens` for guest-token creation and `preset-embedded-rls` for embedded RLS review.
+- Use `preset-api`, `preset-workspaces`, and when permissions matter `preset-superset` first.
+- Default to embedded configuration reads.
+- Route guest-token creation to `preset-guest-tokens`.
+- Route embedded RLS design/review to `preset-embedded-rls`.
+- Require explicit confirmation before embedded config mutations, guest tokens, trusted domain changes, or access-token key changes.
 
-## Scope
+## Decision Rules
 
-Default to embedded configuration reads. Do not create, update, or delete embedded dashboard configuration, issue guest tokens, manage trusted domains, or manage embedded access-token keys without explicit confirmation and a separate security-sensitive review.
+- Distinguish config reads from trusted-domain mutations, guest-token issuance, and RLS changes.
+- Require approval before broadening domains or issuing tokens.
+- Route domain, token, and RLS requests to the correct guardrail.
+- Avoid mutating embedded configuration.
 
-Guest-token creation and RLS for embedded users are Phase 5 security-sensitive workflows handled by `preset-guest-tokens` and `preset-embedded-rls`.
+## Workflow Order
+
+1. Inspect embedded dashboard configuration.
+2. Classify domain, token, and RLS request type.
+3. Prepare approval summary for mutation or token issuance.
+4. Stop before broadening domains, mutating config, or issuing tokens.
+
+## Retrieve
+
+- Embedded dashboard configuration reads: [references/embedded-config-reads.md](references/embedded-config-reads.md)
+- Embedded config create/update/delete routing: [references/embedded-config-mutations.md](references/embedded-config-mutations.md)
+- Trusted domains and origins: [references/trusted-domains-and-origins.md](references/trusted-domains-and-origins.md)
+- Guest-token routing: [references/guest-tokens.md](references/guest-tokens.md)
+- Embedded RLS routing: [references/embedded-rls.md](references/embedded-rls.md)

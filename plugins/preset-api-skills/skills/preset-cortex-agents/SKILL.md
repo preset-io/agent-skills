@@ -1,26 +1,39 @@
 ---
 name: preset-cortex-agents
-description: Use Snowflake Cortex Agent REST and SQL APIs through direct API/operator workflows. Use only for direct API workflows when a user asks to list, describe, create, update, delete, or run Cortex Agent objects; call ad hoc agent:run; handle streaming Cortex Agent responses; or use the SNOWFLAKE.CORTEX.DATA_AGENT_RUN SQL wrapper. Do not use for MCP-only work.
+description: Use Snowflake Cortex Agent REST and SQL APIs for listing, describing, creating, updating, deleting, running agents, streaming responses, and SQL wrappers. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-cortex-agents
 
-Use this skill for Snowflake Cortex Agent object and run workflows.
+Use for Snowflake Cortex Agent object management and run workflows.
 
-## Workflow
+## Always
 
-1. Use `preset-snowflake-cortex` first to establish account URL, auth, role,
-   warehouse, database, schema, and safety context.
-2. Load [references/agent-runs.md](references/agent-runs.md) before object-based or ad hoc `agent:run` calls.
-3. Load [references/agent-management.md](references/agent-management.md) before listing, describing, creating, updating, or deleting Cortex Agent objects.
-4. Load [references/sql-agent-ddl.md](references/sql-agent-ddl.md) when the user wants to create, alter, show, describe, or drop Cortex Agent objects from SQL.
-5. Load [references/sql-wrapper.md](references/sql-wrapper.md) when the user wants to run an agent from SQL instead of REST.
-6. Load [../preset-snowflake-cortex/references/cortex-safety.md](../preset-snowflake-cortex/references/cortex-safety.md), summarize the target, payload, tools, budgets, expected data exposure, and rollback path when applicable, then get explicit confirmation before any run or mutation.
+- Use `preset-snowflake-cortex` first for account, auth, role, warehouse, database/schema, privileges, and safety context.
+- Prefer read-only list/describe before mutations.
+- Require confirmation of query, role, tools, budget, and output handling before any run.
+- Require rollback planning before create, update, replace, or delete.
+- Treat streamed events as sensitive; store redacted summaries unless raw output handling is approved.
+- Do not rely on pre-2025 Cortex Agent schemas.
 
-## Guardrails
+## Decision Rules
 
-- Prefer read-only list/describe calls before mutations.
-- Do not run agents without explicit confirmation of the query, role, tools, budget, and output handling.
-- Do not create, update, replace, or delete agent objects without a rollback plan.
-- Do not assume old `agent:run` schemas are current; Snowflake updated the request and response schemas in 2025, so do not rely on pre-2025 documentation or examples.
-- Treat streamed events as potentially sensitive. Store only redacted summaries unless the user approves raw output handling.
+- Distinguish list and describe from run, create, update, and drop operations.
+- Require approval for data-returning agent runs and mutations.
+- Preserve streaming output handling and redaction.
+- Require AUTOCOMMIT for SQL DDL workflows.
+
+## Workflow Order
+
+1. Verify Snowflake Cortex account, auth, role, warehouse, database, schema, and privilege context.
+2. List or describe agents first.
+3. Prepare run or mutation approval summary with tools, query, budget, and output handling.
+4. Stop before run, create, update, replace, or drop until approved.
+
+## Retrieve
+
+- Object-based or ad hoc `agent:run`: [references/agent-runs.md](references/agent-runs.md)
+- List/describe/create/update/delete agents: [references/agent-management.md](references/agent-management.md)
+- SQL create/alter/show/describe/drop: [references/sql-agent-ddl.md](references/sql-agent-ddl.md)
+- `SNOWFLAKE.CORTEX.DATA_AGENT_RUN` SQL wrapper: [references/sql-wrapper.md](references/sql-wrapper.md)
+- Safety and approval checklist: [../preset-snowflake-cortex/references/cortex-safety.md](../preset-snowflake-cortex/references/cortex-safety.md)

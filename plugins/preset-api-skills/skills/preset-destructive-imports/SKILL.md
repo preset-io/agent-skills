@@ -1,24 +1,34 @@
 ---
 name: preset-destructive-imports
-description: Review and route destructive or overwrite-capable Preset import workflows through direct Superset API calls with explicit approval. Use only for direct API workflows when a user asks to import assets with overwrite, sparse update, database passwords, replacement bundles, destructive changes, or all-assets restore workflows. Do not use for MCP-only work.
+description: Review destructive, overwrite-capable, sparse-update, all-assets restore, database import, and secret-bearing Preset import workflows through direct Superset API calls. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-destructive-imports
 
-Use this skill for import workflows that can overwrite, replace, or materially change workspace assets.
+Use for imports that can overwrite, replace, or materially change workspace assets.
 
-## Workflow
+## Always
 
-1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
-2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
-3. Use `preset-superset` to capture workspace version/OpenAPI before relying on import fields.
-4. Use `preset-import-export` for general import/export endpoint maps.
-5. Load [references/destructive-import-approval.md](references/destructive-import-approval.md) before any overwrite, sparse-update, all-assets import, database import, or secret-bearing import.
-6. Load [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md), summarize the bundle, overwrite behavior, secrets, expected changes, and rollback plan, then get explicit user confirmation.
-
-## Guardrails
-
-- Do not live-test imports without explicit user approval.
+- Use `preset-api`, `preset-workspaces`, `preset-superset`, and `preset-import-export` first.
+- Treat overwrite and sparse-update imports as destructive.
 - Never print import secrets or database passwords.
-- Treat overwrite and sparse-update imports as potentially destructive.
-- Confirm destination workspace and bundle contents before calling an import endpoint.
+- Confirm destination workspace, bundle contents, overwrite behavior, secrets, expected changes, and rollback plan before live testing or import calls.
+
+## Decision Rules
+
+- Classify overwrite-capable, sparse-update, all-assets restore, database import, and secret-bearing import as destructive.
+- Require destructive approval wording before import.
+- Require backup or rollback plan.
+- Inspect bundle metadata without applying changes.
+
+## Workflow Order
+
+1. Inspect bundle metadata.
+2. Classify destructive impact.
+3. Prepare backup, rollback, secret-handling, and approval summary.
+4. Stop before import execution.
+
+## Retrieve
+
+- Destructive import review and approval checklist: [references/destructive-import-approval.md](references/destructive-import-approval.md)
+- Approval policy: [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md)

@@ -1,28 +1,38 @@
 ---
 name: preset-sqllab
-description: Inspect SQL Lab and query-history metadata in a Preset workspace through direct Superset API calls. Use only for direct API workflows when a user needs SQL Lab bootstrap data, query history, saved query metadata, SQL Lab permalink routing, or SQL execution safety guidance after resolving a workspace hostname. Do not use for MCP-only work.
+description: Inspect Preset SQL Lab bootstrap, query history, saved queries, result/export routing, query control, and SQL execution routing through direct Superset API calls. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-sqllab
 
-Use this skill for SQL Lab and query metadata workflows in a Preset workspace.
+Use for SQL Lab capability and query metadata workflows in a resolved Preset workspace.
 
-## Workflow
+## Always
 
-1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
-2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
-3. Use `preset-superset` to capture workspace version/OpenAPI and current-user roles when endpoint drift or permissions matter.
-4. Load the focused reference for the task:
-   - [references/sqllab-bootstrap.md](references/sqllab-bootstrap.md) for SQL Lab availability, database options, and UI defaults.
-   - [references/query-history.md](references/query-history.md) for query history reads that can expose SQL text.
-   - [references/saved-queries.md](references/saved-queries.md) for saved-query reads, mutation routing, and SQL Lab permalink routing.
-   - [references/sql-execution.md](references/sql-execution.md) for SQL execution routing to `preset-sql-execution`.
-   - [references/query-results-and-exports.md](references/query-results-and-exports.md) for SQL result retrieval and export routing.
-   - [references/query-control.md](references/query-control.md) for query stop/cancel routing.
-5. Use `preset-sql-execution` before any SQL execution, result retrieval, result export, query stop, saved-query mutation, or SQL Lab permalink creation.
+- Use `preset-api`, `preset-workspaces`, and when drift or permissions matter `preset-superset` first.
+- Default to SQL Lab bootstrap/capability metadata.
+- Query history and saved-query reads can expose SQL text; get confirmation before listing or retrieving them.
+- Route execution, result retrieval/export, query stop, saved-query mutation, and permalinks to `preset-sql-execution`.
 
-## Scope
+## Decision Rules
 
-Default to SQL Lab bootstrap and capability metadata only. Query history and saved-query reads can return SQL text, so get explicit confirmation before listing or retrieving them. Do not execute SQL, stop queries, export result sets, create/update/delete saved queries, import saved queries, or create permalinks without routing through `preset-sql-execution` and getting explicit confirmation.
+- Distinguish query history metadata from SQL text, result retrieval, and execution.
+- Require approval before reading SQL text, retrieving results, exporting results, stopping queries, or executing SQL.
+- Route saved query, history, result, stop, permalink, and execution requests separately.
+- Avoid SQL execution from this skill.
 
-SQL can read customer data, run expensive warehouse work, or expose database metadata. Always summarize the workspace, database, SQL text, expected row limit, and expected effect before execution.
+## Workflow Order
+
+1. Inspect SQL Lab bootstrap state.
+2. Route history, saved query, result, stop, permalink, and execution request.
+3. Prepare approval for sensitive read or execution.
+4. Stop before SQL text, result retrieval, export, stop, permalink, saved-query mutation, or execution.
+
+## Retrieve
+
+- SQL Lab availability, database options, UI defaults: [references/sqllab-bootstrap.md](references/sqllab-bootstrap.md)
+- Query history reads and SQL text exposure: [references/query-history.md](references/query-history.md)
+- Saved query reads, mutations, permalinks: [references/saved-queries.md](references/saved-queries.md)
+- SQL execution routing: [references/sql-execution.md](references/sql-execution.md)
+- Result retrieval and exports: [references/query-results-and-exports.md](references/query-results-and-exports.md)
+- Query stop/cancel: [references/query-control.md](references/query-control.md)

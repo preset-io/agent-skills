@@ -1,26 +1,40 @@
 ---
 name: preset-superset
-description: Discover and validate the direct Superset workspace API surface for a Preset workspace. Use only for direct API workflows before domain-specific workspace API skills when a user needs workspace version, OpenAPI, current-user permissions, menu capabilities, or API safety classification. Do not use for MCP-only work.
+description: Discover and validate direct Superset workspace API capabilities: version, OpenAPI, current user, permissions, menu, and API safety. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-superset
 
-Use this skill to prepare safe, version-aware Superset workspace API access.
+Use before domain-specific workspace API calls when endpoint drift, permissions, or feature availability matter.
 
-## Workflow
+## Always
 
-1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
-2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
-3. Load the focused reference for the task:
-   - [references/version-and-openapi.md](references/version-and-openapi.md) to capture `/version` and `/api/v1/_openapi`.
-   - [references/current-user-and-permissions.md](references/current-user-and-permissions.md) to inspect `/api/v1/me/` and `/api/v1/me/roles/`.
-   - [references/menu-and-feature-discovery.md](references/menu-and-feature-discovery.md) to inspect `/api/v1/menu/` and visible workspace capabilities.
-   - [references/workspace-api-safety.md](references/workspace-api-safety.md) before calling endpoints that return customer data, exports, credentials, or execution results.
+- Use `preset-api` for auth/client setup and `preset-workspaces` for hostname resolution.
+- Send bearer tokens only to workspace hostnames resolved from the Preset Management API.
+- Prefer the workspace `/api/v1/_openapi` and `/version` over generic Superset docs.
+- Keep this skill read-only discovery.
 
-Only send bearer tokens to workspace hostnames resolved from the Preset Management API, except for explicit local-dev smoke validation against known local hosts.
+## Decision Rules
 
-## Scope
+- Use discovered workspace host and API facts.
+- Classify version, OpenAPI, current-user, permissions, and menu calls as read-only discovery.
+- Identify follow-up calls that need confirmation.
+- Avoid assuming endpoints before discovery.
 
-This skill is read-only discovery. Do not use it to run SQL, fetch chart data, export assets, import assets, mutate dashboard state, mutate datasets/databases, issue guest tokens, or change access controls.
+## Workflow Order
 
-Treat the public Superset API documentation as broad reference material. For Preset workspace calls, prefer the workspace's own `/api/v1/_openapi` response and `/version` metadata when available.
+1. Resolve workspace hostname.
+2. Read version, OpenAPI, current-user, permissions, and menu capabilities.
+3. Classify follow-up risk.
+4. Redact credentials and tokens.
+
+## Retrieve
+
+- Version and OpenAPI: [references/version-and-openapi.md](references/version-and-openapi.md)
+- Current user and roles: [references/current-user-and-permissions.md](references/current-user-and-permissions.md)
+- Menu and feature discovery: [references/menu-and-feature-discovery.md](references/menu-and-feature-discovery.md)
+- Safety classification for data, export, credential, or execution endpoints: [references/workspace-api-safety.md](references/workspace-api-safety.md)
+
+## Do Not
+
+- Do not run SQL, fetch chart data, export/import assets, mutate workspace objects, issue guest tokens, or change access controls from this skill.

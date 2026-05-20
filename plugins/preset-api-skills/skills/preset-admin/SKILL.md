@@ -1,29 +1,44 @@
 ---
 name: preset-admin
-description: Manage Preset teams, workspaces, memberships, invites, role identifiers, and audit logs through direct Preset Management API calls with confirmation-gated mutations. Use only for direct API workflows when a user needs team membership changes, workspace lifecycle operations, invite lifecycle management, role lookup, seat-limit checks, or audit log queries/downloads. Do not use for MCP-only work.
+description: Manage Preset teams, workspaces, memberships, invites, role identifiers, seat checks, and audit logs through direct Management API calls. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-admin
 
-Use this skill for Preset Management API administration workflows that go beyond read-only workspace discovery.
+Use for Preset Management API administration beyond read-only workspace discovery.
 
-## Workflow
+## Always
 
-1. Use `preset-api` first: load its authentication and API convention references, create the reusable Python client as `client`, and configure request conventions.
-2. For role-sensitive operations, load [references/role-identifiers.md](references/role-identifiers.md) before choosing any role value.
-3. Use `preset-roles-permissions` alongside this skill for permission-sensitive role changes, workspace membership role updates, or access-control review.
-4. Load the focused reference for the task:
-   - [references/team-memberships.md](references/team-memberships.md) for team users, role changes, removals, and seat checks.
-   - [references/workspace-management.md](references/workspace-management.md) for workspace create, update, delete, un-hibernate, and membership edge cases.
-   - [references/invites.md](references/invites.md) for pending invites, single and bulk invites, cancellation, and resend.
-   - [references/audit-logs.md](references/audit-logs.md) for audit log query, action lookup, and download requests.
-5. Before any `POST`, `PUT`, `PATCH`, `DELETE`, audit download, role change, invite, workspace lifecycle action, or member removal, also load [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md) and get explicit user confirmation.
-6. If the requested workflow is not in the focused references, check [references/deferrals.md](references/deferrals.md) before improvising from adjacent Manager endpoints.
+- Use `preset-api` first for auth/client setup.
+- Default to read-only preflight and ID/role lookup.
+- Resolve team, workspace, user, invite, and role identifiers from API responses before mutations.
+- Get explicit confirmation before role changes, invites, member removals, workspace lifecycle actions, audit downloads, or any write.
+- Use `preset-roles-permissions` for permission-sensitive role/access changes.
 
-## Guardrails
+## Decision Rules
 
-- Default to read-only calls and preflight checks.
-- Treat team roles, workspace roles, invites, group-derived roles, audit downloads, and workspace lifecycle actions as sensitive administration workflows.
-- Resolve team names, workspace IDs, workspace names, user IDs, invite IDs, and role identifiers from API responses before mutating anything.
-- Do not rely on static role tables when the team payload exposes `workspace_roles`; custom and feature-gated roles can change what is valid for a team.
-- Do not use internal `/api-internal/*` Manager routes, billing/payment routes, SCIM provisioning routes, API key CRUD, permission/DAR/RLS APIs, or database connection mutations from this skill.
+- Classify membership role and invite changes as approval-gated mutations.
+- Use metadata reads for membership, role, invite, and audit inspection.
+- Require target and effect summary before any access change.
+- Avoid applying invite or member role changes until approval is explicit.
+
+## Workflow Order
+
+1. Identify team, workspace, user, invite, member, and role identifiers.
+2. Inspect membership, role, invite, and audit metadata.
+3. Prepare approval summary with target and expected effect.
+4. Stop before invite, member role, removal, or workspace change.
+
+## Retrieve
+
+- Team users, role changes, removals, seats: [references/team-memberships.md](references/team-memberships.md)
+- Workspace create/update/delete/un-hibernate: [references/workspace-management.md](references/workspace-management.md)
+- Invites, cancellation, resend, bulk invite: [references/invites.md](references/invites.md)
+- Audit log lookup and downloads: [references/audit-logs.md](references/audit-logs.md)
+- Role identifiers: [references/role-identifiers.md](references/role-identifiers.md)
+- Unsupported or adjacent Manager endpoints: [references/deferrals.md](references/deferrals.md)
+- Approval policy before writes/downloads: [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md)
+
+## Do Not
+
+- Do not use internal `/api-internal/*`, billing/payment, SCIM, API key CRUD, permission/DAR/RLS, or database connection mutation routes from this skill.

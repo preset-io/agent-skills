@@ -1,28 +1,40 @@
 ---
 name: preset-datasets
-description: Inspect datasets, database metadata, table metadata, datasource values, and database/dataset operation routing in a Preset workspace through direct Superset API calls after resolving a workspace hostname. Use only for direct API workflows. Do not use for MCP-only work.
+description: Inspect Preset workspace datasets, database metadata, schemas, tables, columns, metrics, and dataset/database workflow routing through direct Superset API calls. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-datasets
 
-Use this skill for dataset and database metadata inspection in a Preset workspace.
+Use for dataset and database metadata inspection in a resolved Preset workspace.
 
-## Workflow
+## Always
 
-1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
-2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
-3. Use `preset-superset` to capture the workspace version/OpenAPI when endpoint drift matters.
-4. Load the focused reference for the task:
-   - [references/database-metadata.md](references/database-metadata.md) for database list/detail and available-database metadata.
-   - [references/dataset-metadata.md](references/dataset-metadata.md) for dataset list/detail, related objects, columns, and metrics.
-   - [references/table-and-schema-metadata.md](references/table-and-schema-metadata.md) for catalogs, schemas, tables, table metadata, and function names.
-   - [references/data-returning-reads.md](references/data-returning-reads.md) for table samples, distinct values, and datasource column values.
-   - [references/connection-configuration.md](references/connection-configuration.md) for credential-bearing connection routing to `preset-database-connections`.
-   - [references/dataset-database-mutations.md](references/dataset-database-mutations.md) for dataset/database mutation, validation, upload, cache, import, and export routing.
-5. Use `preset-database-connections` for credential-bearing connection configuration, validation, OAuth, upload, create, update, or delete workflows.
+- Use `preset-api`, `preset-workspaces`, and when drift matters `preset-superset` first.
+- Default to metadata reads.
+- Treat samples, distinct values, datasource values, connection configuration, and exports as sensitive reads requiring confirmation.
+- Route credential-bearing database connection work to `preset-database-connections`.
+- Require confirmation before dataset/database mutations, uploads, cache changes, imports, exports, validation, or SQL execution.
+- Do not create, update, delete, duplicate, import, export, refresh schemas, upload files, test databases, validate SQL, or run SQL Lab queries from this skill without confirmation and focused routing.
 
-## Scope
+## Decision Rules
 
-Default to metadata reads. Sample rows, distinct values, datasource column values, database connection configuration, and exports can expose customer data, credentials, or database structure, so treat them as data-returning or credential-bearing reads that require explicit confirmation after summarizing the target and limit where applicable.
+- Treat schema, table, dataset, column, and metric inspection as read-only metadata.
+- Distinguish metadata inspection from data-returning reads.
+- Use database identity from discovered environment facts or API results.
+- Avoid credential-bearing connection fields; route those to `preset-database-connections`.
 
-Do not create, update, delete, duplicate, import, export, refresh schemas, upload files, test databases, validate SQL, or run SQL Lab queries from this skill without explicit confirmation. Route database connection workflows through `preset-database-connections`. For dataset or database mutations, summarize the target workspace, database/dataset IDs, request body or SQL, and expected effect before making the call.
+## Workflow Order
+
+1. Resolve database connection.
+2. Inspect schemas, tables, datasets, columns, and metrics metadata.
+3. Prepare approval or routing summary for sensitive read, export, mutation, upload, cache, import, validation, or SQL execution.
+4. Stop before sensitive reads, exports, mutations, uploads, cache changes, imports, validation, SQL execution, or credential-bearing connection work.
+
+## Retrieve
+
+- Database list/detail and available database metadata: [references/database-metadata.md](references/database-metadata.md)
+- Dataset list/detail, columns, metrics, related objects: [references/dataset-metadata.md](references/dataset-metadata.md)
+- Catalogs, schemas, tables, table metadata, functions: [references/table-and-schema-metadata.md](references/table-and-schema-metadata.md)
+- Samples, distinct values, datasource values: [references/data-returning-reads.md](references/data-returning-reads.md)
+- Connection configuration routing: [references/connection-configuration.md](references/connection-configuration.md)
+- Dataset/database mutations and routing: [references/dataset-database-mutations.md](references/dataset-database-mutations.md)

@@ -27,8 +27,8 @@ Use for dataset and database metadata inspection in a resolved Preset workspace.
 
 1. Resolve database connection.
 2. Inspect schemas, tables, datasets, columns, and metrics metadata.
-3. Prepare approval before sample, distinct value, datasource value, or data reads.
-4. Redact connection secrets and route credential-bearing work away from this skill.
+3. Prepare approval or routing summary for sensitive read, export, mutation, upload, cache, import, validation, or SQL execution.
+4. Stop before sensitive reads, exports, mutations, uploads, cache changes, imports, validation, SQL execution, or credential-bearing connection work.
 
 ## Retrieve
 

@@ -26,8 +26,8 @@ Use for credential-bearing database connection reads and database connection cha
 
 1. Resolve database connection metadata.
 2. Identify credential-bearing fields and endpoint risk.
-3. Summarize safe non-secret configuration.
-4. Redact URI, password, private key, token, certificate, SSH password, and engine extras.
+3. Prepare approval summary for configuration read, validation, OAuth, upload, create, update, or delete.
+4. Stop before credential-bearing configuration read, validation, OAuth, upload, create, update, or delete.
 
 ## Retrieve
 

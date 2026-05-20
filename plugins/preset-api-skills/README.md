@@ -34,7 +34,16 @@ skills/
   preset-cortex-agents/SKILL.md
 ```
 
-Each `SKILL.md` stays small and always-loaded; detailed API examples live in `references/` files the agent loads on demand, so the always-on context budget stays tight. References are context-loading boundaries after a domain skill has been selected. Phase 6 decomposes dense domain references by task and risk so agents load dashboard metadata, chart data, table samples, SQL results, imports, exports, or embedding changes only when the user request needs that surface. Phase 5 security-sensitive workflows remain separate skills because they need independent routing, explicit confirmation templates, and secret-handling guardrails loaded by construction.
+## Skill Structure
+
+Each skill is split into a small routing card and optional task references:
+
+- `SKILL.md` is the always-loaded card. Keep it focused on when to use the skill, what prerequisites or safety gates always apply, and which references to retrieve for specific work.
+- `references/*.md` files hold endpoint details, examples, approval templates, and risk-specific notes. Agents should load only the reference files needed for the current request after the right skill has been selected.
+- Cross-skill dependencies should be named in `SKILL.md` rather than copied. For example, workspace API skills should point back to `preset-api`, `preset-workspaces`, and `preset-superset` instead of repeating authentication, hostname discovery, or OpenAPI guidance.
+- Security-sensitive workflows stay in separate skills when they need independent routing and loaded-by-construction guardrails, such as guest tokens, embedded RLS, SQL execution, database connection configuration, role changes, destructive imports, and Cortex Agent execution.
+
+This structure keeps package discovery cheap while preserving detailed operational guidance for live API work. A task should normally load one or more compact `SKILL.md` cards first, then a small number of focused references. Loading every reference in a selected skill is a last resort, not the default path.
 
 ## Supported Clients
 

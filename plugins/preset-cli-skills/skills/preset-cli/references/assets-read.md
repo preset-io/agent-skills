@@ -21,7 +21,7 @@ Filter availability is per-entity, not universal. Verify against this matrix bef
 
 | Entity | `--id` | `--ids` | `--search` | `--name` | `--mine` | `--limit` | Other |
 |---|---|---|---|---|---|---|---|
-| `chart` | ✓ | ✓ | ✓ (title) | — | ✓ | ✓ | `--dashboard-id`, `--dataset-id`, `--team` |
+| `chart` | ✓ | ✓ | ✓ (multi-field) | — | ✓ | ✓ | `--dashboard-id`, `--dataset-id`, `--viz-type`, `--team` |
 | `dashboard` | ✓ | ✓ | ✓ (title/slug) | — | ✓ | ✓ | `--published`, `--draft`, `--folder` |
 | `dataset` | ✓ | ✓ | ✓ (table name) | — | ✓ | ✓ | `--database-id`, `--schema`, `--table-type`, `--team` |
 | `query` | ✓ | — | — | ✓ (label pattern, wildcards) | ✓ | ✓ | `--database-id`, `--schema` |

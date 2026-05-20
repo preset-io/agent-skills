@@ -34,8 +34,8 @@ Saved queries can contain SQL text owned by other users. Listing returns metadat
 
 ## Large Result Handling
 
-- `sup sql` honors the workspace's SQL Lab row limit. Override with the workspace setting, not by passing arbitrary `LIMIT N` for `N` larger than the row cap.
-- For exports over a few thousand rows, pipe to a file: `sup sql "SELECT …" --csv > export.csv`. Never paste large CSV/JSON bodies into chat transcripts.
+- `sup sql` exposes two row-limit knobs: `--limit <n>` / `-l <n>` controls how many rows are fetched from Superset (default `1000`), and `--max-rows <n>` controls how many of those are displayed in the terminal (default `100`). Both are CLI flags — you do not need to leave the CLI or edit the workspace SQL Lab cap to change them. The workspace's own SQL Lab row cap still applies as a hard upper bound: `sup sql --limit` cannot exceed it.
+- For exports over a few thousand rows, pipe to a file: `sup sql "SELECT …" --csv > export.csv`. Pair with `--limit` to cap fetched rows; `--max-rows` is irrelevant when piping (it only gates terminal display). Never paste large CSV/JSON bodies into chat transcripts.
 - For analyst-facing iteration, prefer `sup sql` with `--json` over `--csv` so that null handling and types survive intermediate processing.
 
 ## When to Use the API Instead

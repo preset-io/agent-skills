@@ -44,4 +44,4 @@ Only switch off `--json` when the user explicitly asks for CSV/YAML or when pipi
 
 ## Large Results
 
-When listing many assets or exporting query rows, pair the format flag with `--limit` to bound output. The CLI default is `--limit 50`; raise it deliberately and only after confirming the consumer can handle the row count.
+When listing many assets or exporting query rows, pair the format flag with an explicit `--limit` to bound output. `list` commands default to unbounded with a `--page-size 100` server fetch — they will return every result the server has if you do not cap. `sup sql` is the exception: `--limit 1000` (rows fetched) and `--max-rows 100` (rows displayed) are the upstream defaults. Always set `--limit` deliberately when the consumer cannot handle large payloads.

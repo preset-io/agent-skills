@@ -50,9 +50,11 @@ The flag accepts `--workspace-id <id>` (long form) or `-w <id>` (short form). Pe
 
 | File | Scope |
 |---|---|
-| `SUP_*` env vars | Highest priority; ideal for CI and ephemeral overrides. |
-| `~/.sup/config.yml` | Global user preferences (default workspace, stored API token/secret). |
-| `.sup/state.yml` | Project-local overrides (per-repo workspace pinning). |
+| `SUP_*` env vars | Highest priority for both credentials and context. Ideal for CI and ephemeral overrides. |
+| `.sup/state.yml` | Project-local context (workspace, database, assets folder, target workspace). For context fields, **shadows global** in the project directory. No credentials are stored here. |
+| `~/.sup/config.yml` | Global user preferences. Stores credentials and the global defaults that apply when no project state is set. |
+
+Context fields resolve as env → project (`.sup/state.yml`) → global (`~/.sup/config.yml`). Credentials resolve as env → global only. See [install-and-auth.md](install-and-auth.md) for the full precedence breakdown; both chains differ from `sup config`'s own help text, which describes the credential chain only.
 
 Do not commit `.sup/state.yml` if it pins workspaces that other contributors should not inherit; add it to `.gitignore` instead.
 

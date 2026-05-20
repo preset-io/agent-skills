@@ -19,7 +19,7 @@ Use for credential-bearing database connection reads and database connection cha
 
 - Classify connection configuration as credential-bearing.
 - Permit metadata summary only unless the user approves a credential-bearing read.
-- Require approval before data-returning reads, validation, OAuth, upload, create, update, or delete.
+- Require approval before credential-bearing configuration reads, validation, OAuth, upload, create, update, sync permissions, or delete.
 - Forbid printing URI, password, private key, token, certificate, SSH password, or engine extras.
 
 ## Workflow Order

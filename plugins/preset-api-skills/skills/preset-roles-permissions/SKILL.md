@@ -14,6 +14,7 @@ Use as the approval and access-review gate for permission-sensitive workflows.
 - Use `preset-superset` for workspace current-user roles, permissions, and OpenAPI availability.
 - Treat role and permission changes as `permission_write`.
 - Do not guess role IDs or custom role identifiers.
+- Do not use internal `/api-internal/*`, billing, SCIM, broad Superset security manager, or unsupported permission APIs from this skill; defer to `references/role-permission-changes.md`.
 - Require confirmation of target principal, current access, new access, seat impact, and rollback path.
 
 ## Decision Rules

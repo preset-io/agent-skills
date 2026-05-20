@@ -16,7 +16,7 @@ Use for read-only team, workspace, hostname, health, and workspace membership di
 
 ## Decision Rules
 
-- Use Manager and workspace discovery as read-only.
+- Treat Management API team/workspace discovery as read-only.
 - Distinguish membership listing from access change.
 - Use discovered workspace hostname and status.
 - Avoid changing access.

@@ -16,12 +16,15 @@ Do not run a "dump all env vars" command in agent transcripts. `SUP_PRESET_API_T
 
 ```bash
 sup workspace list --json
-sup workspace use <workspace-id>
+sup workspace use <workspace-id>             # Project-local: writes to .sup/state.yml in the current directory
+sup workspace use <workspace-id> --persist   # Global: writes to ~/.sup/config.yml (short form: -p)
 sup workspace show                # Display source + target workspace context
 sup workspace info <workspace-id> # Inspect a single workspace
 ```
 
-`sup workspace use` writes the workspace ID into `~/.sup/config.yml` so subsequent commands inherit it. Pair with `sup workspace list --json` to discover IDs before calling `use`.
+`sup workspace use` accepts a numeric workspace ID, a workspace URL (e.g. `https://myworkspace.us1a.app.preset.io/`), or a bare hostname. **Without `--persist`, the selection is project-local** — `sup` writes to `.sup/state.yml` in the current directory and the CLI reports "Using workspace `{id}` for this project". Pass `--persist` (or `-p`) to save the selection to the global `~/.sup/config.yml`. For ephemeral overrides in CI or scripts, prefer the env var `SUP_WORKSPACE_ID=<id>` instead of either persistence mode.
+
+Pair with `sup workspace list --json` to discover IDs before calling `use`.
 
 ## Set Configuration Values
 

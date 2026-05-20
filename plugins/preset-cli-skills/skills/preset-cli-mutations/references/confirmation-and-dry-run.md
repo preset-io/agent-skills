@@ -4,7 +4,7 @@ Use this template for every mutating `sup` invocation, single-workspace or cross
 
 ## Required Steps
 
-1. **Preview.** For `sup sync run`, run with `--dry-run` and capture the full output. For `sup chart push` / `sup dashboard push` / `sup dataset push` (which do not expose `--dry-run`), pull the current target state with the matching `sup … pull` command and diff against the assets folder; capture the diff.
+1. **Preview.** Use the native `--dry-run` flag where it exists: `sup sync run --dry-run`, `sup user push --dry-run`, `sup user invite --dry-run`. For `sup chart push` / `sup dashboard push` / `sup dataset push` (which do not expose `--dry-run`), pull the current target state with the matching `sup … pull` command and diff against the assets folder; capture the diff. Either way, capture the full preview output.
 2. **Summarize.** Fill out the confirmation template below with the preview results.
 3. **Wait.** Pause for explicit user confirmation that names the target workspace by its human-readable name. If the run uses `--force` or `--overwrite`, the confirmation message must also contain the literal flag strings (`--force`, `--overwrite`).
 4. **Execute.** Run the mutating command only after the confirmation is received.
@@ -27,7 +27,7 @@ About to run a state-changing `sup` command.
   Rollback plan:   <git revert + re-run | manual UI fix | snapshot restore | …>
   Audit trail:     <PR/ticket/run-log location>
 
-Preview output (sync --dry-run, or pull-and-diff for push):
+Preview output (native --dry-run for sync / user push / user invite, or pull-and-diff for chart/dashboard/dataset push):
 <paste the preview output, redacted of any tokens or credentials>
 
 To proceed, reply with the literal target workspace name: "<name>".

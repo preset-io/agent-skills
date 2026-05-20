@@ -11,7 +11,7 @@ Use for state-changing CLI operations: single-workspace writes (push, --force, -
 
 - Use `preset-cli` first to establish auth, workspace, and output context.
 - CLI mutation surface only; route HTTP mutations to `preset-api-skills`.
-- Preview before execution: pull-and-diff for entity push (no native `--dry-run`); `sup sync run --dry-run` for sync.
+- Preview before execution: native `--dry-run` for `sup sync run`, `sup user push`, and `sup user invite`; pull-and-diff for `sup chart push` / `sup dashboard push` / `sup dataset push` (no native `--dry-run`).
 - Identify source AND target workspace explicitly before any cross-workspace operation.
 - Require explicit typed user confirmation that contains the literal `--force` / `--overwrite` flag string when applicable.
 - Redact tokens and credential-bearing output in transcripts.

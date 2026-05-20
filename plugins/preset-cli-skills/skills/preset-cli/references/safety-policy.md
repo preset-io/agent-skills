@@ -40,7 +40,7 @@ For mutations, the confirmation must name the target workspace by its human-read
 
 ## Pull-and-Diff for Entity Push
 
-`sup chart push`, `sup dashboard push`, and `sup dataset push` do **not** expose a native `--dry-run` flag. Only `sup sync run --dry-run` does. For entity push, the agent must pull the current target state with the matching `sup … pull` command and diff against the assets folder, then present the diff as the preview. Skipping this step is equivalent to skipping `--dry-run` on a sync, and is refused by `preset-cli-mutations`.
+`sup chart push`, `sup dashboard push`, and `sup dataset push` do **not** expose a native `--dry-run` flag. The CLI commands that do expose native `--dry-run` are `sup sync run`, `sup user push`, and `sup user invite` — use the native flag there. For chart/dashboard/dataset push, the agent must pull the current target state with the matching `sup … pull` command and diff against the assets folder, then present the diff as the preview. Skipping this step is equivalent to skipping `--dry-run` on a sync, and is refused by `preset-cli-mutations`.
 
 ## Transcripts and Audit Trail
 

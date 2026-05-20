@@ -15,20 +15,22 @@ Use this reference for `list`, `info`, and `pull` workflows that do not mutate w
 
 `pull` writes asset definitions to the local filesystem (YAML files in `./assets/` or a path supplied to the command). It does not modify the source workspace.
 
-## Universal Filters
+## List Filters by Entity
 
-These flags work on every list command:
+Filter availability is per-entity, not universal. Verify against this matrix before composing a `list` command:
 
-```bash
---mine                       # Filter to objects owned by the current user
---search "<pattern>"         # Server-side search (charts, dashboards, datasets, queries)
---name "<pattern>"           # Wildcard name match
---ids "1,2,3"                # Explicit ID list
---limit 50                   # Page size; agent default 50, raise deliberately
---workspace-id <id>          # Per-command workspace override (long form; -w short form)
-```
+| Entity | `--id` | `--ids` | `--search` | `--name` | `--mine` | `--limit` | Other |
+|---|---|---|---|---|---|---|---|
+| `chart` | ✓ | ✓ | ✓ (title) | — | ✓ | ✓ | `--dashboard-id`, `--dataset-id`, `--team` |
+| `dashboard` | ✓ | ✓ | ✓ (title/slug) | — | ✓ | ✓ | `--published`, `--draft`, `--folder` |
+| `dataset` | ✓ | ✓ | ✓ (table name) | — | ✓ | ✓ | `--database-id`, `--schema`, `--table-type`, `--team` |
+| `query` | ✓ | — | — | ✓ (label pattern, wildcards) | ✓ | ✓ | `--database-id`, `--schema` |
+| `database` | — | — | — | — | — | — | output flags + `--workspace-id` only |
+| `user` | — | — | — | — | — | ✓ | output flags + `--workspace-id` only |
 
-Combine with output flags (see [output-formats.md](output-formats.md)) to produce agent-consumable results.
+`--workspace-id <id>` (long form) or `-w <id>` (short form) is accepted on every `list` command for per-command workspace override. Output flags (`--json`, `--yaml`, `--porcelain`) are also universal; see [output-formats.md](output-formats.md).
+
+Do not assume a filter exists on an entity it is not listed for; `sup database list --mine`, `sup user list --search`, and `sup query list --search` will all error. For saved queries specifically, use `--name "<pattern>"` (supports wildcards) rather than `--search`.
 
 ## Common Read Patterns
 

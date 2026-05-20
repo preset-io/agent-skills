@@ -7,10 +7,12 @@ Use this reference for `sup` commands that create, update, or overwrite assets w
 | Command | Effect |
 |---|---|
 | `sup chart push` | Push chart YAML from filesystem into the workspace; creates or updates charts. Supports `--overwrite` and `--force`. |
-| `sup dashboard push` | Push dashboard YAML; creates or updates dashboards. Supports `--overwrite`. |
-| `sup dataset push` | Push dataset YAML; pushes database dependencies first, then datasets. Supports `--overwrite`. |
-| `sup chart push --overwrite` | Overwrite existing charts matching the local IDs/UUIDs. |
-| `sup chart push --force` | Skip the CLI's interactive confirmation prompt. Treat this as elevated permission. |
+| `sup dashboard push` | Push dashboard YAML; creates or updates dashboards. Supports `--overwrite` and `--force`. |
+| `sup dataset push` | Push dataset YAML; pushes database dependencies first, then datasets. Supports `--overwrite` and `--force`. |
+| `sup user push` | Push user YAML; creates or updates user records. Supports `--dry-run`. |
+| `sup user invite` | Invite users to a workspace. Supports `--dry-run`. |
+| `<entity> push --overwrite` | Overwrite existing assets matching the local IDs/UUIDs. |
+| `<entity> push --force` | Skip the CLI's interactive confirmation prompt. Treat this as elevated permission. |
 
 There is no `sup database push` — database connections are not mutated through the CLI's push surface. Dataset push will push the database connection referenced by the dataset YAML, so creating a dataset that references a new database can result in a new database connection being created in the workspace; flag that explicitly in the confirmation step.
 
@@ -19,8 +21,8 @@ There is no general `sup … delete` surface. If a user asks to delete an asset 
 ## `--force` and `--overwrite` Semantics
 
 - `--overwrite` matches assets by ID/UUID and replaces their bodies wholesale. Custom edits made in the target workspace UI are lost.
-- `--force` is currently surfaced on `sup chart push`. It skips the interactive confirmation prompt inside `sup`. It does **not** skip the confirmation required by this skill; an agent must still present the confirmation template from [confirmation-and-dry-run.md](confirmation-and-dry-run.md) before invoking `--force`.
-- Combining `--overwrite --force` on a chart push is the most destructive single-workspace combination available via the CLI. Refuse to run it without the literal target workspace name and the literal flag string(s) in the user's confirmation message.
+- `--force` is surfaced on `sup chart push`, `sup dashboard push`, and `sup dataset push`. It skips the interactive confirmation prompt inside `sup`. It does **not** skip the confirmation required by this skill; an agent must still present the confirmation template from [confirmation-and-dry-run.md](confirmation-and-dry-run.md) before invoking `--force` on any of those commands.
+- Combining `--overwrite --force` on any entity push (chart, dashboard, or dataset) is the most destructive single-workspace combination available via the CLI. Refuse to run it without the literal target workspace name and the literal flag string(s) in the user's confirmation message.
 
 ## Pushed-Dependency Behavior
 
@@ -37,7 +39,7 @@ Always run the assets-folder discovery step first (`ls assets/`, `sup chart pull
 
 ## Pre-Push Checklist
 
-`sup chart push` and `sup dashboard push`/`sup dataset push` do not currently expose a `--dry-run` flag (only `sup sync run` does). Before invoking a single-workspace push the agent must instead:
+`sup chart push`, `sup dashboard push`, and `sup dataset push` do not currently expose a `--dry-run` flag. (`sup sync run`, `sup user push`, and `sup user invite` do — use the native `--dry-run` there.) For entity push without a native `--dry-run`, the agent must instead:
 
 1. Confirm the target workspace name and ID with the user.
 2. Inventory the assets folder (`ls`, `head`) and pull the current target state with `sup chart pull` / `sup dataset pull` / `sup dashboard pull` for diff. Present the diff between local YAML and pulled-target YAML.

@@ -7,7 +7,7 @@ Use this reference when choosing output flags for an agent, automation script, o
 | Flag | When to use |
 |---|---|
 | `--json` | Default for agents. Structured, parsable, stable field names. |
-| `--csv` | Tabular data export, spreadsheets, downstream pandas/duckdb. |
+| `--csv` | Tabular data export from data-returning commands only (`sup sql`, `sup chart data`); spreadsheets, downstream pandas/duckdb. Not supported on `list` commands. |
 | `--yaml` | Configuration-friendly output that round-trips with `sup` config files. |
 | `--porcelain` | Machine-readable, no decorations, stable across versions for scripting (`xargs`, `awk`, `cut`). |
 | _(none)_ | Rich human tables. Never produce these in agent-driven contexts. |
@@ -16,10 +16,14 @@ Use this reference when choosing output flags for an agent, automation script, o
 
 ```bash
 sup chart list --mine --json
-sup dataset list --search="sales" --csv > sales-datasets.csv
+sup dataset list --search="sales" --json > sales-datasets.json
 sup workspace list --porcelain | awk '{print $1}'
 sup sql "SELECT COUNT(*) FROM users" --json
+sup sql "SELECT * FROM sales" --csv > sales.csv
+sup chart data 3628 --csv > chart-3628.csv
 ```
+
+`--csv` is supported on `sup sql` and `sup chart data` (data-returning commands). `list` commands only support `--json`, `--yaml`, and `--porcelain` — there is no `--csv` on list. Pipe through `jq` to `@csv` if you need CSV-shaped list output.
 
 ## Default for Agents
 

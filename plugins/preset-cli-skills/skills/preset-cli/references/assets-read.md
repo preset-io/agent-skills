@@ -11,7 +11,7 @@ Use this reference for `list`, `info`, and `pull` workflows that do not mutate w
 | `chart` | `sup chart list`, `sup chart info`, `sup chart pull`, `sup chart data`, `sup chart sql` | `chart data` returns query results; `chart sql` returns compiled SQL. |
 | `dashboard` | `sup dashboard list`, `sup dashboard info`, `sup dashboard pull` | Layout and chart references. |
 | `query` | `sup query list`, `sup query info` | Saved query metadata and SQL. |
-| `user` | `sup user list` | Read-only; no pull/push by design. |
+| `user` | `sup user list`, `sup user info`, `sup user pull` | User metadata, role memberships, and team assignments. `sup user push` and `sup user invite` exist and are mutating — load `preset-cli-mutations` for those. |
 
 `pull` writes asset definitions to the local filesystem (YAML files in `./assets/` or a path supplied to the command). It does not modify the source workspace.
 

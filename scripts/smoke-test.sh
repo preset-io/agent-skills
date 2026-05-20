@@ -564,7 +564,8 @@ for skill in "${required_cli_skills[@]}"; do
   require_file "$file"
   require_grep "^name: $skill$" "$file"
   require_grep "^description: " "$file"
-  require_grep "Use only for CLI" "$file"
+  grep -Eq "Use only for CLI( mutation)? workflows" "$file" \
+    || fail "missing 'Use only for CLI [mutation ]workflows' anchor in $file"
   require_grep "Do not use for MCP-only work" "$file"
   require_dir "$CLI_ROOT/skills/$skill/references"
   require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/AGENTS.md"
@@ -600,7 +601,7 @@ require_grep "preset-api-skills" "$CLI_ROOT/skills/preset-cli/references/cli-vs-
 require_grep "Default to non-destructive reads" "$CLI_ROOT/skills/preset-cli/references/safety-policy.md"
 require_grep "sup chart push" "$CLI_ROOT/skills/preset-cli-mutations/references/write-operations.md"
 require_grep "sup sync" "$CLI_ROOT/skills/preset-cli-mutations/references/cross-workspace-sync.md"
-require_grep "Always dry-run" "$CLI_ROOT/skills/preset-cli-mutations/references/confirmation-and-dry-run.md"
+require_grep "Always preview before any mutating run" "$CLI_ROOT/skills/preset-cli-mutations/references/confirmation-and-dry-run.md"
 require_grep "preset-cli-mutations" "$CLI_ROOT/skills/preset-cli/SKILL.md"
 require_grep "preset-cli/references/safety-policy.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
 

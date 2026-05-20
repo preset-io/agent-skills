@@ -22,7 +22,7 @@ About to run a state-changing `sup` command.
                    # note: dataset push pushes referenced database connections first
   Asset IDs/UUIDs: <comma-separated list or "see preview output above">
   Overwrite:       <yes / no>
-  --force:         <yes / no>                    # skips interactive prompts inside sup (chart push only)
+  --force:         <yes / no>                    # skips interactive prompts inside sup (chart/dashboard/dataset push)
   Jinja context:   <env=production, region=us-east-1, …>   # sync only
   Rollback plan:   <git revert + re-run | manual UI fix | snapshot restore | …>
   Audit trail:     <PR/ticket/run-log location>
@@ -51,7 +51,7 @@ Abort and do not execute when any of the following holds:
 
 ## Always Dry-Run
 
-Always dry-run before executing `sup sync run`; always pull-and-diff before executing `sup chart push` / `sup dashboard push` / `sup dataset push`. The CLI does not expose a `--dry-run` for the entity-level push commands, so the pull-and-diff substitute is required, not optional. Do this for every mutating run, even operations the agent has run before in the same session — source workspaces evolve, target workspaces drift, and the preview is the only mechanism that surfaces the actual delta about to be applied.
+Always preview before any mutating run. The native `--dry-run` flag is available on `sup sync run`, `sup user push`, and `sup user invite`; use it there. For `sup chart push`, `sup dashboard push`, and `sup dataset push` (which do not expose a native `--dry-run`), the agent must pull the target workspace's current state with the matching `sup … pull` command and diff against the assets folder. The pull-and-diff substitute is required, not optional, for those three. Do this for every mutating run, even operations the agent has run before in the same session — source workspaces evolve, target workspaces drift, and the preview is the only mechanism that surfaces the actual delta about to be applied.
 
 ## Audit-Log Expectations
 
@@ -59,7 +59,7 @@ Every mutating `sup` run leaves a trace in the target workspace's audit log. The
 
 - Record the timestamp and operator before running.
 - Capture the `sup` exit code afterward.
-- Note where the corresponding audit log can be reviewed (`preset-admin` skill, `references/audit-logs.md`).
+- Note where the corresponding audit log can be reviewed (the workspace audit log in Preset Manage, or the Management API audit endpoints).
 
 ## Chain to Safety Policy
 

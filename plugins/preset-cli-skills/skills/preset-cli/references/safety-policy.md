@@ -24,6 +24,7 @@ For mutations, the confirmation must name the target workspace by its human-read
 ## Secret Hygiene
 
 - Never paste `SUP_PRESET_API_TOKEN`, `SUP_PRESET_API_SECRET`, or any bearer token onto a command line. Use environment variables or `sup config auth`.
+- Do not enumerate `SUP_*` environment variables on the user's behalf. If a user needs to debug their environment, ask them to run `env | grep SUP_` themselves, locally, and redact any token/secret values before sharing the output. The agent must not run any "dump all env vars" command in a shared transcript.
 - Do not commit `~/.sup/config.yml` or any `.sup/state.yml` that contains stored credentials.
 - Redact access tokens, refresh tokens, JWTs, database passwords, SQLAlchemy URIs, and signed guest tokens in transcripts, screenshots, PR comments, and CI logs.
 - When dataset push pushes a referenced database connection, treat the database connection as a credential-bearing surface even if `sup` does not print the secret.

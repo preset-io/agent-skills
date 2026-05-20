@@ -1,26 +1,42 @@
 ---
 name: preset-cli
-description: Drive Preset's `sup` CLI (PyPI package `superset-sup`) for shell-level, scripting, and CI/CD workflows. Use only for CLI workflows when a user wants shell one-liners, batch exports, ad-hoc SQL from a terminal, CI automation, or any task that is simpler as a single `sup …` command than as an HTTP call. Do not use for MCP-only work; do not use for state-changing operations (push, sync, --overwrite, --force) — load preset-cli-mutations instead.
+description: Drive Preset's `sup` CLI (PyPI package `superset-sup`) for shell, scripting, CI/CD, and agent-driven Preset workflows. Use only for CLI workflows; Do not use for MCP-only work or for direct HTTP/SDK code paths.
 ---
 
 # preset-cli
 
-Use this skill for non-destructive `sup` CLI workflows: install, auth, configuration, output selection, SQL reads, and read/export of assets. These skills are for CLI workflows only. If the user is working through Preset/Superset MCP tools, stay on the MCP surface and use `preset-mcp-skills`; if the user wants direct HTTP, SDK, or `requests`/`curl` code, use `preset-api-skills`. Do not switch surfaces unless the user explicitly approves the switch.
+Use as the foundation for shell, scripting, CI/CD, and agent-driven Preset workflows through the `sup` CLI.
 
-## Workflow
+## Always
 
-1. Load [references/install-and-auth.md](references/install-and-auth.md) when installing the package, choosing an entry point, configuring credentials, or setting `SUP_PRESET_API_TOKEN` / `SUP_PRESET_API_SECRET`.
-2. Load [references/output-formats.md](references/output-formats.md) when selecting between `--json`, `--csv`, `--yaml`, or `--porcelain`, or interpreting exit codes and stderr.
-3. Load [references/workspace-and-config.md](references/workspace-and-config.md) when listing or switching workspaces, inspecting current config, or using per-command workspace overrides.
-4. Load [references/sql-and-query.md](references/sql-and-query.md) when running ad-hoc SQL via `sup sql`, listing saved queries, or shaping query output for agent consumption.
-5. Load [references/assets-read.md](references/assets-read.md) when listing, getting, or exporting databases, datasets, charts, dashboards, or users.
-6. Load [references/cli-vs-api.md](references/cli-vs-api.md) when deciding whether to use the CLI or route to `preset-api-skills` for HTTP/SDK code paths.
-7. Load [references/safety-policy.md](references/safety-policy.md) before any operation that is not clearly a metadata read, and route any mutating operation to `preset-cli-mutations`.
+- CLI surface only; stay on MCP or direct API if that's what the user requested.
+- Default to `--json` for automation and agent consumption.
+- Keep `SUP_PRESET_API_TOKEN` / `SUP_PRESET_API_SECRET` out of command lines and shared output; use env vars or `sup config auth`, never paste secrets on the command line.
+- Route push, sync, overwrite, and `--force` to `preset-cli-mutations`.
+- Redact tokens and credential-bearing output in transcripts.
 
-## Core Rules
+## Decision Rules
 
-- Default to `--json` when producing output for an agent or downstream automation.
-- Never paste `SUP_PRESET_API_TOKEN`, `SUP_PRESET_API_SECRET`, or any bearer token into a command line; rely on environment variables and `sup config auth`.
-- Do not invoke push, sync, `--overwrite`, or `--force` operations from this skill; route to `preset-cli-mutations` instead.
-- Redact access tokens, refresh tokens, and database credentials in transcripts, screenshots, and PR comments.
-- Load [references/safety-policy.md](references/safety-policy.md) before any data-returning read (e.g. `sup chart data`, `sup sql`) and before routing to `preset-cli-mutations`.
+- Classify CLI vs MCP vs direct API intent before acting; if MCP or direct API was requested, defer to that plugin.
+- Distinguish metadata reads from data-returning reads (e.g. `sup sql`, `sup chart data`) — load safety policy before non-metadata reads.
+- Choose output format based on the downstream consumer: `--json` for automation, `--csv` for files, default Rich for humans, `--porcelain` for shell pipelines.
+- For mutating intent, stop and load `preset-cli-mutations` rather than continuing on this card.
+
+## Workflow Order
+
+1. Establish install, auth, and workspace context.
+2. Choose output format.
+3. Classify risk (metadata read vs data-returning read vs mutation).
+4. Load the focused reference for the operation.
+5. Run only the safe / read command.
+6. Redact output before sharing.
+
+## Retrieve
+
+- Install, entry points, OAuth, env vars: [references/install-and-auth.md](references/install-and-auth.md)
+- Output formats, `--json` / `--csv` / `--yaml` / `--porcelain`, exit codes: [references/output-formats.md](references/output-formats.md)
+- `sup config`, workspace selection, `--workspace-id` override: [references/workspace-and-config.md](references/workspace-and-config.md)
+- Ad-hoc SQL and saved queries: [references/sql-and-query.md](references/sql-and-query.md)
+- Asset reads and exports (databases, datasets, charts, dashboards, users): [references/assets-read.md](references/assets-read.md)
+- CLI vs API routing decision: [references/cli-vs-api.md](references/cli-vs-api.md)
+- Approval gates and credential redaction: [references/safety-policy.md](references/safety-policy.md)

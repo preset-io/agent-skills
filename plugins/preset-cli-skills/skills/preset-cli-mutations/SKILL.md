@@ -1,25 +1,40 @@
 ---
 name: preset-cli-mutations
-description: State-changing operations via Preset's `sup` CLI — single-workspace writes (`sup chart push`, `sup dashboard push`, `sup dataset push`, `--force`/`--overwrite` mutators) and cross-workspace promotion (`sup sync create/run/validate`). Loads confirmation templates and secret-handling guardrails by construction. Use only for CLI workflows when the user explicitly asks to push, sync, or overwrite Preset state via the `sup` CLI. Do not use for MCP-only work. Always preview first (`sup sync run --dry-run` for sync; pull-and-diff for chart/dashboard/dataset push, which have no native dry-run); always present source workspace, target workspace, and asset counts before executing.
+description: State-changing Preset `sup` CLI operations — single-workspace writes (`sup chart push`, `sup dashboard push`, `sup dataset push`, `--force`/`--overwrite`) and cross-workspace promotion (`sup sync create/run/validate`). Use only for CLI mutation workflows; Do not use for MCP-only work or for direct HTTP/SDK mutations.
 ---
 
 # preset-cli-mutations
 
-Use this skill for any `sup` invocation that changes Preset state, locally or across workspaces.
+Use for state-changing CLI operations: single-workspace writes (push, --force, --overwrite) and cross-workspace promotion (sync).
 
-## Workflow
+## Always
 
-1. Confirm workspace context first via [../preset-cli/references/workspace-and-config.md](../preset-cli/references/workspace-and-config.md) so the source and target workspace are named and recorded before any mutation work.
-2. Classify the requested operation: single-workspace write → load [references/write-operations.md](references/write-operations.md); cross-workspace promotion → load [references/cross-workspace-sync.md](references/cross-workspace-sync.md).
-3. Preview before executing: for `sup sync run`, run `--dry-run` and capture the diff; for `sup chart push` / `sup dashboard push` / `sup dataset push` (which do not expose `--dry-run`), pull the target workspace's current state and diff against the assets folder.
-4. Load [references/confirmation-and-dry-run.md](references/confirmation-and-dry-run.md), populate the confirmation template with source workspace, target workspace, asset IDs/types, preview/diff summary, and any `--force` / `--overwrite` flags, then present it to the user.
-5. Execute only after the user types an explicit confirmation that names the target workspace and includes the literal flag string for every destructive flag the run will use.
-6. Load [../preset-cli/references/safety-policy.md](../preset-cli/references/safety-policy.md) to record the disclosure and confirmation. This skill is for CLI workflows only; if the user wants direct HTTP mutations, route to the separate `preset-api-skills` package instead.
+- Use `preset-cli` first to establish auth, workspace, and output context.
+- CLI mutation surface only; route HTTP mutations to `preset-api-skills`.
+- Preview before execution: pull-and-diff for entity push (no native `--dry-run`); `sup sync run --dry-run` for sync.
+- Identify source AND target workspace explicitly before any cross-workspace operation.
+- Require explicit typed user confirmation that contains the literal `--force` / `--overwrite` flag string when applicable.
+- Redact tokens and credential-bearing output in transcripts.
 
-## Core Rules
+## Decision Rules
 
-- Refuse to execute a mutating `sup` command without a prior preview: `--dry-run` for sync, or a pull-and-diff against the target workspace for chart/dashboard/dataset push.
-- Refuse to execute without an explicit confirmation that names the target workspace (ID and human-readable name).
-- Refuse `--force` without typed confirmation containing the literal string `--force` and the target workspace name. Refuse `--overwrite` without typed confirmation containing the literal string `--overwrite` and the target workspace name. Refuse `--overwrite --force` together without both flag strings present in the confirmation message.
-- Never bypass the confirmation step by claiming the call site is "automation" or "CI"; CI must encode the confirmation in code-reviewable configuration, not skip it.
-- Redact tokens, refresh tokens, database passwords, and any credential surfaced in `sup` output before sharing transcripts, logs, or screenshots.
+- Distinguish single-workspace writes (`sup chart/dashboard/dataset push`) from cross-workspace sync (`sup sync run`).
+- Treat `--force` and `--overwrite` as destructive flags; never invoke without explicit per-flag confirmation.
+- Do not let CI / automation context bypass the confirmation step; refuse if no interactive operator is available.
+- Route HTTP mutations to the API plugin; route MCP-driven workflows to the MCP plugin.
+
+## Workflow Order
+
+1. Resolve source and (if cross-workspace) target workspace.
+2. Preview / diff to surface what will change.
+3. Summarize asset counts, effects, and any destructive flags.
+4. Ask for typed confirmation containing the literal destructive flag string.
+5. Stop before execution and wait for the typed confirmation.
+6. Execute only after confirmation.
+
+## Retrieve
+
+- Single-workspace writes (push, `--overwrite`, `--force`, dependency handling): [references/write-operations.md](references/write-operations.md)
+- Cross-workspace promotion (sync, source/target, Jinja2, `--dry-run`): [references/cross-workspace-sync.md](references/cross-workspace-sync.md)
+- Confirmation template and dry-run handling: [references/confirmation-and-dry-run.md](references/confirmation-and-dry-run.md)
+- Approval gates, redaction, abort triggers: [../preset-cli/references/safety-policy.md](../preset-cli/references/safety-policy.md)

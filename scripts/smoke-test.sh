@@ -564,7 +564,7 @@ for skill in "${required_cli_skills[@]}"; do
   require_file "$file"
   require_grep "^name: $skill$" "$file"
   require_grep "^description: " "$file"
-  require_grep "Use only for CLI workflows" "$file"
+  require_grep "Use only for CLI" "$file"
   require_grep "Do not use for MCP-only work" "$file"
   require_dir "$CLI_ROOT/skills/$skill/references"
   require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/AGENTS.md"

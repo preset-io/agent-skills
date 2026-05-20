@@ -1,24 +1,21 @@
 ---
 name: preset-database-connections
-description: Inspect or route Preset workspace database connection configuration, validation, OAuth, upload, and mutation workflows through direct Superset API calls with credential-aware approval. Use only for direct API workflows when a user asks for database connection details, SQLAlchemy URIs, engine parameters, SSH tunnel settings, connection tests, OAuth, or database create/update/delete. Do not use for MCP-only work.
+description: Inspect or route Preset database connection configuration, validation, OAuth, upload, create, update, and delete workflows through direct Superset API calls. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-database-connections
 
-Use this skill for credential-bearing database connection reads and database connection changes.
+Use for credential-bearing database connection reads and database connection changes.
 
-## Workflow
+## Always
 
-1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
-2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
-3. Use `preset-superset` to capture workspace version/OpenAPI and current-user roles when permissions matter.
-4. Use `preset-datasets` for database metadata before reading or changing connection configuration.
-5. Load [references/connection-configuration.md](references/connection-configuration.md) before any connection configuration read, validation, OAuth, upload, create, update, or delete.
-6. Load [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md), summarize the credential exposure or mutation, and get explicit user confirmation.
-
-## Guardrails
-
+- Use `preset-api`, `preset-workspaces`, and `preset-superset` first.
+- Prefer `preset-datasets` metadata before reading connection configuration.
 - Treat connection configuration as credential-bearing even on `GET`.
-- Never print SQLAlchemy URIs, passwords, private keys, SSH tunnel passwords, server certificates, access tokens, or engine `extra` secrets.
-- Prefer metadata reads from `preset-datasets` before accessing connection configuration.
-- Do not test, validate, create, update, or delete database connections without explicit confirmation.
+- Get explicit confirmation before configuration reads, validation, OAuth, upload, create, update, or delete.
+- Redact SQLAlchemy URIs, passwords, private keys, SSH tunnel passwords, server certificates, access tokens, and engine `extra` secrets.
+
+## Retrieve
+
+- Connection configuration, redaction, validation, OAuth, upload, create/update/delete: [references/connection-configuration.md](references/connection-configuration.md)
+- Approval policy: [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md)

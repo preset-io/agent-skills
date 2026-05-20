@@ -1,26 +1,22 @@
 ---
 name: preset-import-export
-description: Inspect and route direct Superset workspace import/export API workflows in Preset. Use only for direct API workflows when a user needs asset export/import endpoint guidance for dashboards, charts, datasets, databases, saved queries, themes, or all-assets bundles after resolving a workspace hostname. Do not use for MCP-only work.
+description: Inspect and route direct Superset import/export workflows for dashboards, charts, datasets, databases, saved queries, themes, and asset bundles. Use only for direct API workflows; Do not use for MCP-only work.
 ---
 
 # preset-import-export
 
-Use this skill for Superset workspace import/export workflows.
+Use for workspace asset import/export endpoint selection and disclosure review.
 
-## Workflow
+## Always
 
-1. Use `preset-api` first: load its authentication reference and create the reusable Python client as `client`.
-2. Use `preset-workspaces` to resolve the workspace hostname as `hostname`.
-3. Use `preset-superset` to capture the workspace version/OpenAPI before relying on an import/export endpoint.
-4. Load the focused reference for the task:
-   - [references/export-workflows.md](references/export-workflows.md) for export endpoint maps and approval details.
-   - [references/import-workflows.md](references/import-workflows.md) for import endpoint maps and mutation routing.
-   - [references/bundle-secrets-and-disclosure.md](references/bundle-secrets-and-disclosure.md) for export bundle disclosure and secret redaction rules.
-   - [references/validation-and-smoke.md](references/validation-and-smoke.md) for OpenAPI checks and safe smoke-validation patterns.
-5. Use `preset-destructive-imports` for overwrite, sparse-update, all-assets restore, database import, or secret-bearing import workflows.
+- Use `preset-api`, `preset-workspaces`, and `preset-superset` first.
+- Treat imports as mutations and exports as potential disclosure of SQL, metadata, UUIDs, tags, and credential-bearing fields.
+- Require confirmation naming workspace, endpoint, object IDs or bundle, and expected disclosure or mutation.
+- Route overwrite, sparse-update, all-assets restore, database import, and secret-bearing import to `preset-destructive-imports`.
 
-## Scope
+## Retrieve
 
-Imports mutate workspace metadata and may create or change databases, datasets, charts, dashboards, saved queries, and themes. Exports can disclose SQL, dataset metadata, database metadata, tags, object UUIDs, and credential-bearing engine or `extra` fields.
-
-Do not import or export without explicit confirmation that names the workspace, endpoint, object IDs or bundle, and expected disclosure or mutation. Route destructive or overwrite-capable imports through `preset-destructive-imports`.
+- Export endpoints and approvals: [references/export-workflows.md](references/export-workflows.md)
+- Import endpoints and mutation routing: [references/import-workflows.md](references/import-workflows.md)
+- Bundle disclosure and secret redaction: [references/bundle-secrets-and-disclosure.md](references/bundle-secrets-and-disclosure.md)
+- OpenAPI checks and safe smoke validation: [references/validation-and-smoke.md](references/validation-and-smoke.md)

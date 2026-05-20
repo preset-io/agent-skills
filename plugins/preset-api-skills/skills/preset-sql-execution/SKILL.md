@@ -30,5 +30,7 @@ Use for high-impact SQL execution and SQL Lab mutation workflows. SQL can read c
 
 ## Retrieve
 
-- Approval gates and endpoint-specific guidance: [references/sql-execution-approval.md](references/sql-execution-approval.md)
+- SQL approval routing: [references/sql-execution-approval.md](references/sql-execution-approval.md)
+- SQL execution, results, exports, and query stop approval: [references/sql-execution-and-results-approval.md](references/sql-execution-and-results-approval.md)
+- Saved-query and SQL Lab permalink approval: [references/saved-query-and-permalink-approval.md](references/saved-query-and-permalink-approval.md)
 - Global sensitive-operation policy: [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md)

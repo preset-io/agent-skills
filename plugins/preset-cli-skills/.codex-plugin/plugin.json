@@ -1,0 +1,43 @@
+{
+  "name": "preset-cli-skills",
+  "version": "0.1.0",
+  "description": "Preset CLI skills for explicit shell, scripting, and CI/CD workflows driven by the `sup` CLI (PyPI package `superset-sup`). Use only for CLI workflows; do not use for MCP-only work or as a substitute for direct API calls when the user wants HTTP/SDK code.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/preset-agent-skills",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "superset",
+    "sup",
+    "cli",
+    "shell",
+    "scripting",
+    "ci-cd",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Preset CLI Skills",
+    "shortDescription": "CLI-only Preset skills (`sup`). Use preset-api-skills for HTTP/SDK code or preset-mcp-skills for MCP-only work.",
+    "longDescription": "Markdown skills for agents driving the Preset `sup` CLI (PyPI package `superset-sup`) for shell one-liners, batch exports, ad-hoc SQL, and CI/CD automation. Includes a non-destructive foundation skill and a separate Phase-5-style mutation skill that gates `push`, `--force`, `--overwrite`, and cross-workspace `sync` behind dry-run/preview and confirmation templates. Use only when the user explicitly asks for `sup`, the Preset CLI, shell automation, or CI scripting. MCP-only tool workflows are intentionally handled by the separate preset-mcp-skills package, and direct HTTP/SDK code paths are intentionally handled by the separate preset-api-skills package; route to whichever surface the user actually asked for.",
+    "developerName": "Preset",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://preset.io/",
+    "defaultPrompt": [
+      "Install the Preset sup CLI",
+      "Authenticate the sup CLI",
+      "Run an ad-hoc SQL query through sup",
+      "Export charts and dashboards as YAML with sup",
+      "Push chart YAML to a Preset workspace",
+      "Sync assets between Preset workspaces"
+    ],
+    "brandColor": "#00A5B5"
+  }
+}

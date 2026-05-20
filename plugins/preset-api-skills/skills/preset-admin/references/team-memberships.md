@@ -4,34 +4,21 @@ Team membership endpoints require team-admin permissions for list, role-change, 
 
 Changing a team role or removing a user changes access. Load the safety policy and get explicit confirmation before making `PATCH` or `DELETE` requests.
 
+Reusable Python snippets live in `../examples/team_memberships.py`; load that file only when implementation detail is needed.
+
+## API-Key-Safe Endpoints
+
+| Goal | Method and path |
+|---|---|
+| List or filter team members | `GET /teams/{team_name}/memberships/?page_number=1&page_size=100` |
+| Get one member | `GET /teams/{team_name}/memberships/{user_id}/` |
+| Check seats remaining | `GET /teams/{team_name}/has-seats-remaining/` |
+| Update team role | `PATCH /teams/{team_name}/memberships/{user_id}/` with `{"team_role_id": <id>}` |
+| Remove team member | `DELETE /teams/{team_name}/memberships/{user_id}/` |
+
 ## List Team Members
 
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/memberships/?page_number=1&page_size=100" \
-  | jq '.payload'
-```
-
-```python
-members = client.mgmt(
-    "GET",
-    f"/teams/{team_name}/memberships/?page_number=1&page_size=100",
-)["payload"]
-```
-
-Useful filters:
-
-```python
-members = client.mgmt(
-    "GET",
-    f"/teams/{team_name}/memberships/"
-    "?page_number=1&page_size=100"
-    "&user_name_or_email=jdoe@example.com"
-    "&user_type=CREATOR",
-)["payload"]
-```
-
-The response includes `meta.count` when paginated.
+Use pagination and filter by `user_name_or_email` or `user_type` when the request targets a specific user or creator/viewer class. The response includes `meta.count` when paginated.
 
 Common response fields:
 
@@ -48,29 +35,11 @@ Common response fields:
 
 ## Get One Team Member
 
-```python
-member = client.mgmt(
-    "GET",
-    f"/teams/{team_name}/memberships/{user_id}/",
-)["payload"]
-```
+Use the numeric `user.id` from list results as `{user_id}`.
 
 ## Seat Limit Preflight
 
 Use this before creating invites or upgrading a viewer to a creator role.
-
-```bash
-curl -s \
-  "https://api.app.preset.io/v1/teams/{team_name}/has-seats-remaining/" | jq '.payload'
-```
-
-```python
-seat_check = client.mgmt(
-    "GET",
-    f"/teams/{team_name}/has-seats-remaining/",
-)["payload"]
-print(seat_check)
-```
 
 Manager also exposes a more detailed `GET /teams/{team_name}/user-limit/` route, but live validation shows it is not API-key allowed. Treat detailed seat limits as a browser/session-backed admin check outside this API-key workflow.
 
@@ -88,38 +57,11 @@ Confirmation summary should include:
 - `new_role`: new numeric `team_role_id` and role name
 - whether the role came from a group
 
-```bash
-TEAM_ROLE_ID="${PRESET_TEAM_ROLE_ID:?set PRESET_TEAM_ROLE_ID to the verified team role ID}"
-curl -s -X PATCH \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  "https://api.app.preset.io/v1/teams/{team_name}/memberships/{user_id}/" \
-  -d "{\"team_role_id\": $TEAM_ROLE_ID}"
-```
-
-```python
-updated = client.mgmt(
-    "PATCH",
-    f"/teams/{team_name}/memberships/{user_id}/",
-    json={"team_role_id": team_role_id},
-)["payload"]
-```
-
 Manager rejects changes that would remove the last team admin.
 
 ## Remove A Team Member
 
 Confirmation summary should include the team name, user ID, email, current team role, and expected access removal.
-
-```bash
-curl -s -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/memberships/{user_id}/"
-```
-
-```python
-client.mgmt("DELETE", f"/teams/{team_name}/memberships/{user_id}/")
-```
 
 Manager rejects removing yourself from a team.
 

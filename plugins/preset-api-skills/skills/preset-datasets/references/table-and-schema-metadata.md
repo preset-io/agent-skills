@@ -16,7 +16,7 @@ Reusable Python snippets live in `../examples/table_and_schema_metadata.py`; loa
 | Function names | `GET /api/v1/database/{pk}/function_names/` |
 | Upload schemas | `GET /api/v1/database/{pk}/schemas_access_for_file_upload/` |
 
-Use Rison query parameters for schema/table filters, for example `force: false` and `schema_name: <schema>`.
+Use Rison query parameters for schema/table filters, for example `force:!f` and `schema_name:<schema>`.
 
 Table metadata can expose database structure. Keep page sizes and filters narrow.
 

@@ -41,6 +41,24 @@ reject_grep() {
   fi
 }
 
+check_markdown_links() {
+  local file target target_path
+  while IFS= read -r file; do
+    while IFS= read -r target; do
+      case "$target" in
+        ""|\#*|http://*|https://*|mailto:*)
+          continue
+          ;;
+      esac
+      target_path="${target%%#*}"
+      test -e "$(dirname "$file")/$target_path" || fail "broken markdown link in $file: $target"
+    done < <(
+      grep -oE '\[[^]]+\]\([^)]+\)' "$file" \
+        | sed -E 's/^.*\]\(([^)]*)\).*$/\1/'
+    )
+  done < <(find . -name '*.md' -type f)
+}
+
 require_jq() {
   local expression="$1"
   local file="$2"
@@ -95,6 +113,7 @@ require_grep "root is not itself an installable plugin" CLAUDE.md
 require_grep "plugins/preset-api-skills/CLAUDE.md" CLAUDE.md
 require_grep "plugins/preset-mcp-skills/CLAUDE.md" CLAUDE.md
 require_grep "MCP intent wins" CLAUDE.md
+check_markdown_links
 
 require_jq '.name == "preset-agent-skills"' .agents/plugins/marketplace.json
 require_jq '.interface.displayName == "Preset Agent Skills"' .agents/plugins/marketplace.json

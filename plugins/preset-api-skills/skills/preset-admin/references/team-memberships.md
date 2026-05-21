@@ -9,7 +9,7 @@ Use this file to route to the narrow membership reference:
 - Resolve numeric role IDs before access changes: [role-identifiers.md](role-identifiers.md)
 - Check unsupported group/SCIM/session-only adjacent routes: [deferrals.md](deferrals.md)
 
-Changing a team role or removing a user changes access. Load [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md) and get explicit confirmation before making `PATCH` or `DELETE` requests.
+Changing a team role or removing a user changes access. Load [../../preset-api/references/safety-policy.md](../../preset-api/references/safety-policy.md) and get explicit confirmation before making `PATCH` or `DELETE` requests.
 
 Lookup anchors: `user_name_or_email`, `/teams/{team_name}/has-seats-remaining/`.
 

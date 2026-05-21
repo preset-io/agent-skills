@@ -10,6 +10,8 @@ Guest tokens grant signed embedded access for external viewers. They are securit
 
 Confirm the target workspace supports the endpoint through `/api/v1/_openapi` before relying on the payload shape.
 
+Reusable Python snippets live in `../examples/guest_token_claims.py`; load that file only when implementation detail is needed.
+
 ## Required Confirmation
 
 Before creating a guest token, summarize:
@@ -26,30 +28,7 @@ Wait for explicit confirmation.
 
 ## Payload Shape
 
-Use neutral placeholder claims in examples:
-
-```python
-payload = {
-    "user": {
-        "username": "external-user-id",
-        "first_name": "External",
-        "last_name": "Viewer",
-    },
-    "resources": [
-        {"type": "dashboard", "id": embedded_dashboard_uuid},
-    ],
-    "rls": [
-        {"clause": "tenant_id = 'approved-tenant-id'"},
-    ],
-}
-
-guest_token = client.workspace(
-    "POST",
-    hostname,
-    "/security/guest_token/",
-    json=payload,
-)["token"]
-```
+Use neutral placeholder claims in examples. The payload must include `user`, `resources`, and any approved `rls` entries. Do not invent identity fields, dashboard IDs, or RLS clauses.
 
 Never print signed guest tokens. Return them only through the approved delivery channel for the embedding runtime.
 

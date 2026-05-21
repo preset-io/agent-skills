@@ -30,6 +30,7 @@ Use for SQL Lab capability and query metadata workflows in a resolved Preset wor
 
 ## Retrieve
 
+- Combined SQL Lab routing and approval essentials: [references/routing-essentials.md](references/routing-essentials.md)
 - SQL Lab availability, database options, UI defaults: [references/sqllab-bootstrap.md](references/sqllab-bootstrap.md)
 - Query history reads and SQL text exposure: [references/query-history.md](references/query-history.md)
 - Saved query reads, mutations, permalinks: [references/saved-queries.md](references/saved-queries.md)

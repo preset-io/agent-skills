@@ -11,18 +11,16 @@
 
 Production examples use `https://api.app.preset.io/v1`. For sandbox or staging environments, set `PRESET_API_BASE` as described in `preset-api` and use that base URL for Management API calls.
 
-## List Teams
+Reusable Python snippets live in `../examples/workspace_discovery.py`; load that file only when implementation detail is needed.
 
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/" | jq '.payload'
-```
+## Endpoints
 
-```python
-teams = client.mgmt("GET", "/teams/")["payload"]
-for team in teams:
-    print(team["name"], team.get("title"))
-```
+| Goal | Method and path |
+|---|---|
+| List teams | `GET /teams/` |
+| Get one team | `GET /teams/{team_name}/` |
+| List workspaces for a team | `GET /teams/{team_name}/workspaces/` |
+| Get one workspace | `GET /teams/{team_name}/workspaces/{workspace_id}/` |
 
 Common response fields:
 
@@ -33,29 +31,7 @@ Common response fields:
 | `id` | Numeric team ID |
 | `created_on` | ISO 8601 creation timestamp |
 
-## Get A Team
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/" | jq '.payload'
-```
-
-```python
-team = client.mgmt("GET", f"/teams/{team_name}/")["payload"]
-```
-
-## List Workspaces For A Team
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/" | jq '.payload'
-```
-
-```python
-workspaces = client.mgmt("GET", f"/teams/{team_name}/workspaces/")["payload"]
-for ws in workspaces:
-    print(ws["title"], ws["hostname"], ws["workspace_status"])
-```
+## Workspace Fields
 
 Common response fields:
 
@@ -67,32 +43,7 @@ Common response fields:
 | `workspace_status` | Status enum such as `READY`, `HIBERNATED`, `UPGRADING`, or `ERROR` |
 | `region` | Cloud region |
 
-## Get A Workspace
-
-```bash
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.app.preset.io/v1/teams/{team_name}/workspaces/{workspace_id}/" \
-  | jq '.payload'
-```
-
-```python
-workspace = client.mgmt(
-    "GET",
-    f"/teams/{team_name}/workspaces/{workspace_id}/",
-)["payload"]
-hostname = workspace["hostname"]
-```
-
 ## Resolve Workspace Hostname By Title
-
-```python
-def get_workspace_hostname(client, team_name, workspace_title):
-    workspaces = client.mgmt("GET", f"/teams/{team_name}/workspaces/")["payload"]
-    for ws in workspaces:
-        if ws["title"].lower() == workspace_title.lower():
-            return ws["hostname"]
-    raise ValueError(f"Workspace '{workspace_title}' not found in team '{team_name}'")
-```
 
 When a user specifies a particular team or workspace by name, filter listing results to find the matching hostname rather than assuming a specific value.
 
@@ -100,26 +51,6 @@ When a user specifies a particular team or workspace by name, filter listing res
 
 Use this fan-out pattern only for inventory or admin tasks. For single-target user requests, resolve the specific team and workspace by name instead of scanning every workspace.
 
-```python
-teams = client.mgmt("GET", "/teams/")["payload"]
-for team in teams:
-    workspaces = client.mgmt("GET", f"/teams/{team['name']}/workspaces/")["payload"]
-    for ws in workspaces:
-        hostname = ws["hostname"]
-        state = ws["workspace_status"]
-        print(f"{team['name']} / {ws['title']} - {hostname} ({state})")
-```
-
 ## Check Workspace Health Before Workspace API Calls
 
-```python
-def workspace_is_ready(ws):
-    return ws["workspace_status"] == "READY"
-
-
-for ws in workspaces:
-    if not workspace_is_ready(ws):
-        print(f"Skipping {ws['title']}: workspace is {ws['workspace_status']}")
-        continue
-    # Safe to make Superset API calls.
-```
+Only make workspace Superset API calls when `workspace_status == "READY"`. If a workspace is hibernated, upgrading, or in error, report that state instead of assuming workspace API availability.

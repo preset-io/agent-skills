@@ -31,7 +31,9 @@ Use for Preset Management API administration beyond read-only workspace discover
 
 ## Retrieve
 
-- Team users, role changes, removals, seats: [references/team-memberships.md](references/team-memberships.md)
+- Team membership routing: [references/team-memberships.md](references/team-memberships.md)
+- Team member lookup, seat checks, response fields: [references/team-member-lookup.md](references/team-member-lookup.md)
+- Team role changes and removals: [references/team-member-access-changes.md](references/team-member-access-changes.md)
 - Workspace create/update/delete/un-hibernate: [references/workspace-management.md](references/workspace-management.md)
 - Invites, cancellation, resend, bulk invite: [references/invites.md](references/invites.md)
 - Audit log lookup and downloads: [references/audit-logs.md](references/audit-logs.md)

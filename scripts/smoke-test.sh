@@ -41,6 +41,24 @@ reject_grep() {
   fi
 }
 
+check_markdown_links() {
+  local file target target_path
+  while IFS= read -r file; do
+    while IFS= read -r target; do
+      case "$target" in
+        ""|\#*|http://*|https://*|mailto:*)
+          continue
+          ;;
+      esac
+      target_path="${target%%#*}"
+      test -e "$(dirname "$file")/$target_path" || fail "broken markdown link in $file: $target"
+    done < <(
+      grep -oE '\[[^]]+\]\([^)]+\)' "$file" \
+        | sed -E 's/^.*\]\(([^)]*)\).*$/\1/'
+    )
+  done < <(find . -name '*.md' -type f)
+}
+
 require_jq() {
   local expression="$1"
   local file="$2"
@@ -95,6 +113,7 @@ require_grep "root is not itself an installable plugin" CLAUDE.md
 require_grep "plugins/preset-api-skills/CLAUDE.md" CLAUDE.md
 require_grep "plugins/preset-mcp-skills/CLAUDE.md" CLAUDE.md
 require_grep "MCP intent wins" CLAUDE.md
+check_markdown_links
 
 require_jq '.name == "preset-agent-skills"' .agents/plugins/marketplace.json
 require_jq '.interface.displayName == "Preset Agent Skills"' .agents/plugins/marketplace.json
@@ -210,6 +229,8 @@ required_api_references=(
   skills/preset-admin/references/invites.md
   skills/preset-admin/references/role-identifiers.md
   skills/preset-admin/references/team-memberships.md
+  skills/preset-admin/references/team-member-access-changes.md
+  skills/preset-admin/references/team-member-lookup.md
   skills/preset-admin/references/workspace-management.md
   skills/preset-superset/references/version-and-openapi.md
   skills/preset-superset/references/current-user-and-permissions.md
@@ -229,6 +250,7 @@ required_api_references=(
   skills/preset-datasets/references/dataset-database-mutations.md
   skills/preset-sqllab/references/sqllab-bootstrap.md
   skills/preset-sqllab/references/query-history.md
+  skills/preset-sqllab/references/routing-essentials.md
   skills/preset-sqllab/references/saved-queries.md
   skills/preset-sqllab/references/sql-execution.md
   skills/preset-sqllab/references/query-results-and-exports.md
@@ -245,10 +267,17 @@ required_api_references=(
   skills/preset-guest-tokens/references/guest-token-claims.md
   skills/preset-embedded-rls/references/embedded-rls-rules.md
   skills/preset-sql-execution/references/sql-execution-approval.md
+  skills/preset-sql-execution/references/saved-query-and-permalink-approval.md
+  skills/preset-sql-execution/references/sql-execution-and-results-approval.md
   skills/preset-database-connections/references/connection-configuration.md
+  skills/preset-database-connections/references/connection-credential-reads.md
+  skills/preset-database-connections/references/connection-mutations-and-validation.md
   skills/preset-roles-permissions/references/role-permission-changes.md
   skills/preset-destructive-imports/references/destructive-import-approval.md
   skills/preset-snowflake-cortex/references/authentication-and-context.md
+  skills/preset-snowflake-cortex/references/account-auth-context.md
+  skills/preset-snowflake-cortex/references/agent-access-and-region.md
+  skills/preset-snowflake-cortex/references/oauth-context.md
   skills/preset-snowflake-cortex/references/cortex-safety.md
   skills/preset-cortex-agents/references/agent-runs.md
   skills/preset-cortex-agents/references/agent-management.md
@@ -257,6 +286,20 @@ required_api_references=(
 )
 
 for file in "${required_api_references[@]}"; do
+  require_file "$API_ROOT/$file"
+done
+
+required_api_examples=(
+  skills/preset-api/examples/preset_client.py
+  skills/preset-admin/examples/team_memberships.py
+  skills/preset-datasets/examples/table_and_schema_metadata.py
+  skills/preset-guest-tokens/examples/guest_token_claims.py
+  skills/preset-sql-execution/examples/sql_execution.py
+  skills/preset-superset/examples/version_and_openapi.py
+  skills/preset-workspaces/examples/workspace_discovery.py
+)
+
+for file in "${required_api_examples[@]}"; do
   require_file "$API_ROOT/$file"
 done
 
@@ -312,6 +355,8 @@ require_grep "/api/v1/sqllab/execute/" "$API_ROOT/skills/preset-sql-execution/re
 require_grep "/api/v1/saved_query/" "$API_ROOT/skills/preset-sql-execution/references/sql-execution-approval.md"
 require_grep "/api/v1/sqllab/permalink" "$API_ROOT/skills/preset-sql-execution/references/sql-execution-approval.md"
 require_grep "Do not paste SQL text" "$API_ROOT/skills/preset-sql-execution/references/sql-execution-approval.md"
+require_grep "build_execute_payload" "$API_ROOT/skills/preset-sql-execution/examples/sql_execution.py"
+require_grep "runAsync" "$API_ROOT/skills/preset-sql-execution/examples/sql_execution.py"
 require_grep "/api/v1/database/{pk}/connection" "$API_ROOT/skills/preset-database-connections/references/connection-configuration.md"
 require_grep "/api/v1/database/test_connection/" "$API_ROOT/skills/preset-database-connections/references/connection-configuration.md"
 require_grep "/api/v1/database/validate_parameters/" "$API_ROOT/skills/preset-database-connections/references/connection-configuration.md"
@@ -341,7 +386,9 @@ require_grep "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/" "$API_
 require_grep "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/actions/" "$API_ROOT/skills/preset-admin/references/audit-logs.md"
 require_grep "/audit/teams/{team_name}/logs/downloads/" "$API_ROOT/skills/preset-admin/references/audit-logs.md"
 require_grep "mgmt_v2_response" "$API_ROOT/skills/preset-admin/references/audit-logs.md"
-require_grep "workspace_root" "$API_ROOT/skills/preset-api/references/authentication.md"
+require_file "$API_ROOT/skills/preset-api/examples/preset_client.py"
+require_grep "workspace_root" "$API_ROOT/skills/preset-api/examples/preset_client.py"
+require_grep "examples/preset_client.py" "$API_ROOT/skills/preset-api/references/authentication.md"
 require_grep "token = download" "$API_ROOT/skills/preset-admin/references/audit-logs.md"
 require_grep "allow_redirects=False" "$API_ROOT/skills/preset-admin/references/audit-logs.md"
 require_grep "proxy/access logs" "$API_ROOT/skills/preset-admin/references/audit-logs.md"

@@ -250,6 +250,7 @@ required_api_references=(
   skills/preset-datasets/references/dataset-database-mutations.md
   skills/preset-sqllab/references/sqllab-bootstrap.md
   skills/preset-sqllab/references/query-history.md
+  skills/preset-sqllab/references/routing-essentials.md
   skills/preset-sqllab/references/saved-queries.md
   skills/preset-sqllab/references/sql-execution.md
   skills/preset-sqllab/references/query-results-and-exports.md
@@ -293,6 +294,7 @@ required_api_examples=(
   skills/preset-admin/examples/team_memberships.py
   skills/preset-datasets/examples/table_and_schema_metadata.py
   skills/preset-guest-tokens/examples/guest_token_claims.py
+  skills/preset-sql-execution/examples/sql_execution.py
   skills/preset-superset/examples/version_and_openapi.py
   skills/preset-workspaces/examples/workspace_discovery.py
 )
@@ -353,6 +355,8 @@ require_grep "/api/v1/sqllab/execute/" "$API_ROOT/skills/preset-sql-execution/re
 require_grep "/api/v1/saved_query/" "$API_ROOT/skills/preset-sql-execution/references/sql-execution-approval.md"
 require_grep "/api/v1/sqllab/permalink" "$API_ROOT/skills/preset-sql-execution/references/sql-execution-approval.md"
 require_grep "Do not paste SQL text" "$API_ROOT/skills/preset-sql-execution/references/sql-execution-approval.md"
+require_grep "build_execute_payload" "$API_ROOT/skills/preset-sql-execution/examples/sql_execution.py"
+require_grep "runAsync" "$API_ROOT/skills/preset-sql-execution/examples/sql_execution.py"
 require_grep "/api/v1/database/{pk}/connection" "$API_ROOT/skills/preset-database-connections/references/connection-configuration.md"
 require_grep "/api/v1/database/test_connection/" "$API_ROOT/skills/preset-database-connections/references/connection-configuration.md"
 require_grep "/api/v1/database/validate_parameters/" "$API_ROOT/skills/preset-database-connections/references/connection-configuration.md"

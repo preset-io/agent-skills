@@ -1,7 +1,7 @@
 {
   "name": "Preset API Skills",
   "version": "0.1.0",
-  "description": "AI agent skills for explicit direct API workflows only. Do not use for MCP-only work; use preset-mcp-skills for MCP tools or MCP clients.",
+  "description": "AI agent skills for explicit direct API workflows only. Do not use for MCP-only work.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/preset-agent-skills",
   "skills": [

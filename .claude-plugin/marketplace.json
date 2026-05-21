@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "preset-agent-skills",
-  "description": "Preset agent skill packages for direct API workflows.",
+  "description": "Preset agent skill package for direct API workflows.",
   "owner": {
     "name": "Preset",
     "url": "https://preset.io/"
@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "preset-api-skills",
-      "description": "Preset API skills for explicit direct API workflows.",
+      "description": "Preset API skills for explicit direct API workflows. Do not use for MCP-only work.",
       "author": {
         "name": "Preset",
         "url": "https://preset.io/"

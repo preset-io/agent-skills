@@ -15,11 +15,13 @@ Use this template for every mutating `sup` invocation, single-workspace or cross
 ```
 About to run a state-changing `sup` command.
 
-  Operation:       <sup chart push | sup sync run | sup dashboard push | sup dataset push>
+  Operation:       <sup chart push | sup dashboard push | sup dataset push | sup user push | sup user invite | sup sync run>
   Source ws:       <name> (id: <id>)             # for sync; omit otherwise
   Target ws:       <name> (id: <id>)             # required
-  Assets to push:  <count> charts, <count> dashboards, <count> datasets, <count> databases
-                   # note: dataset push pushes referenced database connections first
+  Assets to push:  <count> charts, <count> dashboards, <count> datasets, <count> databases, <count> users, <count> invites
+                   # include only the entity counts the operation actually touches.
+                   # note: dataset push pushes referenced database connections first.
+                   # note: sup user invite creates invite records; sup user push updates user records.
   Asset IDs/UUIDs: <comma-separated list or "see preview output above">
   Overwrite:       <yes / no>
   --force:         <yes / no>                    # skips interactive prompts inside sup (chart/dashboard/dataset push)

@@ -229,6 +229,8 @@ required_api_references=(
   skills/preset-admin/references/invites.md
   skills/preset-admin/references/role-identifiers.md
   skills/preset-admin/references/team-memberships.md
+  skills/preset-admin/references/team-member-access-changes.md
+  skills/preset-admin/references/team-member-lookup.md
   skills/preset-admin/references/workspace-management.md
   skills/preset-superset/references/version-and-openapi.md
   skills/preset-superset/references/current-user-and-permissions.md
@@ -264,10 +266,17 @@ required_api_references=(
   skills/preset-guest-tokens/references/guest-token-claims.md
   skills/preset-embedded-rls/references/embedded-rls-rules.md
   skills/preset-sql-execution/references/sql-execution-approval.md
+  skills/preset-sql-execution/references/saved-query-and-permalink-approval.md
+  skills/preset-sql-execution/references/sql-execution-and-results-approval.md
   skills/preset-database-connections/references/connection-configuration.md
+  skills/preset-database-connections/references/connection-credential-reads.md
+  skills/preset-database-connections/references/connection-mutations-and-validation.md
   skills/preset-roles-permissions/references/role-permission-changes.md
   skills/preset-destructive-imports/references/destructive-import-approval.md
   skills/preset-snowflake-cortex/references/authentication-and-context.md
+  skills/preset-snowflake-cortex/references/account-auth-context.md
+  skills/preset-snowflake-cortex/references/agent-access-and-region.md
+  skills/preset-snowflake-cortex/references/oauth-context.md
   skills/preset-snowflake-cortex/references/cortex-safety.md
   skills/preset-cortex-agents/references/agent-runs.md
   skills/preset-cortex-agents/references/agent-management.md
@@ -276,6 +285,19 @@ required_api_references=(
 )
 
 for file in "${required_api_references[@]}"; do
+  require_file "$API_ROOT/$file"
+done
+
+required_api_examples=(
+  skills/preset-api/examples/preset_client.py
+  skills/preset-admin/examples/team_memberships.py
+  skills/preset-datasets/examples/table_and_schema_metadata.py
+  skills/preset-guest-tokens/examples/guest_token_claims.py
+  skills/preset-superset/examples/version_and_openapi.py
+  skills/preset-workspaces/examples/workspace_discovery.py
+)
+
+for file in "${required_api_examples[@]}"; do
   require_file "$API_ROOT/$file"
 done
 

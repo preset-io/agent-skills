@@ -89,11 +89,37 @@ Claude.ai web does not run plugins, so each skill must be uploaded individually 
 
 ### OpenAI Codex
 
-<!-- TODO(Preset): confirm Codex install UX -->
+Codex installs this package as a plugin from the repository-level [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) catalog. The catalog points at `plugins/preset-api-skills/`, where Codex reads [`.codex-plugin/plugin.json`](plugins/preset-api-skills/.codex-plugin/plugin.json), `AGENTS.md`, and the `skills/` directory.
 
-Codex discovers this package via the root [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) catalog, which points at the local `plugins/preset-api-skills/` source. Each skill is exposed to Codex through `AGENTS.md` and the [`.codex-plugin/plugin.json`](plugins/preset-api-skills/.codex-plugin/plugin.json) manifest.
+For local development from a checkout:
 
-Install command and exact UX to be documented — see [Codex plugin documentation](https://platform.openai.com/docs) for the current install path.
+```bash
+codex plugin marketplace add /path/to/preset-agent-skills
+codex plugin add preset-api-skills@preset-agent-skills
+```
+
+For installation from GitHub:
+
+```bash
+codex plugin marketplace add preset-io/preset-agent-skills --ref main
+codex plugin add preset-api-skills@preset-agent-skills
+```
+
+Use a release tag instead of `main` for pinned installs:
+
+```bash
+codex plugin marketplace add preset-io/preset-agent-skills --ref v0.1.0
+codex plugin add preset-api-skills@preset-agent-skills
+```
+
+Verify the plugin is visible and enabled:
+
+```bash
+codex plugin marketplace list
+codex plugin list --marketplace preset-agent-skills
+```
+
+Restart Codex after installing so the new skills are loaded into the next session.
 
 ### Cursor
 

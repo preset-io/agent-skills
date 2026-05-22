@@ -56,7 +56,7 @@ check_markdown_links() {
       grep -oE '\[[^]]+\]\([^)]+\)' "$file" \
         | sed -E 's/^.*\]\(([^)]*)\).*$/\1/'
     )
-  done < <(find . -name '*.md' -type f)
+  done < <(find . -path ./dist -prune -o -name '*.md' -type f -print)
 }
 
 require_jq() {
@@ -89,6 +89,7 @@ require_file README.md
 require_file CLAUDE.md
 require_file CHANGELOG.md
 require_file LICENSE
+require_file scripts/build-claude-web-skills.mjs
 require_file .agents/plugins/marketplace.json
 require_file .claude-plugin/marketplace.json
 require_dir plugins
@@ -109,6 +110,9 @@ require_grep ".claude-plugin/marketplace.json" README.md
 require_grep "not from the repository root" README.md
 require_grep "MCP-only work" README.md
 require_grep "Do not use API skills as a fallback for MCP-only work" README.md
+require_grep "node scripts/build-claude-web-skills.mjs" README.md
+require_grep "## Surface Boundary" scripts/build-claude-web-skills.mjs
+require_grep "Do not use it for Preset/Superset MCP-only work" scripts/build-claude-web-skills.mjs
 require_grep "root is not itself an installable plugin" CLAUDE.md
 require_grep "plugins/preset-api-skills/CLAUDE.md" CLAUDE.md
 check_markdown_links
@@ -171,6 +175,8 @@ require_grep "Do not use this package for Preset/Superset MCP tool workflows" "$
 require_grep "not plugin-loaded context" "$API_ROOT/AGENTS.md"
 require_grep "not plugin-loaded context" "$API_ROOT/CLAUDE.md"
 require_grep "not plugin-loaded context" "$API_ROOT/README.md"
+require_grep "Claude web/Desktop custom skills" "$API_ROOT/README.md"
+require_grep "scripts/build-claude-web-skills.mjs" "$API_ROOT/README.md"
 require_grep "./plugins/preset-api-skills/scripts/live-workspace-smoke.sh" "$API_ROOT/README.md"
 require_grep "Required by the other direct API skills in this package" "$API_ROOT/README.md"
 if grep -q '^\./scripts/live-workspace-smoke.sh$' "$API_ROOT/README.md"; then

@@ -1,6 +1,6 @@
 ---
 name: preset-snowflake-cortex
-description: Prepare Snowflake Cortex direct API access: account URL, auth method, role, warehouse, database/schema context, privileges, and Cortex Agent routing. Use only for direct API workflows; Do not use for MCP-only work.
+description: "Prepare Snowflake Cortex direct API access: account URL, auth method, role, warehouse, database/schema context, privileges, and Cortex Agent routing. Use only for direct API workflows; Do not use for MCP-only work."
 ---
 
 # preset-snowflake-cortex

@@ -51,10 +51,16 @@ This structure keeps package discovery cheap while preserving detailed operation
 |---|---|
 | OpenAI Codex | `.codex-plugin/plugin.json` and `AGENTS.md` |
 | Claude Code | `.claude-plugin/plugin.json` and `skills/*/SKILL.md` |
+| Claude web/Desktop custom skills | Generated one-skill ZIPs from `scripts/build-claude-web-skills.mjs` |
 | Cursor | `.cursor-plugin/plugin.json` |
 | GitHub Copilot | `.github/copilot-instructions.md` |
 
 Claude Code uses the plugin manifest for package metadata and the `skills/` directory for skill discovery. `CLAUDE.md` mirrors package-level routing guidance for direct repository readers, but it is not plugin-loaded context. Cursor enumerates skill files directly in `.cursor-plugin/plugin.json`; Codex points at the `skills/` directory through `.codex-plugin/plugin.json`.
+
+Claude web/Desktop custom skill uploads use a separate flat distribution format:
+one ZIP per skill, one top-level folder, and exactly one `SKILL.md`. The build
+script inlines `references/` and `examples/` into each generated `SKILL.md` so
+the uploaded archives do not include auxiliary folders.
 
 ## Skills
 

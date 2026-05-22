@@ -111,7 +111,6 @@ require_grep "not from the repository root" README.md
 require_grep "MCP-only work" README.md
 require_grep "Do not use API skills as a fallback for MCP-only work" README.md
 require_grep "node scripts/build-claude-web-skills.mjs" README.md
-require_grep "dist/claude-web-flat-skills/report.json" README.md
 require_grep "root is not itself an installable plugin" CLAUDE.md
 require_grep "plugins/preset-api-skills/CLAUDE.md" CLAUDE.md
 check_markdown_links

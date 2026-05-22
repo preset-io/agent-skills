@@ -42,46 +42,27 @@ function main() {
     fail(`no skill folders with SKILL.md found in ${sourceRoot}`);
   }
 
-  const report = {
-    generatedAt: new Date().toISOString(),
-    sourceRoot: path.relative(root, sourceRoot),
-    outRoot: path.relative(root, outRoot),
-    format: "claude-web-desktop-flat-skill-zip",
-    constraints: {
-      oneZipPerSkill: true,
-      exactlyOneTopLevelFolder: true,
-      exactlyOneSkillMd: true,
-      referencesAndExamplesInlined: true,
-      maxDescription,
-      warnLines,
-    },
-    skills: [],
-  };
-
   let hasFailure = false;
+  const failed = [];
   for (const skill of skills) {
     const skillReport = buildSkill(skill);
-    report.skills.push(skillReport);
     if (!skillReport.ok) {
       hasFailure = true;
+      failed.push(skillReport);
     }
   }
-
-  fs.writeFileSync(
-    path.join(outRoot, "report.json"),
-    JSON.stringify(report, null, 2) + "\n",
-  );
 
   if (!keepStage) {
     fs.rmSync(stageRoot, { recursive: true, force: true });
   }
 
   if (hasFailure) {
-    fail(`generated artifacts failed validation; see ${path.join(outRoot, "report.json")}`);
+    console.error("Failed skills:");
+    console.error(JSON.stringify(failed, null, 2));
+    fail("generated artifacts failed validation");
   }
 
   console.log(`Created ${skills.length} Claude web/Desktop skill ZIPs in ${path.relative(root, outRoot)}`);
-  console.log(`Wrote ${path.relative(root, path.join(outRoot, "report.json"))}`);
 }
 
 function buildSkill(skill) {

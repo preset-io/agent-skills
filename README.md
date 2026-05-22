@@ -83,7 +83,7 @@ Claude.ai web does not run plugins, so each skill must be uploaded individually 
    ```bash
    node scripts/build-claude-web-skills.mjs
    ```
-   ZIPs are written to `dist/claude-web-flat-skills/`, with a summary at `dist/claude-web-flat-skills/report.json` covering source files, description lengths, generated sizes, and ZIP validation status.
+   ZIPs are written to `dist/claude-web-flat-skills/`.
 2. In claude.ai, open **Settings → Capabilities → Skills**, click **Upload Skill**, and upload each ZIP.
 3. You only need the skills relevant to your work — see [`plugins/preset-api-skills/README.md`](plugins/preset-api-skills/README.md) for which skills cover which workflows.
 

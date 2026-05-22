@@ -123,11 +123,25 @@ Restart Codex after installing so the new skills are loaded into the next sessio
 
 ### Cursor
 
-<!-- TODO(Preset): confirm Cursor install UX -->
+Cursor can import this repository as a GitHub-backed project rule. Use the `.git` clone URL; Cursor rejects the plain repository URL in the import dialog.
 
-Cursor reads [`.cursor-plugin/plugin.json`](plugins/preset-api-skills/.cursor-plugin/plugin.json), which enumerates each skill file directly.
+1. Open **Cursor Settings → Rules**.
+2. In **Project Rules**, click **Add Rule**.
+3. Select **Remote Rule (Github)**.
+4. Enter:
+   ```text
+   https://github.com/preset-io/preset-agent-skills.git
+   ```
 
-Install command and exact UX to be documented — see [Cursor plugin documentation](https://docs.cursor.com/) for the current install path.
+For local Cursor plugin package testing, copy the plugin package into Cursor's local plugin directory so [`.cursor-plugin/plugin.json`](plugins/preset-api-skills/.cursor-plugin/plugin.json) is at the installed plugin root:
+
+```bash
+mkdir -p ~/.cursor/plugins/local
+rm -rf ~/.cursor/plugins/local/preset-api-skills
+cp -R plugins/preset-api-skills ~/.cursor/plugins/local/preset-api-skills
+```
+
+Then restart Cursor or run **Developer: Reload Window**.
 
 ### GitHub Copilot
 

@@ -1,6 +1,6 @@
 ---
 name: preset-api
-description: Prepare direct Preset API access: auth, JWT exchange, base URLs, pagination, Rison parameters, response handling, and shared API setup. Use only for direct API workflows; Do not use for MCP-only work.
+description: "Prepare direct Preset API access: auth, JWT exchange, base URLs, pagination, Rison parameters, response handling, and shared API setup. Use only for direct API workflows; Do not use for MCP-only work."
 ---
 
 # preset-api

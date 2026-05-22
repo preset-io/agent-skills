@@ -1,6 +1,6 @@
 ---
 name: preset-superset
-description: Discover and validate direct Superset workspace API capabilities: version, OpenAPI, current user, permissions, menu, and API safety. Use only for direct API workflows; Do not use for MCP-only work.
+description: "Discover and validate direct Superset workspace API capabilities: version, OpenAPI, current user, permissions, menu, and API safety. Use only for direct API workflows; Do not use for MCP-only work."
 ---
 
 # preset-superset

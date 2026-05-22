@@ -41,7 +41,7 @@ The smoke test verifies each installable package shape, required skill files, cl
 | Claude Code (CLI) | `.claude-plugin/plugin.json` | `/plugin marketplace add` |
 | Claude.ai web | per-skill ZIPs from `scripts/build-claude-web-skills.mjs` | Manual upload in Skills settings |
 | OpenAI Codex | `.codex-plugin/plugin.json` + root `.agents/plugins/marketplace.json` + `AGENTS.md` | Codex plugin marketplace |
-| Cursor | `.cursor-plugin/plugin.json` | Cursor plugin install |
+| Cursor | GitHub Remote Rule + `.cursor-plugin/plugin.json` for local plugin testing | Remote Rule import; local plugin directory for package testing |
 | GitHub Copilot | `.github/copilot-instructions.md` | Repo-local instructions |
 
 > Replace `<MARKETPLACE_REPO>` below with the public repository URL or `owner/repo` slug for the Preset agent skills marketplace.

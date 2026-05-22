@@ -145,7 +145,7 @@ Then restart Cursor or run **Developer: Reload Window**.
 
 ### GitHub Copilot
 
-Copilot picks up repo-local instructions from [`.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) automatically when working inside a repo that contains this file. To use the Preset API skills with Copilot in a downstream project:
+Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. This package keeps its reusable Copilot instructions at [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md), so consuming repositories must opt in explicitly:
 
 1. Copy `plugins/preset-api-skills/.github/copilot-instructions.md` into the `.github/` directory of the consuming repository, or
 2. Reference the file's content from your own `.github/copilot-instructions.md`.

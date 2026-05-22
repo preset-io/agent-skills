@@ -28,6 +28,7 @@ function main() {
     fail(`source skills directory does not exist: ${sourceRoot}`);
   }
 
+  assertSafeOutputRoot(outRoot);
   fs.rmSync(outRoot, { recursive: true, force: true });
   fs.mkdirSync(stageRoot, { recursive: true });
 
@@ -342,6 +343,43 @@ function readText(file) {
 
 function relativeFromRoot(file) {
   return path.relative(root, file);
+}
+
+function assertSafeOutputRoot(target) {
+  const rootRealPath = fs.realpathSync(root);
+  const relativeTarget = path.relative(rootRealPath, target);
+
+  if (!relativeTarget) {
+    fail(`refusing to delete repository root as output directory: ${target}`);
+  }
+
+  if (relativeTarget.startsWith("..") || path.isAbsolute(relativeTarget)) {
+    fail(`refusing to delete unsafe output directory outside the repository: ${target}`);
+  }
+
+  const pathParts = relativeTarget.split(path.sep).filter(Boolean);
+  if (pathParts.length < 2) {
+    fail(`refusing to delete top-level output directory: ${target}`);
+  }
+
+  const existingAncestor = nearestExistingAncestor(target);
+  const ancestorRealPath = fs.realpathSync(existingAncestor);
+  const relativeAncestor = path.relative(rootRealPath, ancestorRealPath);
+  if (relativeAncestor.startsWith("..") || path.isAbsolute(relativeAncestor)) {
+    fail(`refusing to delete output directory through an unsafe symlink path: ${target}`);
+  }
+}
+
+function nearestExistingAncestor(target) {
+  let current = target;
+  while (!fs.existsSync(current)) {
+    const parent = path.dirname(current);
+    if (parent === current) {
+      fail(`cannot resolve existing parent directory for output path: ${target}`);
+    }
+    current = parent;
+  }
+  return current;
 }
 
 function requireCommand(command) {

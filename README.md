@@ -29,18 +29,93 @@ Run the repository smoke test after package changes:
 
 The smoke test verifies each installable package shape, required skill files, client manifests, and package boundary rules.
 
-## Claude Web/Desktop Skill ZIPs
+## Installation
 
-Claude web/Desktop custom skill uploads require a flatter artifact than the
-source skills in this repository. Build upload-ready ZIPs with:
+`preset-agent-skills` is a multi-provider skill catalog. Each supported AI tool reads the manifest it understands from the same source plugin under [`plugins/preset-api-skills/`](plugins/preset-api-skills).
 
-```bash
-node scripts/build-claude-web-skills.mjs
+### Supported clients
+
+| Client | Manifest | Distribution channel |
+|---|---|---|
+| Claude Desktop | `.claude-plugin/plugin.json` | Custom marketplace (Add marketplace → repo URL) |
+| Claude Code (CLI) | `.claude-plugin/plugin.json` | `/plugin marketplace add` |
+| Claude.ai web | per-skill ZIPs from `scripts/build-claude-web-skills.mjs` | Manual upload in Skills settings |
+| OpenAI Codex | `.codex-plugin/plugin.json` + root `.agents/plugins/marketplace.json` + `AGENTS.md` | Codex plugin marketplace |
+| Cursor | `.cursor-plugin/plugin.json` | Cursor plugin install |
+| GitHub Copilot | `.github/copilot-instructions.md` | Repo-local instructions |
+
+> Replace `<MARKETPLACE_REPO>` below with the public repository URL or `owner/repo` slug for the Preset agent skills marketplace.
+
+### Claude Desktop
+
+Add Preset's marketplace, then install the plugin. One install registers all skills, and Claude Desktop picks up new versions automatically.
+
+1. Open **Claude Desktop → Settings → Connectors**, then click the **Customize** link.
+2. In Customize, select **Skills** in the sidebar, click the **+** next to "Skills", and choose **Browse skills**.
+3. Switch to the **Plugins** tab, click **Personal**, click the **+**, and choose **Add marketplace**.
+4. In the dialog, paste the marketplace URL or `owner/repo` slug:
+   ```text
+   <MARKETPLACE_REPO>
+   ```
+   Click **Sync**. Claude Desktop warns that marketplace plugins are not verified by Anthropic — this is expected.
+5. Open the newly added marketplace and install **Preset API Skills**.
+
+### Claude Code (CLI)
+
+From any Claude Code session:
+
+```text
+/plugin marketplace add <MARKETPLACE_REPO>
+/plugin install preset-api-skills@preset-agent-skills
 ```
 
-The script reads `plugins/preset-api-skills/skills`, inlines each skill's
-`references/` and `examples/` files into that skill's generated `SKILL.md`, and
-writes one ZIP per skill to `dist/claude-web-flat-skills/`. Each ZIP contains a
-single top-level folder and exactly one `SKILL.md`. The build also writes
-`dist/claude-web-flat-skills/report.json` with description lengths, file sizes,
-source files, and ZIP validation results.
+Updates ship with each tagged release — re-run `/plugin install` to pull the latest.
+
+### Claude.ai web
+
+Claude.ai web does not run plugins, so each skill must be uploaded individually as a Skill ZIP.
+
+**Easiest path:** install [Claude Desktop](https://claude.ai/download) (free, same account) and follow the Claude Desktop steps above.
+
+**Web-only path:** upload per-skill ZIPs.
+
+1. Download the per-skill ZIPs from the [latest GitHub Release](https://github.com/preset-io/preset-agent-skills/releases/latest), or build them locally:
+   ```bash
+   node scripts/build-claude-web-skills.mjs
+   ```
+   ZIPs are written to `dist/claude-web-flat-skills/`.
+2. In claude.ai, open **Settings → Capabilities → Skills**, click **Upload Skill**, and upload each ZIP.
+3. You only need the skills relevant to your work — see [`plugins/preset-api-skills/README.md`](plugins/preset-api-skills/README.md) for which skills cover which workflows.
+
+### OpenAI Codex
+
+<!-- TODO(Preset): confirm Codex install UX -->
+
+Codex discovers this package via the root [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) catalog, which points at the local `plugins/preset-api-skills/` source. Each skill is exposed to Codex through `AGENTS.md` and the [`.codex-plugin/plugin.json`](plugins/preset-api-skills/.codex-plugin/plugin.json) manifest.
+
+Install command and exact UX to be documented — see [Codex plugin documentation](https://platform.openai.com/docs) for the current install path.
+
+### Cursor
+
+<!-- TODO(Preset): confirm Cursor install UX -->
+
+Cursor reads [`.cursor-plugin/plugin.json`](plugins/preset-api-skills/.cursor-plugin/plugin.json), which enumerates each skill file directly.
+
+Install command and exact UX to be documented — see [Cursor plugin documentation](https://docs.cursor.com/) for the current install path.
+
+### GitHub Copilot
+
+Copilot picks up repo-local instructions from [`.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) automatically when working inside a repo that contains this file. To use the Preset API skills with Copilot in a downstream project:
+
+1. Copy `plugins/preset-api-skills/.github/copilot-instructions.md` into the `.github/` directory of the consuming repository, or
+2. Reference the file's content from your own `.github/copilot-instructions.md`.
+
+There is no separate install command — Copilot loads the file whenever it edits code in the consuming repo.
+
+### Verifying the install
+
+Ask your AI tool something the skills are designed for, for example:
+
+> "Using the Preset API, list the workspaces I have access to."
+
+The tool should reference one of the Preset skills (such as `preset-workspaces` or `preset-api`). If it doesn't, the plugin/skills are not loaded — re-check the install steps for your client.

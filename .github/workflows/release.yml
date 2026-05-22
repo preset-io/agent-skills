@@ -43,11 +43,10 @@ jobs:
       - name: List generated artifacts
         run: ls -la dist/claude-web-flat-skills/
 
-      - name: Upload ZIPs and report to GitHub Release
+      - name: Upload ZIPs to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
           files: |
             dist/claude-web-flat-skills/*.zip
-            dist/claude-web-flat-skills/report.json
           fail_on_unmatched_files: true

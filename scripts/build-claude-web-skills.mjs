@@ -96,6 +96,9 @@ function buildSkill(skill) {
     `description: ${JSON.stringify(description)}`,
     "---",
     "",
+    "## Surface Boundary",
+    "Use this generated skill only for explicit direct Preset API, Superset workspace API, or Snowflake Cortex API workflows. Do not use it for Preset/Superset MCP-only work; stay on MCP tooling unless the user explicitly approves switching to direct API calls.",
+    "",
     rewriteLocalMarkdownLinks(body),
   ];
   sourceFiles.push(relativeFromRoot(sourceSkillPath));

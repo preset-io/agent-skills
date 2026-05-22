@@ -14,16 +14,20 @@ The installable package is [`preset-api-skills`](plugins/preset-api-skills/READM
 
 See the [package README](plugins/preset-api-skills/README.md) for the full catalog (17 skills covering datasets, SQL Lab, embedding, guest tokens, RLS, database connections, role/permission changes, destructive imports, and Snowflake Cortex Agents).
 
+Broader workflow surfaces are reserved but not installable yet: [`plugins/preset-mcp-skills`](plugins/preset-mcp-skills/README.md) for future MCP-only work and [`plugins/preset-cli-skills`](plugins/preset-cli-skills/README.md) for future CLI work. Codex package discovery metadata lives in [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json), and Claude marketplace metadata lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json); both catalogs intentionally list only `preset-api-skills`.
+
+Install or load `preset-api-skills` from `plugins/preset-api-skills`, not from the repository root. Use it for direct Preset Management API, Superset workspace API, and Snowflake Cortex API workflows. Do not use API skills as a fallback for MCP-only work.
+
 ## Supported clients
 
 | Client | Manifest | Distribution channel |
 |---|---|---|
-| Claude Desktop | `.claude-plugin/plugin.json` | Custom marketplace (Add marketplace → repo URL) |
-| Claude Code (CLI) | `.claude-plugin/plugin.json` | `/plugin marketplace add` |
+| Claude Desktop | `.claude-plugin/marketplace.json` → `plugins/preset-api-skills/.claude-plugin/plugin.json` | Custom marketplace (Add marketplace → repo URL) |
+| Claude Code (CLI) | `.claude-plugin/marketplace.json` → `plugins/preset-api-skills/.claude-plugin/plugin.json` | `/plugin marketplace add` |
 | Claude.ai web | per-skill ZIPs from `scripts/build-claude-web-skills.mjs` | Manual upload in Skills settings |
-| OpenAI Codex | `.codex-plugin/plugin.json` + `AGENTS.md` | Codex plugin marketplace |
-| Cursor | GitHub Remote Rule | Remote Rule import |
-| GitHub Copilot | `.github/copilot-instructions.md` | Repo-local instructions |
+| OpenAI Codex | `.agents/plugins/marketplace.json` → `plugins/preset-api-skills/.codex-plugin/plugin.json` + `AGENTS.md` | Codex plugin marketplace |
+| Cursor | `plugins/preset-api-skills/.cursor-plugin/plugin.json` | Remote Rule import |
+| GitHub Copilot | `plugins/preset-api-skills/.github/copilot-instructions.md` | Repo-local instructions |
 
 ## Installation
 
@@ -62,6 +66,12 @@ Claude.ai web does not run plugins, so each skill must be uploaded individually 
 
 **Web-only path:** download the per-skill ZIPs from the [latest GitHub Release](https://github.com/preset-io/preset-agent-skills/releases/latest), then in claude.ai open **Settings → Capabilities → Skills**, click **Upload Skill**, and upload each ZIP. You only need the skills relevant to your work.
 
+To build the same ZIPs locally instead of downloading a release, run:
+
+```bash
+node scripts/build-claude-web-skills.mjs
+```
+
 ### OpenAI Codex
 
 Install the plugin from GitHub:
@@ -80,9 +90,9 @@ Cursor imports this repository as a GitHub-backed project rule. Use the `.git` c
 1. Open **Cursor Settings → Rules**.
 2. In **Project Rules**, click **Add Rule**.
 3. Select **Remote Rule (Github)**.
-4. Enter:
+4. Enter the HTTPS clone URL:
    ```text
-   <MARKETPLACE_REPO>.git
+   https://github.com/<OWNER>/<REPO>.git
    ```
 
 ### GitHub Copilot

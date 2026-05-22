@@ -1,48 +1,31 @@
 # Preset Agent Skills
 
-Agent guidance packages for Preset, Superset, and adjacent workflows. The repository currently exposes direct API workflow skills, with placeholder directories reserved for future surfaces.
+Agent guidance for working with [Preset](https://preset.io), Apache Superset, and Snowflake Cortex Agents through their direct APIs. The skills work across Claude, OpenAI Codex, Cursor, and GitHub Copilot from a single source.
 
-## Packages
+## What's included
 
-| Package | Status | Purpose |
-|---|---|---|
-| [`plugins/preset-api-skills`](plugins/preset-api-skills/README.md) | Installable | Direct Preset Management API, Superset workspace API, and Snowflake Cortex API workflows. |
-| [`plugins/preset-mcp-skills`](plugins/preset-mcp-skills/README.md) | Placeholder | Reserved for future Preset/Superset Model Context Protocol tool workflow skills. |
-| [`plugins/preset-cli-skills`](plugins/preset-cli-skills/README.md) | Placeholder | Reserved for future Preset CLI workflow skills. |
+The installable package is [`preset-api-skills`](plugins/preset-api-skills/README.md), a catalog of focused skills your AI tool loads on demand. Highlights:
 
-Codex package discovery metadata lives in [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json). Claude marketplace metadata lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). Both catalogs intentionally list only the installable API package.
+- **`preset-api`** — authenticate with the Preset Management API (JWT exchange, base URLs, pagination, safety policy). Required by the other skills.
+- **`preset-workspaces`** — list teams and workspaces, resolve workspace hostnames, inspect membership and status.
+- **`preset-admin`** — manage team memberships, workspace lifecycle, invites, roles, and audit logs with confirmation-gated mutations.
+- **`preset-dashboards`** — inspect dashboards, charts, datasets, and chart data with safety boundaries.
+- **`preset-sql-execution`** — run or route SQL Lab execution, result retrieval, exports, and saved-query mutations with explicit approval.
 
-## Surface Boundaries
+See the [package README](plugins/preset-api-skills/README.md) for the full catalog (17 skills covering datasets, SQL Lab, embedding, guest tokens, RLS, database connections, role/permission changes, destructive imports, and Snowflake Cortex Agents).
 
-- Install or load a package from its package directory under `plugins/`, not from the repository root.
-- Use `preset-api-skills` when the user asks for direct API calls, API credentials, workspace API inspection, or Snowflake Cortex API/operator workflows.
-- Do not use API skills as a fallback for MCP-only work. If the user asks for Preset/Superset MCP tooling, stop and ask whether to switch to the API surface before using these skills.
-- Do not expose MCP or CLI skills yet. Those packages are intentionally not installable until their workflow boundaries, routing rules, and client manifests are designed in later PRs.
-
-## Validation
-
-Run the repository smoke test after package changes:
-
-```bash
-./scripts/smoke-test.sh
-```
-
-The smoke test verifies each installable package shape, required skill files, client manifests, and package boundary rules.
-
-## Installation
-
-`preset-agent-skills` is a multi-provider skill catalog. Each supported AI tool reads the manifest it understands from the same source plugin under [`plugins/preset-api-skills/`](plugins/preset-api-skills).
-
-### Supported clients
+## Supported clients
 
 | Client | Manifest | Distribution channel |
 |---|---|---|
 | Claude Desktop | `.claude-plugin/plugin.json` | Custom marketplace (Add marketplace → repo URL) |
 | Claude Code (CLI) | `.claude-plugin/plugin.json` | `/plugin marketplace add` |
 | Claude.ai web | per-skill ZIPs from `scripts/build-claude-web-skills.mjs` | Manual upload in Skills settings |
-| OpenAI Codex | `.codex-plugin/plugin.json` + root `.agents/plugins/marketplace.json` + `AGENTS.md` | Codex plugin marketplace |
-| Cursor | GitHub Remote Rule + `.cursor-plugin/plugin.json` for local plugin testing | Remote Rule import; local plugin directory for package testing |
+| OpenAI Codex | `.codex-plugin/plugin.json` + `AGENTS.md` | Codex plugin marketplace |
+| Cursor | GitHub Remote Rule | Remote Rule import |
 | GitHub Copilot | `.github/copilot-instructions.md` | Repo-local instructions |
+
+## Installation
 
 > Replace `<MARKETPLACE_REPO>` below with the public repository URL or `owner/repo` slug for the Preset agent skills marketplace.
 
@@ -77,82 +60,36 @@ Claude.ai web does not run plugins, so each skill must be uploaded individually 
 
 **Easiest path:** install [Claude Desktop](https://claude.ai/download) (free, same account) and follow the Claude Desktop steps above.
 
-**Web-only path:** upload per-skill ZIPs.
-
-1. Download the per-skill ZIPs from the [latest GitHub Release](https://github.com/preset-io/preset-agent-skills/releases/latest), or build them locally:
-   ```bash
-   node scripts/build-claude-web-skills.mjs
-   ```
-   ZIPs are written to `dist/claude-web-flat-skills/`.
-2. In claude.ai, open **Settings → Capabilities → Skills**, click **Upload Skill**, and upload each ZIP.
-3. You only need the skills relevant to your work — see [`plugins/preset-api-skills/README.md`](plugins/preset-api-skills/README.md) for which skills cover which workflows.
+**Web-only path:** download the per-skill ZIPs from the [latest GitHub Release](https://github.com/preset-io/preset-agent-skills/releases/latest), then in claude.ai open **Settings → Capabilities → Skills**, click **Upload Skill**, and upload each ZIP. You only need the skills relevant to your work.
 
 ### OpenAI Codex
 
-Codex installs this package as a plugin from the repository-level [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) catalog. The catalog points at `plugins/preset-api-skills/`, where Codex reads [`.codex-plugin/plugin.json`](plugins/preset-api-skills/.codex-plugin/plugin.json), `AGENTS.md`, and the `skills/` directory.
-
-For local development from a checkout:
+Install the plugin from GitHub:
 
 ```bash
-codex plugin marketplace add /path/to/preset-agent-skills
+codex plugin marketplace add <MARKETPLACE_REPO> --ref main
 codex plugin add preset-api-skills@preset-agent-skills
 ```
 
-For installation from GitHub:
-
-```bash
-codex plugin marketplace add preset-io/preset-agent-skills --ref main
-codex plugin add preset-api-skills@preset-agent-skills
-```
-
-Use a release tag instead of `main` for pinned installs:
-
-```bash
-codex plugin marketplace add preset-io/preset-agent-skills --ref v0.1.0
-codex plugin add preset-api-skills@preset-agent-skills
-```
-
-Verify the plugin is visible and enabled:
-
-```bash
-codex plugin marketplace list
-codex plugin list --marketplace preset-agent-skills
-```
-
-Restart Codex after installing so the new skills are loaded into the next session.
+Use a release tag (e.g. `--ref v0.1.0`) instead of `main` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
 
 ### Cursor
 
-Cursor can import this repository as a GitHub-backed project rule. Use the `.git` clone URL; Cursor rejects the plain repository URL in the import dialog.
+Cursor imports this repository as a GitHub-backed project rule. Use the `.git` clone URL; Cursor rejects the plain repository URL in the import dialog.
 
 1. Open **Cursor Settings → Rules**.
 2. In **Project Rules**, click **Add Rule**.
 3. Select **Remote Rule (Github)**.
 4. Enter:
    ```text
-   https://github.com/preset-io/preset-agent-skills.git
+   <MARKETPLACE_REPO>.git
    ```
-
-For local Cursor plugin package testing, copy the plugin package into Cursor's local plugin directory so [`.cursor-plugin/plugin.json`](plugins/preset-api-skills/.cursor-plugin/plugin.json) is at the installed plugin root:
-
-```bash
-mkdir -p ~/.cursor/plugins/local
-rm -rf ~/.cursor/plugins/local/preset-api-skills
-cp -R plugins/preset-api-skills ~/.cursor/plugins/local/preset-api-skills
-```
-
-Then restart Cursor or run **Developer: Reload Window**.
 
 ### GitHub Copilot
 
-Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. This package keeps its reusable Copilot instructions at [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md), so consuming repositories must opt in explicitly:
+Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. Copy [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) into the `.github/` directory of the consuming repository, or reference the file's content from your own `.github/copilot-instructions.md`. Copilot loads the file whenever it edits code in that repo.
 
-1. Copy `plugins/preset-api-skills/.github/copilot-instructions.md` into the `.github/` directory of the consuming repository, or
-2. Reference the file's content from your own `.github/copilot-instructions.md`.
-
-There is no separate install command — Copilot loads the file whenever it edits code in the consuming repo.
-
-### Verifying the install
+## Verifying the install
 
 Ask your AI tool something the skills are designed for, for example:
 

@@ -28,3 +28,19 @@ Run the repository smoke test after package changes:
 ```
 
 The smoke test verifies each installable package shape, required skill files, client manifests, and package boundary rules.
+
+## Claude Web/Desktop Skill ZIPs
+
+Claude web/Desktop custom skill uploads require a flatter artifact than the
+source skills in this repository. Build upload-ready ZIPs with:
+
+```bash
+node scripts/build-claude-web-skills.mjs
+```
+
+The script reads `plugins/preset-api-skills/skills`, inlines each skill's
+`references/` and `examples/` files into that skill's generated `SKILL.md`, and
+writes one ZIP per skill to `dist/claude-web-flat-skills/`. Each ZIP contains a
+single top-level folder and exactly one `SKILL.md`. The build also writes
+`dist/claude-web-flat-skills/report.json` with description lengths, file sizes,
+source files, and ZIP validation results.

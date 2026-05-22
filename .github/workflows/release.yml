@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)build assets for (e.g. v0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify required system tools
+        run: |
+          command -v zip
+          command -v zipinfo
+          command -v jq
+
+      - name: Run smoke test
+        run: ./scripts/smoke-test.sh
+
+      - name: Build Claude web skill ZIPs
+        run: node scripts/build-claude-web-skills.mjs
+
+      - name: List generated artifacts
+        run: ls -la dist/claude-web-flat-skills/
+
+      - name: Upload ZIPs and report to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          files: |
+            dist/claude-web-flat-skills/*.zip
+            dist/claude-web-flat-skills/report.json
+          fail_on_unmatched_files: true

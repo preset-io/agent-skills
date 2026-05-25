@@ -19,7 +19,8 @@ Use for Superset MCP intent, MCP tool routing, and MCP/API surface-boundary deci
 
 - MCP intent includes MCP tools, MCP clients, Superset MCP, Preset MCP, MCP resources, MCP prompts, tool discovery, and MCP tool errors.
 - Direct API intent includes API credentials, REST endpoints, OpenAPI, curl/Python requests, Management API, workspace API, and Snowflake Cortex APIs.
-- If the user mixes MCP and API language, ask which surface they want before taking action.
+- If the user starts with MCP intent and mentions direct API only as a fallback, keep MCP intent. Say: "No API fallback. Direct API is a different surface and requires separate explicit approval. Stop before API calls."
+- If the primary requested surface is unclear, ask which surface they want before taking action.
 - Use a domain skill after routing: discovery, data, visualization, dashboard, sqllab, datasets, or troubleshooting.
 
 ## Workflow Order
@@ -27,7 +28,8 @@ Use for Superset MCP intent, MCP tool routing, and MCP/API surface-boundary deci
 1. Identify whether the user requested MCP or direct API.
 2. For MCP, choose the narrowest MCP domain skill.
 3. Use the live MCP tool schema for parameters.
-4. Stop before any non-MCP surface unless the user starts a new direct API workflow.
+4. If MCP lacks a requested capability, explain the missing MCP capability.
+5. Ask before changing surfaces and stop before API calls.
 
 ## Retrieve
 

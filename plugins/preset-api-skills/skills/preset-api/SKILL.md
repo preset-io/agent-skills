@@ -20,13 +20,18 @@ Use as the prerequisite for direct Preset API skills. If the user is working thr
 - Select base URL from discovered team, workspace, or Superset workspace facts.
 - Use pagination and Rison for list, filter, sort, and search calls.
 - Load safety policy before risky follow-up calls.
+- If the user starts with direct API intent and mentions MCP only as a fallback, keep direct API intent. Say: "No MCP fallback. MCP tools are a different surface and require separate explicit approval. Stop before MCP calls."
+- Do not stop direct API planning just because MCP was mentioned. Stop only before MCP calls or before direct API operations that require confirmation.
 
 ## Workflow Order
 
 1. Resolve base URL and credentials.
 2. Plan paginated Rison requests.
 3. Classify follow-up risk before data, credential, SQL, token, export, import, or mutation calls.
-4. Redact credentials and tokens in all output.
+4. Reject unapproved MCP fallback if the requested workflow is direct API.
+5. Ask before changing surfaces and stop before MCP calls.
+6. Continue the direct API plan unless the direct API operation itself requires confirmation.
+7. Redact credentials and tokens in all output.
 
 ## Retrieve
 

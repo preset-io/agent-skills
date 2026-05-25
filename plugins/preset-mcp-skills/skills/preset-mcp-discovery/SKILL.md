@@ -24,11 +24,14 @@ Use for MCP metadata discovery that does not require result data or persistent c
 
 ## Workflow Order
 
-1. Identify the object type: chart, dashboard, dataset, database, schema, or instance.
-2. List/search first when the identifier is missing.
-3. Fetch details only for the specific object needed.
-4. Route to `preset-mcp-data` for result rows, chart data, previews, or rendered SQL.
-5. Route to mutation-focused skills before creating or updating objects.
+1. Use `health_check` for service availability or MCP health questions.
+2. Use `get_instance_info` for workspace or instance overview.
+3. Identify the object type: chart, dashboard, dataset, database, schema, or instance.
+4. List/search first when the identifier is missing.
+5. Use `get_schema` when valid fields, filters, sort keys, or request shape are needed.
+6. Fetch details only for the specific object needed.
+7. Route to `preset-mcp-data` for result rows, chart data, previews, or rendered SQL.
+8. Route to mutation-focused skills before creating or updating objects.
 
 ## Retrieve
 

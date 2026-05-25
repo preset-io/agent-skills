@@ -11,7 +11,7 @@ Use when the user needs data returned through MCP tools.
 
 - Use MCP tools only; do not switch to REST chart-data, SQL Lab, or dataset endpoints.
 - Treat returned rows, rendered SQL, chart previews, and dataset query results as potentially sensitive.
-- Keep row limits and formats narrow.
+- Keep row limits, selected columns, metrics, filters, and formats narrow.
 - Use discovery tools first when identifiers, metrics, columns, or chart IDs are unknown.
 - Do not use data tools as a workaround after data-model permission denial.
 
@@ -27,8 +27,9 @@ Use when the user needs data returned through MCP tools.
 
 1. Confirm the user asked for result data, preview content, SQL text, or semantic-layer output.
 2. Resolve the object and schema through discovery if needed.
-3. Choose the narrowest data tool and request a small result.
-4. Summarize data carefully; do not paste large raw payloads.
+3. Choose `get_chart_data`, `get_chart_sql`, `get_chart_preview`, or `query_dataset` according to the requested output.
+4. Request a small result with narrow fields, row limits, and the least revealing format.
+5. Summarize data carefully; do not paste large raw payloads.
 
 ## Retrieve
 

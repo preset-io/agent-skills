@@ -12,7 +12,8 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 - Added a root `CLAUDE.md` that redirects direct Claude Code repository users to the installable API package.
 - Added Codex and Claude marketplace metadata for the installable API package.
-- Added placeholder `preset-mcp-skills` and `preset-cli-skills` directories for future MCP and CLI workflow skills.
+- Added placeholder `preset-cli-skills` directory for future CLI workflow skills.
+- Added installable **preset-mcp-skills** package with 8 focused Superset MCP workflow skills, client manifests, package docs, tool inventory, and inventory drift check.
 - Hardened API plugin and skill routing metadata so MCP-intent tasks do not silently fall back to direct API workflows.
 - **preset-admin** skill - Team membership management, workspace lifecycle operations, invite lifecycle workflows, role identifier guidance, seat-limit preflights, audit log queries, and confirmation-gated audit downloads.
 - Management API v2 conventions and reusable client support for audit log endpoints.
@@ -31,12 +32,11 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 - Moved detailed API examples into on-demand `references/` files for each skill.
 - Added Codex and Claude plugin manifests alongside the existing Cursor manifest.
 - Added GitHub Copilot instructions and a local package smoke test.
-- Scoped marketplace catalogs to `preset-api-skills` only.
+- Published `preset-mcp-skills` alongside `preset-api-skills` in marketplace catalogs.
 
 ### Removed
 
 - Removed legacy root `skills/*` paths and root client manifests from the installable package surface.
-- Removed MCP package manifests and skill content from the installable package surface until MCP workflow boundaries are designed.
 
 ## [v0.1.0] - 2026-05-14
 

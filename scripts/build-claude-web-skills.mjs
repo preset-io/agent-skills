@@ -17,6 +17,8 @@ const stageRoot = path.join(outRoot, "_stage");
 const maxDescription = Number(args["max-description"] ?? DEFAULT_MAX_DESCRIPTION);
 const warnLines = Number(args["warn-lines"] ?? DEFAULT_WARN_LINES);
 const keepStage = Boolean(args["keep-stage"]);
+const surfaceBoundary =
+  args["surface-boundary"] ?? defaultSurfaceBoundary(sourceRoot);
 
 main();
 
@@ -98,7 +100,7 @@ function buildSkill(skill) {
     "---",
     "",
     "## Surface Boundary",
-    "Use this generated skill only for explicit direct Preset API, Superset workspace API, or Snowflake Cortex API workflows. Do not use it for Preset/Superset MCP-only work; stay on MCP tooling unless the user explicitly approves switching to direct API calls.",
+    surfaceBoundary,
     "",
     rewriteLocalMarkdownLinks(body),
   ];
@@ -292,6 +294,8 @@ function compactDescription(description, maxLength) {
     /\s*Use only for direct API workflows;?\s*/gi,
     /\s*Do not use for MCP-only work\.?/gi,
     /\s*Use only for direct API workflows\.?/gi,
+    /\s*Use only for MCP tool workflows;?\s*/gi,
+    /\s*Do not use for direct API work\.?/gi,
   ];
   for (const removal of removals) {
     value = value.replace(removal, " ");
@@ -310,6 +314,14 @@ function compactDescription(description, maxLength) {
     .replace(/[.;,:-]+$/g, "")
     .trim();
   return `${trimmed}.`;
+}
+
+function defaultSurfaceBoundary(resolvedSourceRoot) {
+  const normalized = resolvedSourceRoot.split(path.sep).join("/");
+  if (normalized.includes("/preset-mcp-skills/")) {
+    return "Use this generated skill only for Superset MCP tool workflows. Do not use it for direct Preset Management API, Superset REST API, Snowflake Cortex API, curl, Python requests, exports, or database calls. If MCP cannot satisfy the request, stop and explain the missing MCP capability; do not switch surfaces unless the user explicitly starts a direct API workflow.";
+  }
+  return "Use this generated skill only for explicit direct Preset API, Superset workspace API, or Snowflake Cortex API workflows. Do not use it for Preset/Superset MCP-only work; stay on MCP tooling unless the user explicitly approves switching to direct API calls.";
 }
 
 function listFiles(dir) {
@@ -384,7 +396,9 @@ function nearestExistingAncestor(target) {
 
 function requireCommand(command) {
   try {
-    execFileSync("command", ["-v", command], { shell: true, stdio: "ignore" });
+    execFileSync("sh", ["-c", "command -v \"$1\"", "sh", command], {
+      stdio: "ignore",
+    });
   } catch {
     fail(`${command} is required`);
   }
@@ -424,6 +438,7 @@ Build Claude web/Desktop custom skill ZIPs from repository skill folders.
 Options:
   --source <dir>            Source skills directory. Default: ${DEFAULT_SOURCE}
   --out <dir>               Output directory. Default: ${DEFAULT_OUT}
+  --surface-boundary <text> Override the generated Surface Boundary section.
   --max-description <num>   Description character limit. Default: ${DEFAULT_MAX_DESCRIPTION}
   --warn-lines <num>        Warn when generated SKILL.md exceeds this line count. Default: ${DEFAULT_WARN_LINES}
   --keep-stage              Keep generated unzipped skill folders under <out>/_stage

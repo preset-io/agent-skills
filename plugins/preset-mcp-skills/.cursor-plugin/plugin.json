@@ -1,0 +1,49 @@
+{
+  "name": "Preset MCP Skills",
+  "version": "0.1.0",
+  "description": "AI agent skills for Superset MCP tool workflows only. Do not use for direct API work.",
+  "publisher": "preset-io",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "skills": [
+    {
+      "name": "preset-mcp",
+      "path": "skills/preset-mcp/SKILL.md",
+      "description": "Route Superset MCP tool workflows with a strict no-direct-API boundary; do not use for direct API work."
+    },
+    {
+      "name": "preset-mcp-discovery",
+      "path": "skills/preset-mcp-discovery/SKILL.md",
+      "description": "Use Superset MCP health, instance, list, detail, schema, and chart-type discovery tools; do not use for direct API work."
+    },
+    {
+      "name": "preset-mcp-data",
+      "path": "skills/preset-mcp-data/SKILL.md",
+      "description": "Use Superset MCP data-returning tools for chart data, previews, rendered SQL, and dataset query results; do not use for direct API work."
+    },
+    {
+      "name": "preset-mcp-visualization",
+      "path": "skills/preset-mcp-visualization/SKILL.md",
+      "description": "Use Superset MCP tools for Explore links, chart previews, saved charts, and chart updates; do not use for direct API work."
+    },
+    {
+      "name": "preset-mcp-dashboard",
+      "path": "skills/preset-mcp-dashboard/SKILL.md",
+      "description": "Use Superset MCP tools for dashboard inspection, dashboard creation, and adding charts to dashboards; do not use for direct API work."
+    },
+    {
+      "name": "preset-mcp-sqllab",
+      "path": "skills/preset-mcp-sqllab/SKILL.md",
+      "description": "Use Superset MCP tools for SQL execution, SQL Lab links, and saved SQL queries; do not use for direct API work."
+    },
+    {
+      "name": "preset-mcp-datasets",
+      "path": "skills/preset-mcp-datasets/SKILL.md",
+      "description": "Use Superset MCP tools for dataset inspection, semantic-layer querying, and virtual dataset creation; do not use for direct API work."
+    },
+    {
+      "name": "preset-mcp-troubleshooting",
+      "path": "skills/preset-mcp-troubleshooting/SKILL.md",
+      "description": "Troubleshoot Superset MCP health, validation, permission, response-size, and bug-report workflows; do not use for direct API work."
+    }
+  ]
+}

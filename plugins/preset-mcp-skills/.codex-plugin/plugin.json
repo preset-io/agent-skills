@@ -1,0 +1,41 @@
+{
+  "name": "preset-mcp-skills",
+  "version": "0.1.0",
+  "description": "Preset MCP skills for Superset MCP tool workflows only. Do not use for direct API work.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/preset-agent-skills",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "superset",
+    "mcp",
+    "dashboards",
+    "charts",
+    "datasets",
+    "sqllab",
+    "visualization"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Preset MCP Skills",
+    "shortDescription": "MCP-only Superset workflow skills. Do not use for direct API work.",
+    "longDescription": "Markdown skills for agents using Superset MCP tools. Use only when the user asks for MCP, MCP tools, MCP clients, Superset MCP, or Preset MCP workflows. Do not use for direct Preset Management API, Superset REST API, Snowflake Cortex API, curl, Python requests, exports, or database calls. If MCP cannot satisfy the request, stop and explain the missing MCP capability; do not switch surfaces unless the user explicitly starts a direct API workflow.",
+    "developerName": "Preset",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://preset.io/",
+    "defaultPrompt": [
+      "Use Superset MCP tools to list dashboards",
+      "Use Superset MCP to inspect a dataset",
+      "Create an Explore link through MCP",
+      "Troubleshoot a Superset MCP tool error"
+    ],
+    "brandColor": "#00A5B5"
+  }
+}

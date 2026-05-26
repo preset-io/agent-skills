@@ -117,7 +117,7 @@ Cursor imports this repository as a GitHub-backed project rule. Use the `.git` c
 
 ### GitHub Copilot
 
-Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. Copy [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) into the `.github/` directory of the consuming repository, or reference the file's content from your own `.github/copilot-instructions.md`. Copilot loads the file whenever it edits code in that repo.
+Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. Copy the package instructions you need into the `.github/` directory of the consuming repository, or reference their content from your own `.github/copilot-instructions.md`: [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) for direct API workflows, and [`plugins/preset-mcp-skills/.github/copilot-instructions.md`](plugins/preset-mcp-skills/.github/copilot-instructions.md) for Superset MCP workflows. Copilot loads the file whenever it edits code in that repo.
 
 ## Verifying the install
 

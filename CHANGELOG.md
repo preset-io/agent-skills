@@ -10,7 +10,7 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ### Added
 
-- Added a root `CLAUDE.md` that redirects direct Claude Code repository users to the installable API package.
+- Added a root `CLAUDE.md` that redirects direct Claude Code repository users to the installable API and MCP packages.
 - Added Codex and Claude marketplace metadata for the installable API package.
 - Added placeholder `preset-cli-skills` directory for future CLI workflow skills.
 - Added installable **preset-mcp-skills** package with 8 focused Superset MCP workflow skills, client manifests, package docs, tool inventory, and inventory drift check.

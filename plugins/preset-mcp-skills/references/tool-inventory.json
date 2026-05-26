@@ -1,0 +1,32 @@
+{
+  "source": "superset/superset/mcp_service",
+  "tools": [
+    {"name": "add_chart_to_existing_dashboard", "tags": ["mutate"], "class_permission_name": "Dashboard", "method_permission_name": null, "read_only": false, "destructive": false},
+    {"name": "create_virtual_dataset", "tags": ["mutate"], "class_permission_name": "Dataset", "method_permission_name": "write", "read_only": false, "destructive": false},
+    {"name": "execute_sql", "tags": ["mutate"], "class_permission_name": "SQLLab", "method_permission_name": "execute_sql_query", "read_only": false, "destructive": true},
+    {"name": "generate_bug_report", "tags": ["core"], "class_permission_name": null, "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "generate_chart", "tags": ["mutate"], "class_permission_name": "Chart", "method_permission_name": null, "read_only": false, "destructive": false},
+    {"name": "generate_dashboard", "tags": ["mutate"], "class_permission_name": "Dashboard", "method_permission_name": null, "read_only": false, "destructive": false},
+    {"name": "generate_explore_link", "tags": ["explore"], "class_permission_name": "Explore", "method_permission_name": null, "read_only": false, "destructive": false},
+    {"name": "get_chart_data", "tags": ["data"], "class_permission_name": "Chart", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "get_chart_info", "tags": ["discovery"], "class_permission_name": "Chart", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "get_chart_preview", "tags": ["data"], "class_permission_name": "Chart", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "get_chart_sql", "tags": ["data"], "class_permission_name": "SQLLab", "method_permission_name": "execute_sql_query", "read_only": true, "destructive": false},
+    {"name": "get_chart_type_schema", "tags": ["discovery"], "class_permission_name": null, "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "get_dashboard_info", "tags": ["discovery"], "class_permission_name": "Dashboard", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "get_database_info", "tags": ["discovery"], "class_permission_name": "Database", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "get_dataset_info", "tags": ["discovery"], "class_permission_name": "Dataset", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "get_instance_info", "tags": ["core"], "class_permission_name": null, "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "get_schema", "tags": ["discovery"], "class_permission_name": "Dataset", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "health_check", "tags": ["core"], "class_permission_name": null, "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "list_charts", "tags": ["core"], "class_permission_name": "Chart", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "list_dashboards", "tags": ["core"], "class_permission_name": "Dashboard", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "list_databases", "tags": ["core"], "class_permission_name": "Database", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "list_datasets", "tags": ["core"], "class_permission_name": "Dataset", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "open_sql_lab_with_context", "tags": ["explore"], "class_permission_name": "SQLLab", "method_permission_name": "read", "read_only": true, "destructive": false},
+    {"name": "query_dataset", "tags": ["data"], "class_permission_name": "Dataset", "method_permission_name": null, "read_only": true, "destructive": false},
+    {"name": "save_sql_query", "tags": ["mutate"], "class_permission_name": "SavedQuery", "method_permission_name": "write", "read_only": false, "destructive": false},
+    {"name": "update_chart", "tags": ["mutate"], "class_permission_name": "Chart", "method_permission_name": null, "read_only": false, "destructive": true},
+    {"name": "update_chart_preview", "tags": ["mutate"], "class_permission_name": "Chart", "method_permission_name": "write", "read_only": false, "destructive": true}
+  ]
+}

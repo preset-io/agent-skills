@@ -1,0 +1,22 @@
+{
+  "name": "preset-mcp-skills",
+  "version": "0.1.0",
+  "description": "Preset MCP skills for Superset MCP tool workflows only. Do not use for direct API work.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/preset-agent-skills",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "superset",
+    "mcp",
+    "dashboards",
+    "charts",
+    "datasets",
+    "sqllab",
+    "visualization"
+  ]
+}

@@ -96,12 +96,12 @@ node scripts/build-claude-web-skills.mjs \
 Install the plugin from GitHub:
 
 ```bash
-codex plugin marketplace add <MARKETPLACE_REPO> --ref main
+codex plugin marketplace add <MARKETPLACE_REPO> --ref master
 codex plugin add preset-api-skills@preset-agent-skills
 codex plugin add preset-mcp-skills@preset-agent-skills
 ```
 
-Use a release tag (e.g. `--ref v0.1.0`) instead of `main` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
+Use a release tag (e.g. `--ref v0.1.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
 
 ### Cursor
 

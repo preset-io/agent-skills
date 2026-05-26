@@ -496,6 +496,7 @@ require_jq '
     "skills/preset-mcp/SKILL.md"
   ]
 ' "$MCP_ROOT/.cursor-plugin/plugin.json"
+# Intentional drift alarm: update this count when MCP tools are added or removed.
 require_jq '.tools | length == 27' "$MCP_ROOT/references/tool-inventory.json"
 require_jq '[.tools[].name] | sort | .[0] == "add_chart_to_existing_dashboard"' "$MCP_ROOT/references/tool-inventory.json"
 require_jq '.tools[] | select(.name == "execute_sql") | .destructive == true' "$MCP_ROOT/references/tool-inventory.json"

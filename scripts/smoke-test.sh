@@ -30,13 +30,13 @@ reject_file() {
 require_grep() {
   local pattern="$1"
   local file="$2"
-  grep -q "$pattern" "$file" || fail "missing pattern '$pattern' in $file"
+  grep -q -- "$pattern" "$file" || fail "missing pattern '$pattern' in $file"
 }
 
 reject_grep() {
   local pattern="$1"
   local path="$2"
-  if grep -R -q "$pattern" "$path"; then
+  if grep -R -q -- "$pattern" "$path"; then
     fail "unexpected pattern '$pattern' in $path"
   fi
 }
@@ -100,6 +100,7 @@ require_file README.md
 require_file CLAUDE.md
 require_file CHANGELOG.md
 require_file LICENSE
+require_file .github/workflows/release.yml
 require_file scripts/build-claude-web-skills.mjs
 require_file .agents/plugins/marketplace.json
 require_file .claude-plugin/marketplace.json
@@ -125,6 +126,11 @@ require_grep "node scripts/build-claude-web-skills.mjs" README.md
 require_grep "## Surface Boundary" scripts/build-claude-web-skills.mjs
 require_grep "Do not use it for Preset/Superset MCP-only work" scripts/build-claude-web-skills.mjs
 require_grep "Use this generated skill only for Superset MCP tool workflows" scripts/build-claude-web-skills.mjs
+require_grep "Build Claude web API skill ZIPs" .github/workflows/release.yml
+require_grep "Build Claude web MCP skill ZIPs" .github/workflows/release.yml
+require_grep "--source plugins/preset-mcp-skills/skills" .github/workflows/release.yml
+require_grep "--out dist/claude-web-flat-mcp-skills" .github/workflows/release.yml
+require_grep "dist/claude-web-flat-mcp-skills/\\*.zip" .github/workflows/release.yml
 require_grep "root is not itself an installable plugin" CLAUDE.md
 require_grep "plugins/preset-api-skills/CLAUDE.md" CLAUDE.md
 require_grep "plugins/preset-mcp-skills/CLAUDE.md" CLAUDE.md

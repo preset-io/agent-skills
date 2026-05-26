@@ -1,6 +1,6 @@
 # Superset MCP Tool Inventory
 
-This inventory is a snapshot of the live Superset MCP server under `superset/superset/mcp_service`. Validate it with `scripts/check-tool-inventory.py` when the Superset checkout is available.
+This inventory is a snapshot of the live Superset MCP server under `superset/superset/mcp_service`. Validate it from the repository root with `python3 plugins/preset-mcp-skills/scripts/check-tool-inventory.py` when the Superset checkout is available.
 
 | Tool | Tags | Permission | Read Only | Destructive |
 |---|---|---|---|---|

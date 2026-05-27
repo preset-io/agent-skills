@@ -20,6 +20,7 @@ Use for state-changing CLI operations: single-workspace writes (push, --force, -
 
 - Distinguish single-workspace writes (`sup chart/dashboard/dataset push`) from cross-workspace sync (`sup sync run`).
 - Treat `--force` and `--overwrite` as destructive flags; never invoke without explicit per-flag confirmation.
+- For mutating command groups not named on this card, load command coverage and stop unless it explicitly marks the command as mutation-gated.
 - Do not let CI / automation context bypass the confirmation step; refuse if no interactive operator is available.
 - Route HTTP mutations to the API plugin; route MCP-driven workflows to the MCP plugin.
 
@@ -40,4 +41,5 @@ Use for state-changing CLI operations: single-workspace writes (push, --force, -
 - Preview and dry-run handling: [references/preview-and-dry-run.md](references/preview-and-dry-run.md)
 - Confirmation template and abort triggers: [references/confirmation-template.md](references/confirmation-template.md)
 - Confirmation overview and audit expectations: [references/confirmation-and-dry-run.md](references/confirmation-and-dry-run.md)
+- Registered command coverage and uncovered mutation routing: [../preset-cli/references/command-coverage.md](../preset-cli/references/command-coverage.md)
 - Approval gates, redaction, abort triggers: [../preset-cli/references/safety-policy.md](../preset-cli/references/safety-policy.md)

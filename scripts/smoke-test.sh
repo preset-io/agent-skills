@@ -583,6 +583,7 @@ done
 
 required_cli_references=(
   skills/preset-cli/references/asset-filter-matrix.md
+  skills/preset-cli/references/command-coverage.md
   skills/preset-cli/references/command-examples.md
   skills/preset-cli/references/config-precedence.md
   skills/preset-cli/references/install-and-auth.md
@@ -611,6 +612,15 @@ require_grep "SUP_PRESET_API_TOKEN" "$CLI_ROOT/skills/preset-cli/references/inst
 require_grep "Project-local state shadows the global default" "$CLI_ROOT/skills/preset-cli/references/config-precedence.md"
 require_grep "\-\-json" "$CLI_ROOT/skills/preset-cli/references/output-formats.md"
 require_grep "sup workspace use" "$CLI_ROOT/skills/preset-cli/references/workspace-and-config.md"
+require_grep "sup workspace set-target" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup database list/use/info/pull" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup sync native" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup theme push" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup role push/sync" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup rls push" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup ownership push" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup group sync/create" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup dbt core/cloud/list-models" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
 require_grep "sup query list --search" "$CLI_ROOT/skills/preset-cli/references/asset-filter-matrix.md"
 require_grep "sup sql" "$CLI_ROOT/skills/preset-cli/references/sql-and-query.md"
 require_grep "SQL and Data-Returning Read Safety" "$CLI_ROOT/skills/preset-cli/references/sql-data-safety.md"
@@ -626,6 +636,8 @@ require_grep "Always preview before any mutating run" "$CLI_ROOT/skills/preset-c
 require_grep "sup user invite" "$CLI_ROOT/skills/preset-cli-mutations/references/confirmation-template.md"
 require_grep "Pull-and-Diff Substitute" "$CLI_ROOT/skills/preset-cli-mutations/references/preview-and-dry-run.md"
 require_grep "preset-cli-mutations" "$CLI_ROOT/skills/preset-cli/SKILL.md"
+require_grep "command-coverage.md" "$CLI_ROOT/skills/preset-cli/SKILL.md"
+require_grep "command-coverage.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
 require_grep "preset-cli/references/safety-policy.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
 
 # The CLI package must not be documented as a placeholder anywhere.

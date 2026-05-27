@@ -40,3 +40,9 @@ jobs:
           node scripts/build-claude-web-skills.mjs \
             --source plugins/preset-mcp-skills/skills \
             --out dist/claude-web-flat-mcp-skills
+
+      - name: Build Claude web CLI skill ZIPs
+        run: |
+          node scripts/build-claude-web-skills.mjs \
+            --source plugins/preset-cli-skills/skills \
+            --out dist/claude-web-flat-cli-skills

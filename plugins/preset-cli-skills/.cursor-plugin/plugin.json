@@ -1,0 +1,19 @@
+{
+  "name": "Preset CLI Skills",
+  "version": "0.1.0",
+  "description": "AI agent skills for explicit Preset CLI (`sup`) workflows only. Use preset-api-skills for direct HTTP/SDK code; use preset-mcp-skills for MCP tools.",
+  "publisher": "preset-io",
+  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "skills": [
+    {
+      "name": "preset-cli",
+      "path": "skills/preset-cli/SKILL.md",
+      "description": "Drive the `sup` CLI for non-destructive shell, scripting, and CI/CD workflows: install, authentication, workspace selection, output formats, ad-hoc SQL, and asset read/export. Use only for CLI workflows. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-cli-mutations",
+      "path": "skills/preset-cli-mutations/SKILL.md",
+      "description": "State-changing `sup` CLI operations (push, --force, --overwrite, cross-workspace sync) with mandatory preview, confirmation templates, and secret-handling guardrails. Use only for CLI workflows. Do not use for MCP-only work."
+    }
+  ]
+}

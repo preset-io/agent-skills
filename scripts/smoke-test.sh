@@ -121,33 +121,37 @@ require_grep ".agents/plugins/marketplace.json" README.md
 require_grep ".claude-plugin/marketplace.json" README.md
 require_grep "not from the repository root" README.md
 require_grep "MCP-only work" README.md
-require_grep "Do not use API skills as a fallback for MCP-only work" README.md
+require_grep "Do not use API or CLI skills as a fallback for MCP-only work" README.md
 require_grep "node scripts/build-claude-web-skills.mjs" README.md
 require_grep "## Surface Boundary" scripts/build-claude-web-skills.mjs
 require_grep "Do not use it for Preset/Superset MCP-only work" scripts/build-claude-web-skills.mjs
 require_grep "Use this generated skill only for Superset MCP tool workflows" scripts/build-claude-web-skills.mjs
+require_grep "Use this generated skill only for explicit Preset CLI" scripts/build-claude-web-skills.mjs
 require_grep "Build Claude web API skill ZIPs" .github/workflows/release.yml
 require_grep "Build Claude web MCP skill ZIPs" .github/workflows/release.yml
+require_grep "Build Claude web CLI skill ZIPs" .github/workflows/release.yml
+require_grep "Build Claude web CLI skill ZIPs" .github/workflows/ci.yml
 require_grep "--source plugins/preset-mcp-skills/skills" .github/workflows/release.yml
 require_grep "--out dist/claude-web-flat-mcp-skills" .github/workflows/release.yml
 require_grep "dist/claude-web-flat-mcp-skills/\\*.zip" .github/workflows/release.yml
+require_grep "--source plugins/preset-cli-skills/skills" .github/workflows/release.yml
+require_grep "--out dist/claude-web-flat-cli-skills" .github/workflows/release.yml
+require_grep "dist/claude-web-flat-cli-skills/\\*.zip" .github/workflows/release.yml
 require_grep "root is not itself an installable plugin" CLAUDE.md
 require_grep "plugins/preset-api-skills/CLAUDE.md" CLAUDE.md
 require_grep "plugins/preset-mcp-skills/CLAUDE.md" CLAUDE.md
+require_grep "plugins/preset-cli-skills/CLAUDE.md" CLAUDE.md
 check_markdown_links
 
 require_jq '.name == "preset-agent-skills"' .agents/plugins/marketplace.json
 require_jq '.interface.displayName == "Preset Agent Skills"' .agents/plugins/marketplace.json
 require_jq '
-  [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills"]
+  [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills", "preset-cli-skills"]
 ' .agents/plugins/marketplace.json
 require_jq '
-  [.plugins[].source.path] == ["./plugins/preset-api-skills", "./plugins/preset-mcp-skills"]
+  [.plugins[].source.path] == ["./plugins/preset-api-skills", "./plugins/preset-mcp-skills", "./plugins/preset-cli-skills"]
 ' .agents/plugins/marketplace.json
 require_jq 'all(.plugins[]; .policy.installation == "AVAILABLE" and .policy.authentication == "ON_INSTALL")' .agents/plugins/marketplace.json
-if jq -e '.plugins[] | select(.name == "preset-cli-skills")' .agents/plugins/marketplace.json >/dev/null; then
-  fail "CLI placeholder must not be listed as an installable marketplace plugin"
-fi
 
 require_jq '."$schema" == "https://anthropic.com/claude-code/marketplace.schema.json"' .claude-plugin/marketplace.json
 require_jq '.name == "preset-agent-skills"' .claude-plugin/marketplace.json
@@ -155,17 +159,15 @@ require_jq '.owner.name == "Preset"' .claude-plugin/marketplace.json
 require_jq '.description | contains("direct API workflows")' .claude-plugin/marketplace.json
 require_jq '.description | contains("MCP tool workflows")' .claude-plugin/marketplace.json
 require_jq '
-  [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills"]
+  [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills", "preset-cli-skills"]
 ' .claude-plugin/marketplace.json
 require_jq '
-  [.plugins[].source] == ["./plugins/preset-api-skills", "./plugins/preset-mcp-skills"]
+  [.plugins[].source] == ["./plugins/preset-api-skills", "./plugins/preset-mcp-skills", "./plugins/preset-cli-skills"]
 ' .claude-plugin/marketplace.json
 require_jq 'all(.plugins[]; .category == "development" and .author.name == "Preset")' .claude-plugin/marketplace.json
 require_jq '.plugins[] | select(.name == "preset-api-skills") | .description | contains("Do not use for MCP-only work")' .claude-plugin/marketplace.json
 require_jq '.plugins[] | select(.name == "preset-mcp-skills") | .description | contains("Do not use for direct API work")' .claude-plugin/marketplace.json
-if jq -e '.plugins[] | select(.name == "preset-cli-skills")' .claude-plugin/marketplace.json >/dev/null; then
-  fail "CLI placeholder must not be listed as an installable Claude marketplace plugin"
-fi
+require_jq '.plugins[] | select(.name == "preset-cli-skills") | .description | contains("Use only for CLI workflows")' .claude-plugin/marketplace.json
 
 require_jq '.name == "preset-api-skills"' "$API_ROOT/.codex-plugin/plugin.json"
 require_jq '.description | contains("Do not use for MCP-only work")' "$API_ROOT/.codex-plugin/plugin.json"
@@ -521,12 +523,147 @@ reject_grep "curl -s" "$MCP_ROOT"
 reject_grep "import requests" "$MCP_ROOT"
 reject_grep "python requests" "$MCP_ROOT/skills"
 
+required_cli_skills=(
+  preset-cli
+  preset-cli-mutations
+)
+
+require_jq '.name == "preset-cli-skills"' "$CLI_ROOT/.codex-plugin/plugin.json"
+require_jq '.description | contains("Use only for CLI workflows")' "$CLI_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.shortDescription | contains("CLI-only")' "$CLI_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.longDescription | contains("preset-api-skills")' "$CLI_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.longDescription | contains("preset-mcp-skills")' "$CLI_ROOT/.codex-plugin/plugin.json"
+require_jq '.skills == "./skills/"' "$CLI_ROOT/.codex-plugin/plugin.json"
+require_jq '.name == "preset-cli-skills"' "$CLI_ROOT/.claude-plugin/plugin.json"
+require_jq '.description | contains("Use only for CLI workflows")' "$CLI_ROOT/.claude-plugin/plugin.json"
+require_jq 'has("skills") | not' "$CLI_ROOT/.claude-plugin/plugin.json"
+require_jq '.name == "Preset CLI Skills"' "$CLI_ROOT/.cursor-plugin/plugin.json"
+require_jq '.description | contains("preset-api-skills")' "$CLI_ROOT/.cursor-plugin/plugin.json"
+require_jq '.description | contains("preset-mcp-skills")' "$CLI_ROOT/.cursor-plugin/plugin.json"
+require_jq 'all(.skills[]; .description | contains("Do not use for MCP-only work"))' "$CLI_ROOT/.cursor-plugin/plugin.json"
+require_jq '
+  [.skills[].path] | sort == [
+    "skills/preset-cli-mutations/SKILL.md",
+    "skills/preset-cli/SKILL.md"
+  ]
+' "$CLI_ROOT/.cursor-plugin/plugin.json"
+require_file "$CLI_ROOT/AGENTS.md"
+require_file "$CLI_ROOT/CLAUDE.md"
+require_file "$CLI_ROOT/.github/copilot-instructions.md"
 require_file "$CLI_ROOT/README.md"
-require_grep "intentionally not an installable plugin yet" "$CLI_ROOT/README.md"
-require_grep "only be promoted to an installable plugin after the CLI workflow boundaries" "$CLI_ROOT/README.md"
-reject_file "$CLI_ROOT/.codex-plugin"
-reject_file "$CLI_ROOT/.claude-plugin"
-reject_file "$CLI_ROOT/.cursor-plugin"
-reject_file "$CLI_ROOT/skills"
+
+for doc in AGENTS.md CLAUDE.md README.md .github/copilot-instructions.md; do
+  require_grep "preset-mcp-skills" "$CLI_ROOT/$doc"
+  require_grep "preset-api-skills" "$CLI_ROOT/$doc"
+  require_grep "sup" "$CLI_ROOT/$doc"
+  require_grep "SUP_PRESET_API_TOKEN" "$CLI_ROOT/$doc"
+done
+require_grep "not plugin-loaded context" "$CLI_ROOT/AGENTS.md"
+require_grep "not plugin-loaded context" "$CLI_ROOT/CLAUDE.md"
+require_grep "not plugin-loaded context" "$CLI_ROOT/README.md"
+require_grep "MCP intent wins over resource type" "$CLI_ROOT/AGENTS.md"
+require_grep "MCP intent wins over resource type" "$CLI_ROOT/CLAUDE.md"
+require_grep "MCP intent wins over resource type" "$CLI_ROOT/.github/copilot-instructions.md"
+require_grep "MCP intent wins over resource type" "$CLI_ROOT/README.md"
+
+for skill in "${required_cli_skills[@]}"; do
+  file="$CLI_ROOT/skills/$skill/SKILL.md"
+  require_file "$file"
+  require_grep "^name: $skill$" "$file"
+  require_grep "^description: " "$file"
+  grep -Eq "Use only for CLI( mutation)? workflows" "$file" \
+    || fail "missing 'Use only for CLI [mutation ]workflows' anchor in $file"
+  require_grep "Do not use for MCP-only work" "$file"
+  require_dir "$CLI_ROOT/skills/$skill/references"
+  require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/AGENTS.md"
+  require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/CLAUDE.md"
+  require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/.github/copilot-instructions.md"
+  require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/README.md"
+done
+
+required_cli_references=(
+  skills/preset-cli/references/asset-filter-matrix.md
+  skills/preset-cli/references/command-coverage.md
+  skills/preset-cli/references/command-examples.md
+  skills/preset-cli/references/config-precedence.md
+  skills/preset-cli/references/install-and-auth.md
+  skills/preset-cli/references/output-formats.md
+  skills/preset-cli/references/workspace-and-config.md
+  skills/preset-cli/references/sql-and-query.md
+  skills/preset-cli/references/sql-data-safety.md
+  skills/preset-cli/references/saved-query-reads.md
+  skills/preset-cli/references/assets-read.md
+  skills/preset-cli/references/cli-vs-api.md
+  skills/preset-cli/references/safety-policy.md
+  skills/preset-cli-mutations/references/write-operations.md
+  skills/preset-cli-mutations/references/cross-workspace-sync.md
+  skills/preset-cli-mutations/references/sync-templating-and-rollback.md
+  skills/preset-cli-mutations/references/confirmation-and-dry-run.md
+  skills/preset-cli-mutations/references/confirmation-template.md
+  skills/preset-cli-mutations/references/preview-and-dry-run.md
+)
+
+for file in "${required_cli_references[@]}"; do
+  require_file "$CLI_ROOT/$file"
+done
+
+require_grep "pip install superset-sup" "$CLI_ROOT/skills/preset-cli/references/install-and-auth.md"
+require_grep "SUP_PRESET_API_TOKEN" "$CLI_ROOT/skills/preset-cli/references/install-and-auth.md"
+require_grep "Project-local state shadows the global default" "$CLI_ROOT/skills/preset-cli/references/config-precedence.md"
+require_grep "\-\-json" "$CLI_ROOT/skills/preset-cli/references/output-formats.md"
+require_grep "sup workspace use" "$CLI_ROOT/skills/preset-cli/references/workspace-and-config.md"
+require_grep "sup workspace set-target" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup database list/use/info/pull" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup sync native" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup theme push" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup role push/sync" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup rls push" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup ownership push" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup group sync/create" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup dbt core/cloud/list-models" "$CLI_ROOT/skills/preset-cli/references/command-coverage.md"
+require_grep "sup query list --search" "$CLI_ROOT/skills/preset-cli/references/asset-filter-matrix.md"
+require_grep "sup sql" "$CLI_ROOT/skills/preset-cli/references/sql-and-query.md"
+require_grep "SQL and Data-Returning Read Safety" "$CLI_ROOT/skills/preset-cli/references/sql-data-safety.md"
+require_grep "sup query list --name" "$CLI_ROOT/skills/preset-cli/references/saved-query-reads.md"
+require_grep "sup chart data" "$CLI_ROOT/skills/preset-cli/references/command-examples.md"
+require_grep "sup chart pull" "$CLI_ROOT/skills/preset-cli/references/assets-read.md"
+require_grep "preset-api-skills" "$CLI_ROOT/skills/preset-cli/references/cli-vs-api.md"
+require_grep "Default to non-destructive reads" "$CLI_ROOT/skills/preset-cli/references/safety-policy.md"
+require_grep "sup chart push" "$CLI_ROOT/skills/preset-cli-mutations/references/write-operations.md"
+require_grep "sup sync" "$CLI_ROOT/skills/preset-cli-mutations/references/cross-workspace-sync.md"
+require_grep "Jinja2 Templating" "$CLI_ROOT/skills/preset-cli-mutations/references/sync-templating-and-rollback.md"
+require_grep "Always preview before any mutating run" "$CLI_ROOT/skills/preset-cli-mutations/references/confirmation-and-dry-run.md"
+require_grep "sup user invite" "$CLI_ROOT/skills/preset-cli-mutations/references/confirmation-template.md"
+require_grep "Pull-and-Diff Substitute" "$CLI_ROOT/skills/preset-cli-mutations/references/preview-and-dry-run.md"
+require_grep "preset-cli-mutations" "$CLI_ROOT/skills/preset-cli/SKILL.md"
+require_grep "command-coverage.md" "$CLI_ROOT/skills/preset-cli/SKILL.md"
+require_grep "command-coverage.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
+require_grep "preset-cli/references/safety-policy.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
+
+# The CLI package must not be documented as a placeholder anywhere.
+if grep -q "intentionally not an installable plugin yet" "$CLI_ROOT/README.md"; then
+  fail "CLI package README must not still claim placeholder status"
+fi
+if grep -q "is a placeholder only" CLAUDE.md; then
+  fail "root CLAUDE.md must not still describe CLI as a placeholder"
+fi
+
+# The CLI package must not link out to other plugins via relative paths.
+if grep -R -q "\.\./\.\./preset-api/" "$CLI_ROOT"; then
+  fail "CLI package contains forbidden ../../preset-api/... cross-plugin link"
+fi
+if grep -R -q "\.\./preset-api/" "$CLI_ROOT"; then
+  fail "CLI package contains forbidden ../preset-api/... cross-plugin link"
+fi
+
+# The CLI package must not advertise sup config env as a safe inspection command.
+reject_grep "sup config env" "$CLI_ROOT"
+
+reject_grep "skills/preset-api" "$CLI_ROOT"
+reject_grep "skills/preset-mcp" "$CLI_ROOT"
+
+while IFS= read -r path; do
+  require_file "$CLI_ROOT/$path"
+done < <(jq -r '.skills[].path' "$CLI_ROOT/.cursor-plugin/plugin.json")
 
 echo "Smoke test passed."

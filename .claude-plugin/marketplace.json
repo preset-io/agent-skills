@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "preset-agent-skills",
-  "description": "Preset agent skill package for direct API workflows and MCP tool workflows.",
+  "description": "Preset agent skill packages split by surface: direct API workflows, MCP tool workflows, and CLI/`sup` workflows.",
   "owner": {
     "name": "Preset",
     "url": "https://preset.io/"
@@ -28,6 +28,17 @@
       "category": "development",
       "source": "./plugins/preset-mcp-skills",
       "homepage": "https://github.com/preset-io/preset-agent-skills/tree/master/plugins/preset-mcp-skills"
+    },
+    {
+      "name": "preset-cli-skills",
+      "description": "Preset CLI skills for shell, scripting, and CI/CD workflows driven by the `sup` CLI (PyPI package `superset-sup`). Use only for CLI workflows; do not use for MCP-only work, and do not use as a substitute for direct HTTP/SDK code.",
+      "author": {
+        "name": "Preset",
+        "url": "https://preset.io/"
+      },
+      "category": "development",
+      "source": "./plugins/preset-cli-skills",
+      "homepage": "https://github.com/preset-io/preset-agent-skills/tree/master/plugins/preset-cli-skills"
     }
   ]
 }

@@ -8,6 +8,7 @@ The installable packages are:
 
 - [`preset-api-skills`](plugins/preset-api-skills/README.md) — focused skills for direct Preset Management API, Superset workspace API, and Snowflake Cortex API workflows.
 - [`preset-mcp-skills`](plugins/preset-mcp-skills/README.md) — focused skills for Superset MCP tool workflows.
+- [`preset-cli-skills`](plugins/preset-cli-skills/README.md) — focused skills for Preset CLI (`sup`) shell, scripting, CI/CD, read/export, SQL, and gated mutation workflows.
 
 API package highlights:
 
@@ -29,9 +30,16 @@ MCP package highlights:
 
 See the [MCP package README](plugins/preset-mcp-skills/README.md) for the full 8-skill catalog.
 
-Broader CLI workflow surfaces are reserved but not installable yet: [`plugins/preset-cli-skills`](plugins/preset-cli-skills/README.md). Codex package discovery metadata lives in [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json), and Claude marketplace metadata lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
+CLI package highlights:
 
-Install or load each package from its plugin directory, not from the repository root. Use `preset-api-skills` for direct API workflows. Use `preset-mcp-skills` for MCP workflows. Do not use API skills as a fallback for MCP-only work, and do not use MCP skills for direct API work.
+- **`preset-cli`** — install and authenticate `sup`, select workspaces, choose output formats, run read-only asset workflows, and handle SQL/data-returning reads with safety boundaries.
+- **`preset-cli-mutations`** — handle `sup` push, `--force`, `--overwrite`, user push/invite, and cross-workspace sync with mandatory preview and confirmation.
+
+See the [CLI package README](plugins/preset-cli-skills/README.md) for the full 2-skill catalog.
+
+Codex package discovery metadata lives in [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json), and Claude marketplace metadata lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
+
+Install or load each package from its plugin directory, not from the repository root. Use `preset-api-skills` for direct API workflows. Use `preset-mcp-skills` for MCP workflows. Use `preset-cli-skills` for explicit `sup` CLI workflows. Do not use API or CLI skills as a fallback for MCP-only work, and do not use MCP or CLI skills for direct API work.
 
 ## Supported clients
 
@@ -60,7 +68,7 @@ Add Preset's marketplace, then install the plugin. One install registers all ski
    <MARKETPLACE_REPO>
    ```
    Click **Sync**. Claude Desktop warns that marketplace plugins are not verified by Anthropic — this is expected.
-5. Open the newly added marketplace and install **Preset API Skills** or **Preset MCP Skills**.
+5. Open the newly added marketplace and install **Preset API Skills**, **Preset MCP Skills**, or **Preset CLI Skills**.
 
 ### Claude Code (CLI)
 
@@ -70,6 +78,7 @@ From any Claude Code session:
 /plugin marketplace add <MARKETPLACE_REPO>
 /plugin install preset-api-skills@preset-agent-skills
 /plugin install preset-mcp-skills@preset-agent-skills
+/plugin install preset-cli-skills@preset-agent-skills
 ```
 
 Updates ship with each tagged release — re-run `/plugin install` to pull the latest.
@@ -89,6 +98,9 @@ node scripts/build-claude-web-skills.mjs
 node scripts/build-claude-web-skills.mjs \
   --source plugins/preset-mcp-skills/skills \
   --out dist/claude-web-flat-mcp-skills
+node scripts/build-claude-web-skills.mjs \
+  --source plugins/preset-cli-skills/skills \
+  --out dist/claude-web-flat-cli-skills
 ```
 
 ### OpenAI Codex
@@ -99,6 +111,7 @@ Install the plugin from GitHub:
 codex plugin marketplace add <MARKETPLACE_REPO> --ref master
 codex plugin add preset-api-skills@preset-agent-skills
 codex plugin add preset-mcp-skills@preset-agent-skills
+codex plugin add preset-cli-skills@preset-agent-skills
 ```
 
 Use a release tag (e.g. `--ref v0.1.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
@@ -117,7 +130,7 @@ Cursor imports this repository as a GitHub-backed project rule. Use the `.git` c
 
 ### GitHub Copilot
 
-Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. Copy the package instructions you need into the `.github/` directory of the consuming repository, or reference their content from your own `.github/copilot-instructions.md`: [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) for direct API workflows, and [`plugins/preset-mcp-skills/.github/copilot-instructions.md`](plugins/preset-mcp-skills/.github/copilot-instructions.md) for Superset MCP workflows. Copilot loads the file whenever it edits code in that repo.
+Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. Copy the package instructions you need into the `.github/` directory of the consuming repository, or reference their content from your own `.github/copilot-instructions.md`: [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) for direct API workflows, [`plugins/preset-mcp-skills/.github/copilot-instructions.md`](plugins/preset-mcp-skills/.github/copilot-instructions.md) for Superset MCP workflows, and [`plugins/preset-cli-skills/.github/copilot-instructions.md`](plugins/preset-cli-skills/.github/copilot-instructions.md) for `sup` CLI workflows. Copilot loads the file whenever it edits code in that repo.
 
 ## Verifying the install
 
@@ -125,5 +138,6 @@ Ask your AI tool something the installed skills are designed for, for example:
 
 > "Using the Preset API, list the workspaces I have access to."
 > "Using Superset MCP tools, list dashboards."
+> "Using the Preset CLI, show me the `sup` command to export dashboards as JSON."
 
-The tool should reference one of the Preset skills (such as `preset-workspaces`, `preset-api`, or `preset-mcp-discovery`). If it doesn't, the plugin/skills are not loaded — re-check the install steps for your client.
+The tool should reference one of the Preset skills (such as `preset-workspaces`, `preset-api`, `preset-mcp-discovery`, or `preset-cli`). If it doesn't, the plugin/skills are not loaded — re-check the install steps for your client.

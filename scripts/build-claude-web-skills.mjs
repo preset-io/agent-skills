@@ -296,11 +296,19 @@ function compactDescription(description, maxLength) {
     /\s*Use only for direct API workflows\.?/gi,
     /\s*Use only for MCP tool workflows;?\s*/gi,
     /\s*Do not use for direct API work\.?/gi,
+    /\s*Use only for CLI workflows;?\s*/gi,
+    /\s*Use only for CLI mutation workflows;?\s*/gi,
+    /\s*Do not use for MCP-only work or for direct HTTP\/SDK code paths\.?/gi,
+    /\s*Do not use for MCP-only work or for direct HTTP\/SDK mutations\.?/gi,
+    /\s*Do not use for direct HTTP\/SDK code paths\.?/gi,
+    /\s*Do not use for direct HTTP\/SDK mutations\.?/gi,
+    /\s*or for direct HTTP\/SDK code paths\.?/gi,
+    /\s*or for direct HTTP\/SDK mutations\.?/gi,
   ];
   for (const removal of removals) {
     value = value.replace(removal, " ");
   }
-  value = value.replace(/\s+/g, " ").replace(/\s+([.;,:])/g, "$1").trim();
+  value = value.replace(/\s+/g, " ").replace(/\s+([.;,:])/g, "$1").replace(/\.{2,}/g, ".").trim();
   value = value.replace(/[;,]\s*$/, ".");
 
   if (value.length <= maxLength) {
@@ -320,6 +328,9 @@ function defaultSurfaceBoundary(resolvedSourceRoot) {
   const normalized = resolvedSourceRoot.split(path.sep).join("/");
   if (normalized.includes("/preset-mcp-skills/")) {
     return "Use this generated skill only for Superset MCP tool workflows. Do not use it for direct Preset Management API, Superset REST API, Snowflake Cortex API, curl, Python requests, exports, or database calls. If MCP cannot satisfy the request, stop and explain the missing MCP capability; do not switch surfaces unless the user explicitly starts a direct API workflow.";
+  }
+  if (normalized.includes("/preset-cli-skills/")) {
+    return "Use this generated skill only for explicit Preset CLI (`sup`) workflows: shell, scripting, CI/CD, reads, exports, and confirmation-gated CLI mutations. Do not use it for Preset/Superset MCP-only work or as a substitute for direct HTTP/SDK code. If the CLI lacks a needed capability, stop and ask before switching surfaces.";
   }
   return "Use this generated skill only for explicit direct Preset API, Superset workspace API, or Snowflake Cortex API workflows. Do not use it for Preset/Superset MCP-only work; stay on MCP tooling unless the user explicitly approves switching to direct API calls.";
 }

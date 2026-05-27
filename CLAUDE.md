@@ -4,5 +4,8 @@ This repository is a catalog of installable Claude plugin packages. The root is 
 
 Installable packages:
 
-- [`plugins/preset-api-skills/CLAUDE.md`](plugins/preset-api-skills/CLAUDE.md) — Preset direct API workflows.
-- [`plugins/preset-mcp-skills/CLAUDE.md`](plugins/preset-mcp-skills/CLAUDE.md) — Superset MCP tool workflows.
+- Direct API workflows: [`plugins/preset-api-skills/CLAUDE.md`](plugins/preset-api-skills/CLAUDE.md)
+- MCP tool workflows: [`plugins/preset-mcp-skills/CLAUDE.md`](plugins/preset-mcp-skills/CLAUDE.md)
+- CLI (`sup`) workflows: [`plugins/preset-cli-skills/CLAUDE.md`](plugins/preset-cli-skills/CLAUDE.md)
+
+If multiple packages are present, route by the user's requested surface, not by resource type. MCP intent wins for Preset/Superset MCP, MCP tools, MCP clients, or Copilot/MCP behavior. CLI intent (`sup`, shell, CI/CD scripts, batch exports) uses `preset-cli-skills`. Direct HTTP/SDK code uses `preset-api-skills`. Do not switch surfaces unless the user explicitly approves the switch.

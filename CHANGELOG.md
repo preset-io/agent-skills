@@ -12,8 +12,8 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 - Added a root `CLAUDE.md` that redirects direct Claude Code repository users to the installable API and MCP packages.
 - Added Codex and Claude marketplace metadata for the installable API package.
-- Added placeholder `preset-cli-skills` directory for future CLI workflow skills.
 - Added installable **preset-mcp-skills** package with 8 focused Superset MCP workflow skills, client manifests, package docs, tool inventory, and inventory drift check.
+- Added installable **preset-cli-skills** package with `preset-cli` and `preset-cli-mutations` skills for `sup` CLI workflows, package manifests, docs, local safety policy, and marketplace entries.
 - Hardened API plugin and skill routing metadata so MCP-intent tasks do not silently fall back to direct API workflows.
 - **preset-admin** skill - Team membership management, workspace lifecycle operations, invite lifecycle workflows, role identifier guidance, seat-limit preflights, audit log queries, and confirmation-gated audit downloads.
 - Management API v2 conventions and reusable client support for audit log endpoints.

@@ -21,7 +21,7 @@ There is no general `sup … delete` surface. If a user asks to delete an asset 
 ## `--force` and `--overwrite` Semantics
 
 - `--overwrite` matches assets by ID/UUID and replaces their bodies wholesale. Custom edits made in the target workspace UI are lost.
-- `--force` is surfaced on `sup chart push`, `sup dashboard push`, and `sup dataset push`. It skips the interactive confirmation prompt inside `sup`. It does **not** skip the confirmation required by this skill; an agent must still present the confirmation template from [confirmation-and-dry-run.md](confirmation-and-dry-run.md) before invoking `--force` on any of those commands.
+- `--force` is surfaced on `sup chart push`, `sup dashboard push`, and `sup dataset push`. It skips the interactive confirmation prompt inside `sup`. It does **not** skip the confirmation required by this skill; an agent must still present the confirmation template from [confirmation-template.md](confirmation-template.md) before invoking `--force` on any of those commands.
 - Combining `--overwrite --force` on any entity push (chart, dashboard, or dataset) is the most destructive single-workspace combination available via the CLI. Refuse to run it without the literal target workspace name and the literal flag string(s) in the user's confirmation message.
 
 ## Pushed-Dependency Behavior
@@ -45,6 +45,6 @@ Always run the assets-folder discovery step first (`ls assets/`, `sup chart pull
 2. Inventory the assets folder (`ls`, `head`) and pull the current target state with `sup chart pull` / `sup dataset pull` / `sup dashboard pull` for diff. Present the diff between local YAML and pulled-target YAML.
 3. Confirm whether `--overwrite` is required and why.
 4. Confirm whether `--force` is required and why interactive confirmation must be skipped.
-5. Load [confirmation-and-dry-run.md](confirmation-and-dry-run.md) and present the template.
+5. Load [preview-and-dry-run.md](preview-and-dry-run.md), then [confirmation-template.md](confirmation-template.md), and present the template.
 
 Only after explicit user confirmation that names the target workspace (and names every `--force` / `--overwrite` flag the run will use) should the agent execute the mutating run.

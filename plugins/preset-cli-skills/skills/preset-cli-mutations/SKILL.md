@@ -1,6 +1,6 @@
 ---
 name: preset-cli-mutations
-description: State-changing Preset `sup` CLI operations — single-workspace writes (`sup chart push`, `sup dashboard push`, `sup dataset push`, `--force`/`--overwrite`) and cross-workspace promotion (`sup sync create/run/validate`). Use only for CLI mutation workflows; Do not use for MCP-only work or for direct HTTP/SDK mutations.
+description: State-changing Preset `sup` CLI workflows: chart/dashboard/dataset push, user push/invite, destructive flags, and cross-workspace sync. Use only for CLI mutation workflows. Do not use for MCP-only work. Do not use for direct HTTP/SDK mutations.
 ---
 
 # preset-cli-mutations
@@ -36,5 +36,8 @@ Use for state-changing CLI operations: single-workspace writes (push, --force, -
 
 - Single-workspace writes (push, `--overwrite`, `--force`, dependency handling): [references/write-operations.md](references/write-operations.md)
 - Cross-workspace promotion (sync, source/target, Jinja2, `--dry-run`): [references/cross-workspace-sync.md](references/cross-workspace-sync.md)
-- Confirmation template and dry-run handling: [references/confirmation-and-dry-run.md](references/confirmation-and-dry-run.md)
+- Sync templating, rollback, and multi-target risk: [references/sync-templating-and-rollback.md](references/sync-templating-and-rollback.md)
+- Preview and dry-run handling: [references/preview-and-dry-run.md](references/preview-and-dry-run.md)
+- Confirmation template and abort triggers: [references/confirmation-template.md](references/confirmation-template.md)
+- Confirmation overview and audit expectations: [references/confirmation-and-dry-run.md](references/confirmation-and-dry-run.md)
 - Approval gates, redaction, abort triggers: [../preset-cli/references/safety-policy.md](../preset-cli/references/safety-policy.md)

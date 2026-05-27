@@ -1,6 +1,6 @@
 # SQL and Saved Queries via `sup`
 
-Use this reference when running ad-hoc SQL through `sup sql` or listing saved queries with `sup query`.
+Use this reference for basic ad-hoc SQL routing through `sup sql`. For row disclosure rules, load [sql-data-safety.md](sql-data-safety.md). For saved query metadata and SQL text reads, load [saved-query-reads.md](saved-query-reads.md).
 
 ## Ad-hoc SQL Execution
 
@@ -10,31 +10,19 @@ sup sql "SELECT * FROM sales LIMIT 100" --csv
 sup sql "SELECT id, email FROM users WHERE active" --porcelain
 ```
 
-`sup sql` runs through Superset's data access layer in the active workspace, so it inherits the same database connections, row limits, and RLS policies as SQL Lab. It is **not** a direct database connection.
+`sup sql` runs through Superset's data access layer in the active workspace, so it inherits the same database connections, row limits, and RLS policies as SQL Lab. It is not a direct database connection.
 
 ## Read-Only Stance
 
 Treat `sup sql` as read-only by default:
 
 - Run `SELECT` statements freely after confirming the workspace.
-- Refuse `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `DROP`, `ALTER`, `CREATE`, `MERGE`, `REPLACE`, `GRANT`, `REVOKE`, `CALL`, and `COPY` without explicit user confirmation that the upstream database is the intended target and that DML/DDL is in scope. Route confirmation through [safety-policy.md](safety-policy.md).
+- Refuse `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `DROP`, `ALTER`, `CREATE`, `MERGE`, `REPLACE`, `GRANT`, `REVOKE`, `CALL`, and `COPY` without explicit user confirmation that the upstream database is the intended target and that DML/DDL is in scope. Route confirmation through [sql-data-safety.md](sql-data-safety.md) and [safety-policy.md](safety-policy.md).
 - Do not paste user-supplied SQL into shell strings without confirming there are no shell metacharacters that would break quoting; prefer single-quoted heredocs for multi-line statements.
-
-## Saved Queries
-
-```bash
-sup query list --mine --json
-sup query list --name="*revenue*" --json
-sup query info <query-id> --json
-```
-
-Saved-query filtering uses `--name "<pattern>"` (label pattern, supports wildcards), not `--search`. The `--search` flag exists for `sup chart/dashboard/dataset list` but is not implemented for `sup query list`; passing it will error.
-
-Saved queries can contain SQL text owned by other users. Listing returns metadata; fetching a saved query returns the SQL body. Treat the SQL body as sensitive (it may encode business logic, table names, or filtering conditions) and avoid printing it in shared transcripts unless the user has approved that disclosure.
 
 ## Large Result Handling
 
-- `sup sql` exposes two row-limit knobs: `--limit <n>` / `-l <n>` controls how many rows are fetched from Superset (default `1000`), and `--max-rows <n>` controls how many of those are displayed in the terminal (default `100`). Both are CLI flags — you do not need to leave the CLI or edit the workspace SQL Lab cap to change them. The workspace's own SQL Lab row cap still applies as a hard upper bound: `sup sql --limit` cannot exceed it.
+- `sup sql` exposes two row-limit knobs: `--limit <n>` / `-l <n>` controls how many rows are fetched from Superset (default `1000`), and `--max-rows <n>` controls how many of those are displayed in the terminal (default `100`). Both are CLI flags. The workspace SQL Lab row cap still applies as a hard upper bound.
 - For exports over a few thousand rows, pipe to a file: `sup sql "SELECT …" --csv > export.csv`. Pair with `--limit` to cap fetched rows; `--max-rows` is irrelevant when piping (it only gates terminal display). Never paste large CSV/JSON bodies into chat transcripts.
 - For analyst-facing iteration, prefer `sup sql` with `--json` over `--csv` so that null handling and types survive intermediate processing.
 

@@ -121,19 +121,26 @@ require_grep ".agents/plugins/marketplace.json" README.md
 require_grep ".claude-plugin/marketplace.json" README.md
 require_grep "not from the repository root" README.md
 require_grep "MCP-only work" README.md
-require_grep "Do not use API skills as a fallback for MCP-only work" README.md
+require_grep "Do not use API or CLI skills as a fallback for MCP-only work" README.md
 require_grep "node scripts/build-claude-web-skills.mjs" README.md
 require_grep "## Surface Boundary" scripts/build-claude-web-skills.mjs
 require_grep "Do not use it for Preset/Superset MCP-only work" scripts/build-claude-web-skills.mjs
 require_grep "Use this generated skill only for Superset MCP tool workflows" scripts/build-claude-web-skills.mjs
+require_grep "Use this generated skill only for explicit Preset CLI" scripts/build-claude-web-skills.mjs
 require_grep "Build Claude web API skill ZIPs" .github/workflows/release.yml
 require_grep "Build Claude web MCP skill ZIPs" .github/workflows/release.yml
+require_grep "Build Claude web CLI skill ZIPs" .github/workflows/release.yml
+require_grep "Build Claude web CLI skill ZIPs" .github/workflows/ci.yml
 require_grep "--source plugins/preset-mcp-skills/skills" .github/workflows/release.yml
 require_grep "--out dist/claude-web-flat-mcp-skills" .github/workflows/release.yml
 require_grep "dist/claude-web-flat-mcp-skills/\\*.zip" .github/workflows/release.yml
+require_grep "--source plugins/preset-cli-skills/skills" .github/workflows/release.yml
+require_grep "--out dist/claude-web-flat-cli-skills" .github/workflows/release.yml
+require_grep "dist/claude-web-flat-cli-skills/\\*.zip" .github/workflows/release.yml
 require_grep "root is not itself an installable plugin" CLAUDE.md
 require_grep "plugins/preset-api-skills/CLAUDE.md" CLAUDE.md
 require_grep "plugins/preset-mcp-skills/CLAUDE.md" CLAUDE.md
+require_grep "plugins/preset-cli-skills/CLAUDE.md" CLAUDE.md
 check_markdown_links
 
 require_jq '.name == "preset-agent-skills"' .agents/plugins/marketplace.json
@@ -575,16 +582,24 @@ for skill in "${required_cli_skills[@]}"; do
 done
 
 required_cli_references=(
+  skills/preset-cli/references/asset-filter-matrix.md
+  skills/preset-cli/references/command-examples.md
+  skills/preset-cli/references/config-precedence.md
   skills/preset-cli/references/install-and-auth.md
   skills/preset-cli/references/output-formats.md
   skills/preset-cli/references/workspace-and-config.md
   skills/preset-cli/references/sql-and-query.md
+  skills/preset-cli/references/sql-data-safety.md
+  skills/preset-cli/references/saved-query-reads.md
   skills/preset-cli/references/assets-read.md
   skills/preset-cli/references/cli-vs-api.md
   skills/preset-cli/references/safety-policy.md
   skills/preset-cli-mutations/references/write-operations.md
   skills/preset-cli-mutations/references/cross-workspace-sync.md
+  skills/preset-cli-mutations/references/sync-templating-and-rollback.md
   skills/preset-cli-mutations/references/confirmation-and-dry-run.md
+  skills/preset-cli-mutations/references/confirmation-template.md
+  skills/preset-cli-mutations/references/preview-and-dry-run.md
 )
 
 for file in "${required_cli_references[@]}"; do
@@ -593,15 +608,23 @@ done
 
 require_grep "pip install superset-sup" "$CLI_ROOT/skills/preset-cli/references/install-and-auth.md"
 require_grep "SUP_PRESET_API_TOKEN" "$CLI_ROOT/skills/preset-cli/references/install-and-auth.md"
+require_grep "Project-local state shadows the global default" "$CLI_ROOT/skills/preset-cli/references/config-precedence.md"
 require_grep "\-\-json" "$CLI_ROOT/skills/preset-cli/references/output-formats.md"
 require_grep "sup workspace use" "$CLI_ROOT/skills/preset-cli/references/workspace-and-config.md"
+require_grep "sup query list --search" "$CLI_ROOT/skills/preset-cli/references/asset-filter-matrix.md"
 require_grep "sup sql" "$CLI_ROOT/skills/preset-cli/references/sql-and-query.md"
+require_grep "SQL and Data-Returning Read Safety" "$CLI_ROOT/skills/preset-cli/references/sql-data-safety.md"
+require_grep "sup query list --name" "$CLI_ROOT/skills/preset-cli/references/saved-query-reads.md"
+require_grep "sup chart data" "$CLI_ROOT/skills/preset-cli/references/command-examples.md"
 require_grep "sup chart pull" "$CLI_ROOT/skills/preset-cli/references/assets-read.md"
 require_grep "preset-api-skills" "$CLI_ROOT/skills/preset-cli/references/cli-vs-api.md"
 require_grep "Default to non-destructive reads" "$CLI_ROOT/skills/preset-cli/references/safety-policy.md"
 require_grep "sup chart push" "$CLI_ROOT/skills/preset-cli-mutations/references/write-operations.md"
 require_grep "sup sync" "$CLI_ROOT/skills/preset-cli-mutations/references/cross-workspace-sync.md"
+require_grep "Jinja2 Templating" "$CLI_ROOT/skills/preset-cli-mutations/references/sync-templating-and-rollback.md"
 require_grep "Always preview before any mutating run" "$CLI_ROOT/skills/preset-cli-mutations/references/confirmation-and-dry-run.md"
+require_grep "sup user invite" "$CLI_ROOT/skills/preset-cli-mutations/references/confirmation-template.md"
+require_grep "Pull-and-Diff Substitute" "$CLI_ROOT/skills/preset-cli-mutations/references/preview-and-dry-run.md"
 require_grep "preset-cli-mutations" "$CLI_ROOT/skills/preset-cli/SKILL.md"
 require_grep "preset-cli/references/safety-policy.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
 

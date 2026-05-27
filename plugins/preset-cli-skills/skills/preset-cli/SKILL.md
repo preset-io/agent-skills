@@ -34,9 +34,14 @@ Use as the foundation for shell, scripting, CI/CD, and agent-driven Preset workf
 ## Retrieve
 
 - Install, entry points, OAuth, env vars: [references/install-and-auth.md](references/install-and-auth.md)
-- Output formats, `--json` / `--csv` / `--yaml` / `--porcelain`, exit codes: [references/output-formats.md](references/output-formats.md)
-- `sup config`, workspace selection, `--workspace-id` override: [references/workspace-and-config.md](references/workspace-and-config.md)
-- Ad-hoc SQL and saved queries: [references/sql-and-query.md](references/sql-and-query.md)
-- Asset reads and exports (databases, datasets, charts, dashboards, users): [references/assets-read.md](references/assets-read.md)
+- Config precedence and source resolution: [references/config-precedence.md](references/config-precedence.md)
+- Workspace selection and `--workspace-id` override: [references/workspace-and-config.md](references/workspace-and-config.md)
+- Output formats and exit behavior: [references/output-formats.md](references/output-formats.md)
+- Asset read/export entity scope: [references/assets-read.md](references/assets-read.md)
+- Asset list filter matrix: [references/asset-filter-matrix.md](references/asset-filter-matrix.md)
+- Ad-hoc SQL routing: [references/sql-and-query.md](references/sql-and-query.md)
+- SQL/data-returning read safety: [references/sql-data-safety.md](references/sql-data-safety.md)
+- Saved query reads: [references/saved-query-reads.md](references/saved-query-reads.md)
+- Detailed command examples: [references/command-examples.md](references/command-examples.md)
 - CLI vs API routing decision: [references/cli-vs-api.md](references/cli-vs-api.md)
 - Approval gates and credential redaction: [references/safety-policy.md](references/safety-policy.md)

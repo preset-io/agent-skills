@@ -15,32 +15,11 @@ Use this reference for `list`, `info`, and `pull` workflows that do not mutate w
 
 `pull` writes asset definitions to the local filesystem (YAML files in `./assets/` or a path supplied to the command). It does not modify the source workspace.
 
-## List Filters by Entity
-
-Filter availability is per-entity, not universal. Verify against this matrix before composing a `list` command:
-
-| Entity | `--id` | `--ids` | `--search` | `--name` | `--mine` | `--limit` | Other |
-|---|---|---|---|---|---|---|---|
-| `chart` | ✓ | ✓ | ✓ (multi-field) | — | ✓ | ✓ | `--dashboard-id`, `--dataset-id`, `--viz-type`, `--team` |
-| `dashboard` | ✓ | ✓ | ✓ (title/slug) | — | ✓ | ✓ | `--published`, `--draft`, `--folder` |
-| `dataset` | ✓ | ✓ | ✓ (table name) | — | ✓ | ✓ | `--database-id`, `--schema`, `--table-type`, `--team` |
-| `query` | ✓ | — | — | ✓ (label pattern, wildcards) | ✓ | ✓ | `--database-id`, `--schema` |
-| `database` | — | — | — | — | — | — | output flags + `--workspace-id` only |
-| `user` | — | — | — | — | — | ✓ | output flags + `--workspace-id` only |
-
-`--workspace-id <id>` (long form) or `-w <id>` (short form) is accepted on every `list` command for per-command workspace override. Output flags (`--json`, `--yaml`, `--porcelain`) are also universal; see [output-formats.md](output-formats.md).
-
-Do not assume a filter exists on an entity it is not listed for; `sup database list --mine`, `sup user list --search`, and `sup query list --search` will all error. For saved queries specifically, use `--name "<pattern>"` (supports wildcards) rather than `--search`.
+For entity-specific list filters, load [asset-filter-matrix.md](asset-filter-matrix.md). Do not assume a filter exists on every entity.
 
 ## Common Read Patterns
 
 ```bash
-# Discover and inventory
-sup workspace list --json
-sup dashboard list --mine --json --limit 100
-sup chart list --search="revenue" --json
-sup dataset list --search="users" --json
-
 # Detail
 sup chart info 3628 --json
 sup dashboard info 254 --json
@@ -54,13 +33,7 @@ sup chart data 3628 --csv > chart-3628.csv
 
 ## Data-Returning Reads
 
-`sup chart data` and `sup sql` are **data-returning reads**, not pure metadata. Even though they do not change workspace state, they can expose customer data. Before running these on an unfamiliar workspace, confirm with the user:
-
-- The workspace and chart/query target.
-- The row volume expected (use `--limit` to cap).
-- The destination of the output (local file, agent transcript, downstream pipeline).
-
-Then chain to [safety-policy.md](safety-policy.md) to record the disclosure.
+`sup chart data` and `sup sql` are data-returning reads, not pure metadata. Before using them, load [sql-data-safety.md](sql-data-safety.md) and [safety-policy.md](safety-policy.md).
 
 ## Pull Without Mutation
 

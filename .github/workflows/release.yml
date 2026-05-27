@@ -46,10 +46,17 @@ jobs:
             --source plugins/preset-mcp-skills/skills \
             --out dist/claude-web-flat-mcp-skills
 
+      - name: Build Claude web CLI skill ZIPs
+        run: |
+          node scripts/build-claude-web-skills.mjs \
+            --source plugins/preset-cli-skills/skills \
+            --out dist/claude-web-flat-cli-skills
+
       - name: List generated artifacts
         run: |
           ls -la dist/claude-web-flat-skills/
           ls -la dist/claude-web-flat-mcp-skills/
+          ls -la dist/claude-web-flat-cli-skills/
 
       - name: Upload ZIPs to GitHub Release
         uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
@@ -58,4 +65,5 @@ jobs:
           files: |
             dist/claude-web-flat-skills/*.zip
             dist/claude-web-flat-mcp-skills/*.zip
+            dist/claude-web-flat-cli-skills/*.zip
           fail_on_unmatched_files: true

@@ -54,24 +54,4 @@ Use `sup config show` to confirm the active workspace, target workspace, and aut
 - For CI/CD, inject credentials via the runner's secret store (GitHub Actions secrets, GitLab CI variables, Vault, etc.) and reference them as environment variables only.
 - Redact tokens, JWTs, and any `Authorization:` headers in command transcripts and screenshots.
 
-## Configuration Precedence
-
-`sup` resolves configuration with two different precedence chains depending on the field. The CLI's own `sup config` help text shows env > global > project for everything, but upstream `src/sup/config/settings.py` only follows that order for credentials. For workspace, database, assets-folder, and target-workspace context, project state *shadows* global config.
-
-**Credentials** (`SUP_PRESET_API_TOKEN`, `SUP_PRESET_API_SECRET`) — env → global only:
-
-1. `SUP_PRESET_API_TOKEN` / `SUP_PRESET_API_SECRET` environment variables.
-2. Global `~/.sup/config.yml`.
-
-(There is no project-local credential store; tokens live in env or `~/.sup/config.yml`.)
-
-**Context fields** (workspace ID, database ID, assets folder, target workspace) — env → project → global:
-
-1. Per-command CLI override (`--workspace-id`, `--database-id`, etc.).
-2. `SUP_*` environment variables (e.g. `SUP_WORKSPACE_ID`).
-3. Project-local `.sup/state.yml`.
-4. Global `~/.sup/config.yml`.
-
-So an agent that runs `sup config set workspace-id 123` (writes to `~/.sup/config.yml`) and then `sup workspace use 456` (writes to `.sup/state.yml` by default) will see workspace **456** win in the current directory — the project-local state shadows the global default. Always verify the active values with `sup config show` before relying on a precedence claim; it prints the resolved values, not the precedence chain.
-
-Document the resolved source in any handoff: an agent should record whether credentials and context came from environment, project state, or global config when running in CI to make incident review easier.
+For precedence between environment variables, project-local state, and global config, load [config-precedence.md](config-precedence.md).

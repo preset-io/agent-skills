@@ -25,6 +25,8 @@ This package is one of three surface-scoped Preset agent packages:
 
 Each `SKILL.md` is small and always-loaded once routed; detailed examples live in `references/` files the agent loads on demand.
 
+The references are intentionally split by task so routine routing does not require loading the full command catalog: install/auth, config precedence, workspace selection, output formats, asset filter matrices, SQL/data safety, saved-query reads, mutation preview, confirmation templates, and cross-workspace sync each live in focused files.
+
 ## Quick Start
 
 ```bash
@@ -43,6 +45,7 @@ The `sup` entry point ships in the `superset-sup` PyPI package and authenticates
 ## Client Entry Points
 
 - Claude Code: `.claude-plugin/plugin.json` plus `skills/*/SKILL.md`; `CLAUDE.md` mirrors this package guidance for direct repository readers, but it is not plugin-loaded context.
+- Claude web/Desktop custom skills: build per-skill ZIPs with `node scripts/build-claude-web-skills.mjs --source plugins/preset-cli-skills/skills --out dist/claude-web-flat-cli-skills`.
 - OpenAI Codex: `.codex-plugin/plugin.json` plus `AGENTS.md`.
 - Cursor: `.cursor-plugin/plugin.json`.
 - GitHub Copilot: `.github/copilot-instructions.md`.

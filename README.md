@@ -45,7 +45,7 @@ Install or load each package from its plugin directory, not from the repository 
 
 | Client | Manifest | Distribution channel |
 |---|---|---|
-| Claude Desktop | `.claude-plugin/marketplace.json` → package `.claude-plugin/plugin.json` | Custom marketplace (Add marketplace → repo URL) |
+| Claude Desktop | per-skill ZIPs from `scripts/build-claude-web-skills.mjs` | Manual upload in Skills settings |
 | Claude Code (CLI) | `.claude-plugin/marketplace.json` → package `.claude-plugin/plugin.json` | `/plugin marketplace add` |
 | Claude.ai web | per-skill ZIPs from `scripts/build-claude-web-skills.mjs` | Manual upload in Skills settings |
 | OpenAI Codex | `.agents/plugins/marketplace.json` → package `.codex-plugin/plugin.json` + `AGENTS.md` | Codex plugin marketplace |
@@ -56,17 +56,13 @@ Install or load each package from its plugin directory, not from the repository 
 
 ### Claude Desktop
 
-Add Preset's marketplace, then install the plugin. One install registers all skills, and Claude Desktop picks up new versions automatically.
+Claude Desktop should use individual Skill ZIP uploads. Do not use the Plugins marketplace path for Claude Desktop until marketplace plugin installation is reliable for this package.
 
 1. Open **Claude Desktop → Settings → Connectors**, then click the **Customize** link.
-2. In Customize, select **Skills** in the sidebar, click the **+** next to "Skills", and choose **Browse skills**.
-3. Switch to the **Plugins** tab, click **Personal**, click the **+**, and choose **Add marketplace**.
-4. In the dialog, paste the marketplace URL or `owner/repo` slug:
-   ```text
-   preset-io/agent-skills
-   ```
-   Click **Sync**. Claude Desktop warns that marketplace plugins are not verified by Anthropic — this is expected.
-5. Open the newly added marketplace and install **Preset API Skills**, **Preset MCP Skills**, or **Preset CLI Skills**.
+2. In Customize, select **Skills** in the sidebar, click the **+** next to "Skills", then choose **Create skill → Upload a skill**.
+3. Download the per-skill ZIPs from the [latest GitHub Release](https://github.com/preset-io/agent-skills/releases/latest).
+4. Upload each skill ZIP one by one. Start with only the skills relevant to your work, such as `preset-api.zip` for direct API workflows, `preset-mcp.zip` / `preset-mcp-discovery.zip` for MCP workflows, or `preset-cli.zip` / `preset-cli-mutations.zip` for `sup` CLI workflows.
+5. Restart Claude Desktop after uploading or replacing skill ZIPs.
 
 ### Claude Code (CLI)
 
@@ -85,7 +81,7 @@ Updates ship with each tagged release — re-run `/plugin install` to pull the l
 
 Claude.ai web does not run plugins, so each skill must be uploaded individually as a Skill ZIP.
 
-**Easiest path:** install [Claude Desktop](https://claude.ai/download) (free, same account) and follow the Claude Desktop steps above.
+**Easiest path:** install [Claude Desktop](https://claude.ai/download) (free, same account) and follow the individual Skill ZIP upload steps above.
 
 **Web-only path:** download the per-skill ZIPs from the [latest GitHub Release](https://github.com/preset-io/agent-skills/releases/latest), then in claude.ai open **Settings → Capabilities → Skills**, click **Upload Skill**, and upload each ZIP. You only need the skills relevant to your work.
 

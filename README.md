@@ -54,8 +54,6 @@ Install or load each package from its plugin directory, not from the repository 
 
 ## Installation
 
-> Replace `<MARKETPLACE_REPO>` below with the public repository URL or `owner/repo` slug for the Preset agent skills marketplace.
-
 ### Claude Desktop
 
 Add Preset's marketplace, then install the plugin. One install registers all skills, and Claude Desktop picks up new versions automatically.
@@ -65,7 +63,7 @@ Add Preset's marketplace, then install the plugin. One install registers all ski
 3. Switch to the **Plugins** tab, click **Personal**, click the **+**, and choose **Add marketplace**.
 4. In the dialog, paste the marketplace URL or `owner/repo` slug:
    ```text
-   <MARKETPLACE_REPO>
+   preset-io/agent-skills
    ```
    Click **Sync**. Claude Desktop warns that marketplace plugins are not verified by Anthropic — this is expected.
 5. Open the newly added marketplace and install **Preset API Skills**, **Preset MCP Skills**, or **Preset CLI Skills**.
@@ -75,7 +73,7 @@ Add Preset's marketplace, then install the plugin. One install registers all ski
 From any Claude Code session:
 
 ```text
-/plugin marketplace add <MARKETPLACE_REPO>
+/plugin marketplace add preset-io/agent-skills
 /plugin install preset-api-skills@preset-agent-skills
 /plugin install preset-mcp-skills@preset-agent-skills
 /plugin install preset-cli-skills@preset-agent-skills
@@ -108,7 +106,7 @@ node scripts/build-claude-web-skills.mjs \
 Install the plugin from GitHub:
 
 ```bash
-codex plugin marketplace add <MARKETPLACE_REPO> --ref master
+codex plugin marketplace add preset-io/agent-skills --ref master
 codex plugin add preset-api-skills@preset-agent-skills
 codex plugin add preset-mcp-skills@preset-agent-skills
 codex plugin add preset-cli-skills@preset-agent-skills
@@ -125,7 +123,7 @@ Cursor imports this repository as a GitHub-backed project rule. Use the `.git` c
 3. Select **Remote Rule (Github)**.
 4. Enter the HTTPS clone URL:
    ```text
-   https://github.com/<OWNER>/<REPO>.git
+   https://github.com/preset-io/agent-skills.git
    ```
 
 ### GitHub Copilot

@@ -27,11 +27,12 @@ Use for state-changing CLI operations: single-workspace writes (push, --force, -
 ## Workflow Order
 
 1. Resolve source and (if cross-workspace) target workspace.
-2. Preview / diff to surface what will change.
-3. Summarize asset counts, effects, and any destructive flags.
-4. Ask for typed confirmation containing the literal destructive flag string.
-5. Stop before execution and wait for the typed confirmation.
-6. Execute only after confirmation.
+2. Validate configuration where the command supports it (e.g. `sup sync validate`) before previewing.
+3. Preview / diff to surface what will change.
+4. Summarize asset counts, target effects, rollback expectations, and any destructive flags.
+5. Ask for typed confirmation containing the literal destructive flag string.
+6. Stop before execution and wait for the typed confirmation.
+7. Execute only after confirmation.
 
 ## Retrieve
 

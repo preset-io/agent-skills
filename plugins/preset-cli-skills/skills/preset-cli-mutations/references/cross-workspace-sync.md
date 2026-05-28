@@ -23,11 +23,12 @@ Sync operations are always overwrite-style at the target — sync's design assum
 
 For Jinja2 target context, rollback expectations, and multi-target escalation, load [sync-templating-and-rollback.md](sync-templating-and-rollback.md).
 
-## Dry-Run and Diff Inspection
+## Sync Workflow
 
-1. `sup sync validate <dir>` to confirm configuration parses cleanly.
+1. `sup sync validate <dir>` to validate the sync configuration before any run.
 2. `sup sync run <dir> --dry-run` to preview the asset list per target.
-3. Capture the dry-run output and present it to the user with the confirmation template from [confirmation-template.md](confirmation-template.md).
+3. Summarize the target effects (assets created/updated/overwritten per target) and the rollback expectations — sync is overwrite-style with no `overwrite=false`, so state how each target would be restored if the result is wrong.
+4. Stop before execution and present the dry-run with the confirmation template from [confirmation-template.md](confirmation-template.md); wait for typed confirmation.
 
 Run the dry-run for every sync, even repeated syncs of the same configuration. Source assets evolve; the dry-run is the only way to see what will actually change in this run.
 

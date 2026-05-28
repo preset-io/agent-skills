@@ -29,6 +29,7 @@ For Jinja2 target context, rollback expectations, and multi-target escalation, l
 2. `sup sync run <dir> --dry-run` to preview the asset list per target.
 3. Summarize the target effects (assets created/updated/overwritten per target) and the rollback expectations — sync is overwrite-style with no `overwrite=false`, so state how each target would be restored if the result is wrong.
 4. Stop before execution and present the dry-run with the confirmation template from [confirmation-template.md](confirmation-template.md); wait for typed confirmation.
+5. After typed confirmation, run `sup sync run <dir>` without `--dry-run` to execute the sync.
 
 Run the dry-run for every sync, even repeated syncs of the same configuration. Source assets evolve; the dry-run is the only way to see what will actually change in this run.
 

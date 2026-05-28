@@ -16,7 +16,7 @@
       },
       "category": "development",
       "source": "./plugins/preset-api-skills",
-      "homepage": "https://github.com/preset-io/preset-agent-skills/tree/master/plugins/preset-api-skills"
+      "homepage": "https://github.com/preset-io/agent-skills/tree/master/plugins/preset-api-skills"
     },
     {
       "name": "preset-mcp-skills",
@@ -27,7 +27,7 @@
       },
       "category": "development",
       "source": "./plugins/preset-mcp-skills",
-      "homepage": "https://github.com/preset-io/preset-agent-skills/tree/master/plugins/preset-mcp-skills"
+      "homepage": "https://github.com/preset-io/agent-skills/tree/master/plugins/preset-mcp-skills"
     },
     {
       "name": "preset-cli-skills",
@@ -38,7 +38,7 @@
       },
       "category": "development",
       "source": "./plugins/preset-cli-skills",
-      "homepage": "https://github.com/preset-io/preset-agent-skills/tree/master/plugins/preset-cli-skills"
+      "homepage": "https://github.com/preset-io/agent-skills/tree/master/plugins/preset-cli-skills"
     }
   ]
 }

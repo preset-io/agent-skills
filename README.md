@@ -87,7 +87,7 @@ Claude.ai web does not run plugins, so each skill must be uploaded individually 
 
 **Easiest path:** install [Claude Desktop](https://claude.ai/download) (free, same account) and follow the Claude Desktop steps above.
 
-**Web-only path:** download the per-skill ZIPs from the [latest GitHub Release](https://github.com/preset-io/preset-agent-skills/releases/latest), then in claude.ai open **Settings → Capabilities → Skills**, click **Upload Skill**, and upload each ZIP. You only need the skills relevant to your work.
+**Web-only path:** download the per-skill ZIPs from the [latest GitHub Release](https://github.com/preset-io/agent-skills/releases/latest), then in claude.ai open **Settings → Capabilities → Skills**, click **Upload Skill**, and upload each ZIP. You only need the skills relevant to your work.
 
 To build the same ZIPs locally instead of downloading a release, run:
 
@@ -112,7 +112,7 @@ codex plugin add preset-mcp-skills@preset-agent-skills
 codex plugin add preset-cli-skills@preset-agent-skills
 ```
 
-Use a release tag (e.g. `--ref v0.1.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
+Use a release tag (e.g. `--ref v0.3.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
 
 ### Cursor
 

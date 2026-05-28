@@ -37,22 +37,20 @@ CLI package highlights:
 
 See the [CLI package README](plugins/preset-cli-skills/README.md) for the full 2-skill catalog.
 
-Codex package discovery metadata lives in [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json), and Claude marketplace metadata lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
-
 Install or load each package from its plugin directory, not from the repository root. Use `preset-api-skills` for direct API workflows. Use `preset-mcp-skills` for MCP workflows. Use `preset-cli-skills` for explicit `sup` CLI workflows. Do not use API or CLI skills as a fallback for MCP-only work, and do not use MCP or CLI skills for direct API work.
 
 ## Supported clients
 
-| Client | Loaded source | Install path |
+| Client | How skills load | Install |
 |---|---|---|
-| Claude Desktop | per-skill ZIPs from `scripts/build-claude-web-skills.mjs` | Manual upload in Skills settings |
-| Claude Code (CLI) | `.claude-plugin/marketplace.json` → package `.claude-plugin/plugin.json` | `/plugin marketplace add` |
-| Claude.ai web | per-skill ZIPs from `scripts/build-claude-web-skills.mjs` | Manual upload in Skills settings |
-| OpenAI Codex | `.agents/plugins/marketplace.json` → package `.codex-plugin/plugin.json` + `AGENTS.md` | Codex plugin marketplace |
-| Cursor | package `.cursor-plugin/plugin.json` | Remote Rule import |
-| GitHub Copilot | package `.github/copilot-instructions.md` | Repo-local instructions |
-| Snowflake Cortex Code CLI | package `skills/*/SKILL.md` files | `cortex skill add` / `/skill add` |
-| Gemini CLI | package `AGENTS.md` files imported from `GEMINI.md` | `GEMINI.md` imports |
+| Claude Code (CLI) | Plugin marketplace | `/plugin marketplace add` → `/plugin install` |
+| OpenAI Codex | Plugin marketplace | `codex plugin marketplace add` → `codex plugin add` |
+| Claude Desktop | Individual Skill ZIPs | Upload in Skills settings |
+| Claude.ai web | Individual Skill ZIPs | Upload in Skills settings |
+| Cursor | Project rule | Remote Rule (GitHub) import |
+| GitHub Copilot | Repo-local instructions | Copy `copilot-instructions.md` |
+| Snowflake Cortex Code CLI | Custom skills | `cortex skill add` / `/skill add` |
+| Gemini CLI | `GEMINI.md` context import | `@`-import package `AGENTS.md` files |
 
 ## Installation
 
@@ -182,3 +180,13 @@ Ask your AI tool something the installed skills are designed for, for example:
 > "Using the Preset CLI, show me the `sup` command to export dashboards as JSON."
 
 The tool should reference one of the Preset skills or package instruction files (such as `preset-workspaces`, `preset-api`, `preset-mcp-discovery`, or `preset-cli`). If it doesn't, the plugin, skill, or context instructions are not loaded — re-check the install steps for your client.
+
+## Repository Layout
+
+This repository keeps client metadata next to each package for contributors and debugging:
+
+- Claude marketplace metadata: [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) and each package's `.claude-plugin/plugin.json`.
+- Codex marketplace metadata: [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) and each package's `.codex-plugin/plugin.json`.
+- Cursor package metadata: each package's `.cursor-plugin/plugin.json`.
+- Copilot instructions: each package's `.github/copilot-instructions.md`.
+- Claude Desktop/web ZIP generation: [`scripts/build-claude-web-skills.mjs`](scripts/build-claude-web-skills.mjs).

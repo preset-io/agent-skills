@@ -56,9 +56,11 @@ Install or load each package from its plugin directory, not from the repository 
 
 ## Installation
 
+Find your client in the table above, then follow its section below. The GitHub repository is `preset-io/agent-skills`; `preset-agent-skills` is the marketplace/package name used by plugin install commands.
+
 ### Claude Desktop
 
-Claude Desktop should use individual Skill ZIP uploads. Do not use the Plugins marketplace path for Claude Desktop until marketplace plugin installation is reliable for this package.
+Claude Desktop installs these as individual Skill ZIP uploads.
 
 1. Open **Claude Desktop → Settings → Connectors**, then click the **Customize** link.
 2. In Customize, select **Skills** in the sidebar, click the **+** next to "Skills", then choose **Create skill → Upload a skill**.
@@ -163,6 +165,13 @@ git clone https://github.com/preset-io/agent-skills.git
 ```
 
 Run `/memory refresh` in Gemini CLI after updating `GEMINI.md`.
+
+## Updating
+
+- Claude Desktop and Claude.ai web: download the latest release ZIPs and upload or replace the skills again.
+- Claude Code and OpenAI Codex: re-run the install commands, or pin to a newer release tag when you want deterministic installs.
+- Snowflake Cortex Code CLI: re-run `/skill add` for the Git URL, or pull the local clone and re-run `cortex skill add`.
+- Gemini CLI: pull the latest repo contents, then run `/memory refresh`.
 
 ## Verifying the install
 

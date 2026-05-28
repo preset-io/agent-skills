@@ -40,7 +40,7 @@ jobs:
           git remote add public "https://x-access-token:${PUBLIC_MIRROR_TOKEN}@github.com/preset-io/agent-skills.git"
 
           if [ "${GITHUB_REF_TYPE}" = "branch" ] && [ "${GITHUB_REF_NAME}" = "master" ]; then
-            git push public HEAD:refs/heads/master --force-with-lease
+            git push public HEAD:refs/heads/master --force
             git push public --tags
           elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             git push public "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"

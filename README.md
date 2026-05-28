@@ -1,6 +1,6 @@
 # Preset Agent Skills
 
-Agent guidance for working with [Preset](https://preset.io), Apache Superset, Superset MCP tools, and Snowflake Cortex Agents. The skills work across Claude, OpenAI Codex, Cursor, and GitHub Copilot from a single source.
+Agent guidance for working with [Preset](https://preset.io), Apache Superset, Superset MCP tools, and Snowflake Cortex Agents. The skills work across Claude, OpenAI Codex, Cursor, GitHub Copilot, Snowflake Cortex Code CLI, and Gemini CLI from a single source.
 
 ## What's included
 
@@ -43,7 +43,7 @@ Install or load each package from its plugin directory, not from the repository 
 
 ## Supported clients
 
-| Client | Manifest | Distribution channel |
+| Client | Loaded source | Install path |
 |---|---|---|
 | Claude Desktop | per-skill ZIPs from `scripts/build-claude-web-skills.mjs` | Manual upload in Skills settings |
 | Claude Code (CLI) | `.claude-plugin/marketplace.json` → package `.claude-plugin/plugin.json` | `/plugin marketplace add` |
@@ -51,8 +51,8 @@ Install or load each package from its plugin directory, not from the repository 
 | OpenAI Codex | `.agents/plugins/marketplace.json` → package `.codex-plugin/plugin.json` + `AGENTS.md` | Codex plugin marketplace |
 | Cursor | package `.cursor-plugin/plugin.json` | Remote Rule import |
 | GitHub Copilot | package `.github/copilot-instructions.md` | Repo-local instructions |
-| Snowflake Cortex Code CLI | `skills/*/SKILL.md` | `cortex skill add` / `/skill add` |
-| Gemini CLI | `AGENTS.md` package instructions | `GEMINI.md` imports |
+| Snowflake Cortex Code CLI | package `skills/*/SKILL.md` files | `cortex skill add` / `/skill add` |
+| Gemini CLI | package `AGENTS.md` files imported from `GEMINI.md` | `GEMINI.md` imports |
 
 ## Installation
 
@@ -172,4 +172,4 @@ Ask your AI tool something the installed skills are designed for, for example:
 > "Using Superset MCP tools, list dashboards."
 > "Using the Preset CLI, show me the `sup` command to export dashboards as JSON."
 
-The tool should reference one of the Preset skills (such as `preset-workspaces`, `preset-api`, `preset-mcp-discovery`, or `preset-cli`). If it doesn't, the plugin/skills are not loaded — re-check the install steps for your client.
+The tool should reference one of the Preset skills or package instruction files (such as `preset-workspaces`, `preset-api`, `preset-mcp-discovery`, or `preset-cli`). If it doesn't, the plugin, skill, or context instructions are not loaded — re-check the install steps for your client.

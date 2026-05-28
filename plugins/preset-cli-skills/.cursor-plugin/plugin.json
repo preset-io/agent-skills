@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "AI agent skills for explicit Preset CLI (`sup`) workflows only. Use preset-api-skills for direct HTTP/SDK code; use preset-mcp-skills for MCP tools.",
   "publisher": "preset-io",
-  "repository": "https://github.com/preset-io/preset-agent-skills",
+  "repository": "https://github.com/preset-io/agent-skills",
   "skills": [
     {
       "name": "preset-cli",

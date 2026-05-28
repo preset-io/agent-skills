@@ -1,0 +1,49 @@
+name: Mirror public repo
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    if: github.repository == 'preset-io/preset-agent-skills'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Mirror branch and tags
+        env:
+          PUBLIC_MIRROR_TOKEN: ${{ secrets.PUBLIC_MIRROR_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${PUBLIC_MIRROR_TOKEN}" ]; then
+            echo "PUBLIC_MIRROR_TOKEN is not configured"
+            exit 1
+          fi
+
+          git remote add public "https://x-access-token:${PUBLIC_MIRROR_TOKEN}@github.com/preset-io/agent-skills.git"
+
+          if [ "${GITHUB_REF_TYPE}" = "branch" ] && [ "${GITHUB_REF_NAME}" = "master" ]; then
+            git push public HEAD:refs/heads/master --force
+            git push public --tags
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            git push public "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+          else
+            echo "Nothing to mirror for ${GITHUB_REF_TYPE} ${GITHUB_REF_NAME}"
+          fi

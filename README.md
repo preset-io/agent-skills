@@ -51,6 +51,8 @@ Install or load each package from its plugin directory, not from the repository 
 | OpenAI Codex | `.agents/plugins/marketplace.json` → package `.codex-plugin/plugin.json` + `AGENTS.md` | Codex plugin marketplace |
 | Cursor | package `.cursor-plugin/plugin.json` | Remote Rule import |
 | GitHub Copilot | package `.github/copilot-instructions.md` | Repo-local instructions |
+| Snowflake Cortex Code CLI | `skills/*/SKILL.md` | `cortex skill add` / `/skill add` |
+| Gemini CLI | `AGENTS.md` package instructions | `GEMINI.md` imports |
 
 ## Installation
 
@@ -125,6 +127,42 @@ Cursor imports this repository as a GitHub-backed project rule. Use the `.git` c
 ### GitHub Copilot
 
 Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. Copy the package instructions you need into the `.github/` directory of the consuming repository, or reference their content from your own `.github/copilot-instructions.md`: [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) for direct API workflows, [`plugins/preset-mcp-skills/.github/copilot-instructions.md`](plugins/preset-mcp-skills/.github/copilot-instructions.md) for Superset MCP workflows, and [`plugins/preset-cli-skills/.github/copilot-instructions.md`](plugins/preset-cli-skills/.github/copilot-instructions.md) for `sup` CLI workflows. Copilot loads the file whenever it edits code in that repo.
+
+### Snowflake Cortex Code CLI
+
+Cortex Code CLI supports custom skills from local folders and Git repositories. Install the public repo, then confirm the skills are visible:
+
+```text
+/skill add https://github.com/preset-io/agent-skills.git
+/skill list
+```
+
+If remote discovery does not pick up the nested package folders, clone the repo and add the package skill directories directly:
+
+```bash
+git clone https://github.com/preset-io/agent-skills.git
+cortex skill add agent-skills/plugins/preset-api-skills/skills
+cortex skill add agent-skills/plugins/preset-mcp-skills/skills
+cortex skill add agent-skills/plugins/preset-cli-skills/skills
+```
+
+Use the API package for direct Preset/Superset API and Snowflake Cortex Agent workflows, the MCP package for Superset MCP workflows, and the CLI package for `sup` workflows.
+
+### Gemini CLI
+
+Gemini CLI uses `GEMINI.md` context files rather than installable skill packages. Clone the public repo, then import the package instructions from your global or project `GEMINI.md`:
+
+```bash
+git clone https://github.com/preset-io/agent-skills.git
+```
+
+```md
+@/path/to/agent-skills/plugins/preset-api-skills/AGENTS.md
+@/path/to/agent-skills/plugins/preset-mcp-skills/AGENTS.md
+@/path/to/agent-skills/plugins/preset-cli-skills/AGENTS.md
+```
+
+Run `/memory refresh` in Gemini CLI after updating `GEMINI.md`.
 
 ## Verifying the install
 

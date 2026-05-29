@@ -34,6 +34,8 @@ jobs:
           PUBLIC_RELEASE_WORKFLOW: release.yml
         run: |
           set -euo pipefail
+          # Tag pushes can auto-trigger the public release; wait up to 90s before manual dispatch.
+          AUTO_RELEASE_WAIT_ATTEMPTS=18
 
           if [ -z "${PUBLIC_MIRROR_TOKEN}" ]; then
             echo "PUBLIC_MIRROR_TOKEN is not configured"
@@ -88,9 +90,10 @@ jobs:
           public_release_matches_expected_assets() {
             local tag="$1"
             local quiet="${2:-false}"
-            local expected_assets
-            local public_assets
+            local expected_assets=""
+            local public_assets=""
 
+            trap 'rm -f "${expected_assets:-}" "${public_assets:-}"' RETURN
             expected_assets="$(mktemp)"
             public_assets="$(mktemp)"
 
@@ -98,7 +101,6 @@ jobs:
             public_release_asset_names "${tag}" > "${public_assets}"
 
             if cmp -s "${expected_assets}" "${public_assets}"; then
-              rm -f "${expected_assets}" "${public_assets}"
               return 0
             fi
 
@@ -109,7 +111,6 @@ jobs:
               cat "${public_assets}"
             fi
 
-            rm -f "${expected_assets}" "${public_assets}"
             return 1
           }
 
@@ -216,21 +217,29 @@ jobs:
 
           dispatch_missing_public_releases() {
             local tag
+            local failed=false
 
             while IFS= read -r tag; do
               if [ -n "${tag}" ]; then
-                dispatch_public_release "${tag}"
+                if ! dispatch_public_release "${tag}"; then
+                  echo "::warning::Public release backfill failed for ${tag}"
+                  failed=true
+                fi
               fi
             done < <(git tag --list | sort -V)
+
+            if [ "${failed}" = "true" ]; then
+              return 1
+            fi
           }
 
           if [ "${GITHUB_REF_TYPE}" = "branch" ] && [ "${GITHUB_REF_NAME}" = "master" ]; then
             git push public HEAD:refs/heads/master --force
             git push public --tags
-            dispatch_missing_public_releases
+            dispatch_missing_public_releases || echo "::warning::Some public release backfills failed; mirror completed"
           elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             git push public "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
-            dispatch_public_release "${GITHUB_REF_NAME}" 18
+            dispatch_public_release "${GITHUB_REF_NAME}" "${AUTO_RELEASE_WAIT_ATTEMPTS}"
           else
             echo "Nothing to mirror for ${GITHUB_REF_TYPE} ${GITHUB_REF_NAME}"
           fi

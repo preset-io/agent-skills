@@ -29,6 +29,9 @@ jobs:
       - name: Mirror branch and tags
         env:
           PUBLIC_MIRROR_TOKEN: ${{ secrets.PUBLIC_MIRROR_TOKEN }}
+          GH_TOKEN: ${{ secrets.PUBLIC_MIRROR_TOKEN }}
+          PUBLIC_REPO: preset-io/agent-skills
+          PUBLIC_RELEASE_WORKFLOW: release.yml
         run: |
           set -euo pipefail
 
@@ -37,13 +40,117 @@ jobs:
             exit 1
           fi
 
-          git remote add public "https://x-access-token:${PUBLIC_MIRROR_TOKEN}@github.com/preset-io/agent-skills.git"
+          git remote add public "https://x-access-token:${PUBLIC_MIRROR_TOKEN}@github.com/${PUBLIC_REPO}.git"
+
+          expected_asset_count() {
+            local tag="$1"
+            local count=0
+            local path
+
+            for path in \
+              plugins/preset-api-skills/skills \
+              plugins/preset-mcp-skills/skills \
+              plugins/preset-cli-skills/skills
+            do
+              if git cat-file -e "${tag}:${path}" 2>/dev/null; then
+                count=$((count + $(git ls-tree -d --name-only "${tag}:${path}" | wc -l | tr -d ' ')))
+              fi
+            done
+
+            echo "${count}"
+          }
+
+          public_release_asset_count() {
+            local tag="$1"
+
+            gh api "repos/${PUBLIC_REPO}/releases/tags/${tag}" --jq '.assets | length' 2>/dev/null || true
+          }
+
+          dispatch_public_release() {
+            local tag="$1"
+            local auto_release_attempts="${2:-0}"
+            local expected_count
+            local current_count
+            local attempt
+
+            expected_count="$(expected_asset_count "${tag}")"
+
+            if [ "${expected_count}" = "0" ]; then
+              echo "No expected release assets for ${tag}; skipping dispatch"
+              return 0
+            fi
+
+            current_count="$(public_release_asset_count "${tag}")"
+
+            if [ "${current_count}" = "${expected_count}" ]; then
+              echo "Public release ${tag} already has ${current_count} assets; skipping dispatch"
+              return 0
+            fi
+
+            for attempt in $(seq 1 "${auto_release_attempts}"); do
+              echo "Waiting for automatically triggered public release ${tag}; current assets: ${current_count:-none}, expected: ${expected_count}"
+              sleep 5
+
+              current_count="$(public_release_asset_count "${tag}")"
+              if [ "${current_count}" = "${expected_count}" ]; then
+                echo "Public release ${tag} completed without manual dispatch"
+                return 0
+              fi
+            done
+
+            echo "Dispatching public release workflow for ${tag}; current assets: ${current_count:-none}, expected: ${expected_count}"
+
+            for attempt in 1 2 3 4 5; do
+              if gh api \
+                --method POST \
+                "repos/${PUBLIC_REPO}/actions/workflows/${PUBLIC_RELEASE_WORKFLOW}/dispatches" \
+                -f ref=master \
+                -f "inputs[tag]=${tag}" >/dev/null
+              then
+                break
+              fi
+
+              if [ "${attempt}" = "5" ]; then
+                echo "::error::Failed to dispatch public release workflow for ${tag}"
+                return 1
+              fi
+
+              echo "Dispatch failed for ${tag}; retrying"
+              sleep 5
+            done
+
+            for attempt in $(seq 1 60); do
+              current_count="$(public_release_asset_count "${tag}")"
+
+              if [ "${current_count}" = "${expected_count}" ]; then
+                echo "Public release ${tag} has expected asset count: ${current_count}"
+                return 0
+              fi
+
+              sleep 5
+            done
+
+            echo "::error::Public release ${tag} did not reach expected asset count ${expected_count}; latest count: ${current_count:-none}"
+            return 1
+          }
+
+          dispatch_missing_public_releases() {
+            local tag
+
+            while IFS= read -r tag; do
+              if [ -n "${tag}" ]; then
+                dispatch_public_release "${tag}"
+              fi
+            done < <(git tag --list | sort -V)
+          }
 
           if [ "${GITHUB_REF_TYPE}" = "branch" ] && [ "${GITHUB_REF_NAME}" = "master" ]; then
             git push public HEAD:refs/heads/master --force
             git push public --tags
+            dispatch_missing_public_releases
           elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             git push public "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+            dispatch_public_release "${GITHUB_REF_NAME}" 18
           else
             echo "Nothing to mirror for ${GITHUB_REF_TYPE} ${GITHUB_REF_NAME}"
           fi

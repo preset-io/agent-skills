@@ -54,7 +54,7 @@ Install or load each package from its plugin directory, not from the repository 
 
 ## Installation
 
-Find your client in the table above, then follow its section below. The GitHub repository is `preset-io/agent-skills`; `preset-agent-skills` is the marketplace/package name used by plugin install commands.
+Find your client in the table above, then follow its section below. The GitHub repository is `preset-io/agent-skills`; `agent-skills` is the marketplace name used by plugin install commands.
 
 ### Claude Desktop
 
@@ -72,9 +72,9 @@ From any Claude Code session:
 
 ```text
 /plugin marketplace add preset-io/agent-skills
-/plugin install preset-api-skills@preset-agent-skills
-/plugin install preset-mcp-skills@preset-agent-skills
-/plugin install preset-cli-skills@preset-agent-skills
+/plugin install preset-api-skills@agent-skills
+/plugin install preset-mcp-skills@agent-skills
+/plugin install preset-cli-skills@agent-skills
 ```
 
 Updates ship with each tagged release — re-run `/plugin install` to pull the latest.
@@ -105,9 +105,9 @@ Install the plugin from GitHub:
 
 ```bash
 codex plugin marketplace add preset-io/agent-skills --ref master
-codex plugin add preset-api-skills@preset-agent-skills
-codex plugin add preset-mcp-skills@preset-agent-skills
-codex plugin add preset-cli-skills@preset-agent-skills
+codex plugin add preset-api-skills@agent-skills
+codex plugin add preset-mcp-skills@agent-skills
+codex plugin add preset-cli-skills@agent-skills
 ```
 
 Use a release tag (e.g. `--ref v0.3.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.

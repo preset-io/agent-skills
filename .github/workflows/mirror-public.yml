@@ -29,21 +29,217 @@ jobs:
       - name: Mirror branch and tags
         env:
           PUBLIC_MIRROR_TOKEN: ${{ secrets.PUBLIC_MIRROR_TOKEN }}
+          GH_TOKEN: ${{ secrets.PUBLIC_MIRROR_TOKEN }}
+          PUBLIC_REPO: preset-io/agent-skills
+          PUBLIC_RELEASE_WORKFLOW: release.yml
         run: |
           set -euo pipefail
+          # Tag pushes can auto-trigger the public release; wait up to 90s before manual dispatch.
+          AUTO_RELEASE_WAIT_ATTEMPTS=18
 
           if [ -z "${PUBLIC_MIRROR_TOKEN}" ]; then
             echo "PUBLIC_MIRROR_TOKEN is not configured"
             exit 1
           fi
 
-          git remote add public "https://x-access-token:${PUBLIC_MIRROR_TOKEN}@github.com/preset-io/agent-skills.git"
+          git remote add public "https://x-access-token:${PUBLIC_MIRROR_TOKEN}@github.com/${PUBLIC_REPO}.git"
+
+          expected_asset_names() {
+            local tag="$1"
+            local path
+            local skill
+
+            for path in \
+              plugins/preset-api-skills/skills \
+              plugins/preset-mcp-skills/skills \
+              plugins/preset-cli-skills/skills
+            do
+              if git cat-file -e "${tag}:${path}" 2>/dev/null; then
+                while IFS= read -r skill; do
+                  if git cat-file -e "${tag}:${path}/${skill}/SKILL.md" 2>/dev/null; then
+                    printf '%s.zip\n' "${skill}"
+                  fi
+                done < <(git ls-tree -d --name-only "${tag}:${path}")
+              fi
+            done | sort
+          }
+
+          expected_asset_count() {
+            local tag="$1"
+
+            expected_asset_names "${tag}" | wc -l | tr -d ' '
+          }
+
+          public_release_asset_names() {
+            local tag="$1"
+            local assets
+
+            assets="$(gh api "repos/${PUBLIC_REPO}/releases/tags/${tag}" --jq '.assets[].name' 2>/dev/null)" || return 0
+
+            if [ -n "${assets}" ]; then
+              printf '%s\n' "${assets}" | sort
+            fi
+          }
+
+          public_release_asset_count() {
+            local tag="$1"
+
+            public_release_asset_names "${tag}" | wc -l | tr -d ' '
+          }
+
+          public_release_matches_expected_assets() {
+            local tag="$1"
+            local quiet="${2:-false}"
+            local expected_assets=""
+            local public_assets=""
+
+            trap 'rm -f "${expected_assets:-}" "${public_assets:-}"' RETURN
+            expected_assets="$(mktemp)"
+            public_assets="$(mktemp)"
+
+            expected_asset_names "${tag}" > "${expected_assets}"
+            public_release_asset_names "${tag}" > "${public_assets}"
+
+            if cmp -s "${expected_assets}" "${public_assets}"; then
+              return 0
+            fi
+
+            if [ "${quiet}" != "true" ]; then
+              echo "Expected public release assets for ${tag}:"
+              cat "${expected_assets}"
+              echo "Actual public release assets for ${tag}:"
+              cat "${public_assets}"
+            fi
+
+            return 1
+          }
+
+          active_public_tag_release_run() {
+            local tag="$1"
+
+            gh api "repos/${PUBLIC_REPO}/actions/workflows/${PUBLIC_RELEASE_WORKFLOW}/runs?per_page=20" 2>/dev/null \
+              | jq -r --arg tag "${tag}" '.workflow_runs[] | select(.head_branch == $tag and .status != "completed") | .html_url' \
+              | head -n 1
+          }
+
+          dispatch_public_release() {
+            local tag="$1"
+            local auto_release_attempts="${2:-0}"
+            local expected_count
+            local current_count
+            local active_run
+            local attempt
+
+            expected_count="$(expected_asset_count "${tag}")"
+
+            if [ "${expected_count}" = "0" ]; then
+              echo "No expected release assets for ${tag}; skipping dispatch"
+              return 0
+            fi
+
+            current_count="$(public_release_asset_count "${tag}")"
+
+            if public_release_matches_expected_assets "${tag}" true; then
+              echo "Public release ${tag} already has expected assets; skipping dispatch"
+              return 0
+            fi
+
+            for ((attempt = 1; attempt <= auto_release_attempts; attempt++)); do
+              echo "Waiting for automatically triggered public release ${tag}; current assets: ${current_count:-none}, expected: ${expected_count}"
+              sleep 5
+
+              current_count="$(public_release_asset_count "${tag}")"
+              if public_release_matches_expected_assets "${tag}" true; then
+                echo "Public release ${tag} completed without manual dispatch"
+                return 0
+              fi
+            done
+
+            for attempt in $(seq 1 60); do
+              active_run="$(active_public_tag_release_run "${tag}")"
+
+              if [ -z "${active_run}" ]; then
+                break
+              fi
+
+              echo "Public release workflow is already active for ${tag}: ${active_run}"
+              sleep 5
+
+              current_count="$(public_release_asset_count "${tag}")"
+              if public_release_matches_expected_assets "${tag}" true; then
+                echo "Public release ${tag} completed during active-run wait"
+                return 0
+              fi
+            done
+
+            active_run="$(active_public_tag_release_run "${tag}")"
+            if [ -n "${active_run}" ]; then
+              echo "::error::Public release workflow is still active for ${tag}: ${active_run}"
+              return 1
+            fi
+
+            echo "Dispatching public release workflow for ${tag}; current assets: ${current_count:-none}, expected: ${expected_count}"
+
+            for attempt in 1 2 3 4 5; do
+              if gh api \
+                --method POST \
+                "repos/${PUBLIC_REPO}/actions/workflows/${PUBLIC_RELEASE_WORKFLOW}/dispatches" \
+                -f ref=master \
+                -f "inputs[tag]=${tag}" >/dev/null
+              then
+                break
+              fi
+
+              if [ "${attempt}" = "5" ]; then
+                echo "::error::Failed to dispatch public release workflow for ${tag}"
+                return 1
+              fi
+
+              echo "Dispatch failed for ${tag}; retrying"
+              sleep 5
+            done
+
+            for attempt in $(seq 1 60); do
+              current_count="$(public_release_asset_count "${tag}")"
+
+              if public_release_matches_expected_assets "${tag}" true; then
+                echo "Public release ${tag} has expected assets"
+                return 0
+              fi
+
+              sleep 5
+            done
+
+            public_release_matches_expected_assets "${tag}" || true
+            echo "::error::Public release ${tag} did not reach expected assets; latest count: ${current_count:-none}, expected count: ${expected_count}"
+            return 1
+          }
+
+          dispatch_missing_public_releases() {
+            local tag
+            local failed=false
+
+            while IFS= read -r tag; do
+              if [ -n "${tag}" ]; then
+                if ! dispatch_public_release "${tag}"; then
+                  echo "::warning::Public release backfill failed for ${tag}"
+                  failed=true
+                fi
+              fi
+            done < <(git tag --list | sort -V)
+
+            if [ "${failed}" = "true" ]; then
+              return 1
+            fi
+          }
 
           if [ "${GITHUB_REF_TYPE}" = "branch" ] && [ "${GITHUB_REF_NAME}" = "master" ]; then
             git push public HEAD:refs/heads/master --force
             git push public --tags
+            dispatch_missing_public_releases || echo "::warning::Some public release backfills failed; mirror completed"
           elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             git push public "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+            dispatch_public_release "${GITHUB_REF_NAME}" "${AUTO_RELEASE_WAIT_ATTEMPTS}"
           else
             echo "Nothing to mirror for ${GITHUB_REF_TYPE} ${GITHUB_REF_NAME}"
           fi

@@ -1,5 +1,5 @@
 {
-  "name": "preset-agent-skills",
+  "name": "agent-skills",
   "interface": {
     "displayName": "Preset Agent Skills"
   },

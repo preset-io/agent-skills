@@ -65,8 +65,13 @@ jobs:
 
           public_release_asset_names() {
             local tag="$1"
+            local assets
 
-            gh api "repos/${PUBLIC_REPO}/releases/tags/${tag}" --jq '.assets[].name' 2>/dev/null | sort || true
+            assets="$(gh api "repos/${PUBLIC_REPO}/releases/tags/${tag}" --jq '.assets[].name' 2>/dev/null)" || return 0
+
+            if [ -n "${assets}" ]; then
+              printf '%s\n' "${assets}" | sort
+            fi
           }
 
           public_release_asset_count() {

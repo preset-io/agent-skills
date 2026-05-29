@@ -143,7 +143,7 @@ require_grep "plugins/preset-mcp-skills/CLAUDE.md" CLAUDE.md
 require_grep "plugins/preset-cli-skills/CLAUDE.md" CLAUDE.md
 check_markdown_links
 
-require_jq '.name == "preset-agent-skills"' .agents/plugins/marketplace.json
+require_jq '.name == "agent-skills"' .agents/plugins/marketplace.json
 require_jq '.interface.displayName == "Preset Agent Skills"' .agents/plugins/marketplace.json
 require_jq '
   [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills", "preset-cli-skills"]
@@ -154,7 +154,7 @@ require_jq '
 require_jq 'all(.plugins[]; .policy.installation == "AVAILABLE" and .policy.authentication == "ON_INSTALL")' .agents/plugins/marketplace.json
 
 require_jq '."$schema" == "https://anthropic.com/claude-code/marketplace.schema.json"' .claude-plugin/marketplace.json
-require_jq '.name == "preset-agent-skills"' .claude-plugin/marketplace.json
+require_jq '.name == "agent-skills"' .claude-plugin/marketplace.json
 require_jq '.owner.name == "Preset"' .claude-plugin/marketplace.json
 require_jq '.description | contains("direct API workflows")' .claude-plugin/marketplace.json
 require_jq '.description | contains("MCP tool workflows")' .claude-plugin/marketplace.json

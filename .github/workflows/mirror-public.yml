@@ -45,6 +45,7 @@ jobs:
           expected_asset_names() {
             local tag="$1"
             local path
+            local skill
 
             for path in \
               plugins/preset-api-skills/skills \
@@ -52,7 +53,11 @@ jobs:
               plugins/preset-cli-skills/skills
             do
               if git cat-file -e "${tag}:${path}" 2>/dev/null; then
-                git ls-tree -d --name-only "${tag}:${path}" | sed 's/$/.zip/'
+                while IFS= read -r skill; do
+                  if git cat-file -e "${tag}:${path}/${skill}/SKILL.md" 2>/dev/null; then
+                    printf '%s.zip\n' "${skill}"
+                  fi
+                done < <(git ls-tree -d --name-only "${tag}:${path}")
               fi
             done | sort
           }
@@ -138,7 +143,7 @@ jobs:
               return 0
             fi
 
-            for attempt in $(seq 1 "${auto_release_attempts}"); do
+            for ((attempt = 1; attempt <= auto_release_attempts; attempt++)); do
               echo "Waiting for automatically triggered public release ${tag}; current assets: ${current_count:-none}, expected: ${expected_count}"
               sleep 5
 

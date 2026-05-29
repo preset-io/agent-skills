@@ -42,9 +42,8 @@ jobs:
 
           git remote add public "https://x-access-token:${PUBLIC_MIRROR_TOKEN}@github.com/${PUBLIC_REPO}.git"
 
-          expected_asset_count() {
+          expected_asset_names() {
             local tag="$1"
-            local count=0
             local path
 
             for path in \
@@ -53,17 +52,63 @@ jobs:
               plugins/preset-cli-skills/skills
             do
               if git cat-file -e "${tag}:${path}" 2>/dev/null; then
-                count=$((count + $(git ls-tree -d --name-only "${tag}:${path}" | wc -l | tr -d ' ')))
+                git ls-tree -d --name-only "${tag}:${path}" | sed 's/$/.zip/'
               fi
-            done
+            done | sort
+          }
 
-            echo "${count}"
+          expected_asset_count() {
+            local tag="$1"
+
+            expected_asset_names "${tag}" | wc -l | tr -d ' '
+          }
+
+          public_release_asset_names() {
+            local tag="$1"
+
+            gh api "repos/${PUBLIC_REPO}/releases/tags/${tag}" --jq '.assets[].name' 2>/dev/null | sort || true
           }
 
           public_release_asset_count() {
             local tag="$1"
 
-            gh api "repos/${PUBLIC_REPO}/releases/tags/${tag}" --jq '.assets | length' 2>/dev/null || true
+            public_release_asset_names "${tag}" | wc -l | tr -d ' '
+          }
+
+          public_release_matches_expected_assets() {
+            local tag="$1"
+            local quiet="${2:-false}"
+            local expected_assets
+            local public_assets
+
+            expected_assets="$(mktemp)"
+            public_assets="$(mktemp)"
+
+            expected_asset_names "${tag}" > "${expected_assets}"
+            public_release_asset_names "${tag}" > "${public_assets}"
+
+            if cmp -s "${expected_assets}" "${public_assets}"; then
+              rm -f "${expected_assets}" "${public_assets}"
+              return 0
+            fi
+
+            if [ "${quiet}" != "true" ]; then
+              echo "Expected public release assets for ${tag}:"
+              cat "${expected_assets}"
+              echo "Actual public release assets for ${tag}:"
+              cat "${public_assets}"
+            fi
+
+            rm -f "${expected_assets}" "${public_assets}"
+            return 1
+          }
+
+          active_public_tag_release_run() {
+            local tag="$1"
+
+            gh api "repos/${PUBLIC_REPO}/actions/workflows/${PUBLIC_RELEASE_WORKFLOW}/runs?per_page=20" 2>/dev/null \
+              | jq -r --arg tag "${tag}" '.workflow_runs[] | select(.head_branch == $tag and .status != "completed") | .html_url' \
+              | head -n 1
           }
 
           dispatch_public_release() {
@@ -71,6 +116,7 @@ jobs:
             local auto_release_attempts="${2:-0}"
             local expected_count
             local current_count
+            local active_run
             local attempt
 
             expected_count="$(expected_asset_count "${tag}")"
@@ -82,8 +128,8 @@ jobs:
 
             current_count="$(public_release_asset_count "${tag}")"
 
-            if [ "${current_count}" = "${expected_count}" ]; then
-              echo "Public release ${tag} already has ${current_count} assets; skipping dispatch"
+            if public_release_matches_expected_assets "${tag}" true; then
+              echo "Public release ${tag} already has expected assets; skipping dispatch"
               return 0
             fi
 
@@ -92,11 +138,34 @@ jobs:
               sleep 5
 
               current_count="$(public_release_asset_count "${tag}")"
-              if [ "${current_count}" = "${expected_count}" ]; then
+              if public_release_matches_expected_assets "${tag}" true; then
                 echo "Public release ${tag} completed without manual dispatch"
                 return 0
               fi
             done
+
+            for attempt in $(seq 1 60); do
+              active_run="$(active_public_tag_release_run "${tag}")"
+
+              if [ -z "${active_run}" ]; then
+                break
+              fi
+
+              echo "Public release workflow is already active for ${tag}: ${active_run}"
+              sleep 5
+
+              current_count="$(public_release_asset_count "${tag}")"
+              if public_release_matches_expected_assets "${tag}" true; then
+                echo "Public release ${tag} completed during active-run wait"
+                return 0
+              fi
+            done
+
+            active_run="$(active_public_tag_release_run "${tag}")"
+            if [ -n "${active_run}" ]; then
+              echo "::error::Public release workflow is still active for ${tag}: ${active_run}"
+              return 1
+            fi
 
             echo "Dispatching public release workflow for ${tag}; current assets: ${current_count:-none}, expected: ${expected_count}"
 
@@ -122,15 +191,16 @@ jobs:
             for attempt in $(seq 1 60); do
               current_count="$(public_release_asset_count "${tag}")"
 
-              if [ "${current_count}" = "${expected_count}" ]; then
-                echo "Public release ${tag} has expected asset count: ${current_count}"
+              if public_release_matches_expected_assets "${tag}" true; then
+                echo "Public release ${tag} has expected assets"
                 return 0
               fi
 
               sleep 5
             done
 
-            echo "::error::Public release ${tag} did not reach expected asset count ${expected_count}; latest count: ${current_count:-none}"
+            public_release_matches_expected_assets "${tag}" || true
+            echo "::error::Public release ${tag} did not reach expected assets; latest count: ${current_count:-none}, expected count: ${expected_count}"
             return 1
           }
 

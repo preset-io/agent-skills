@@ -81,12 +81,6 @@ jobs:
             fi
           }
 
-          public_release_asset_count() {
-            local tag="$1"
-
-            public_release_asset_names "${tag}" | wc -l | tr -d ' '
-          }
-
           public_release_asset_summary() {
             local tag="$1"
             local asset_count
@@ -108,6 +102,8 @@ jobs:
             local quiet="${2:-false}"
             local expected_assets=""
             local public_assets=""
+            local public_asset_count
+            local public_asset_summary
 
             trap 'rm -f "${expected_assets:-}" "${public_assets:-}"' RETURN
             expected_assets="$(mktemp)"
@@ -121,9 +117,16 @@ jobs:
             fi
 
             if [ "${quiet}" != "true" ]; then
+              public_asset_count="$(wc -l < "${public_assets}" | tr -d ' ')"
+              if [ "${public_asset_count}" = "1" ]; then
+                public_asset_summary="1 asset"
+              else
+                public_asset_summary="${public_asset_count} assets"
+              fi
+
               echo "Expected public release assets for ${tag}:"
               cat "${expected_assets}"
-              echo "Actual public release assets for ${tag} ($(public_release_asset_summary "${tag}")):"
+              echo "Actual public release assets for ${tag} (${public_asset_summary}):"
               cat "${public_assets}"
             fi
 
@@ -169,7 +172,6 @@ jobs:
             local tag="$1"
             local auto_release_attempts="${2:-0}"
             local expected_count
-            local current_count
             local current_state
             local active_run
             local attempt
@@ -181,7 +183,6 @@ jobs:
               return 0
             fi
 
-            current_count="$(public_release_asset_count "${tag}")"
             current_state="$(public_release_asset_summary "${tag}")"
 
             if public_release_matches_expected_assets "${tag}" true; then
@@ -193,7 +194,6 @@ jobs:
               echo "Waiting for automatically triggered public release ${tag}; current public release: ${current_state}, expected assets: ${expected_count}"
               sleep 5
 
-              current_count="$(public_release_asset_count "${tag}")"
               current_state="$(public_release_asset_summary "${tag}")"
               if public_release_matches_expected_assets "${tag}" true; then
                 echo "Public release ${tag} completed without manual dispatch"
@@ -211,7 +211,6 @@ jobs:
               echo "Public release workflow is already active for ${tag}: ${active_run}"
               sleep 5
 
-              current_count="$(public_release_asset_count "${tag}")"
               current_state="$(public_release_asset_summary "${tag}")"
               if public_release_matches_expected_assets "${tag}" true; then
                 echo "Public release ${tag} completed during active-run wait"
@@ -228,7 +227,6 @@ jobs:
             request_public_release_dispatch "${tag}" "${current_state}" "${expected_count}"
 
             for attempt in $(seq 1 60); do
-              current_count="$(public_release_asset_count "${tag}")"
               current_state="$(public_release_asset_summary "${tag}")"
 
               if public_release_matches_expected_assets "${tag}" true; then

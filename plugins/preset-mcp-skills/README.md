@@ -26,6 +26,7 @@ These skills describe durable workflows and safety boundaries. They do not repla
 | [preset-mcp-sqllab](skills/preset-mcp-sqllab/SKILL.md) | SQL execution, SQL Lab links, and saved SQL queries through MCP |
 | [preset-mcp-datasets](skills/preset-mcp-datasets/SKILL.md) | Dataset inspection, semantic-layer querying, and virtual dataset creation |
 | [preset-mcp-troubleshooting](skills/preset-mcp-troubleshooting/SKILL.md) | Health checks, validation errors, permission errors, response-size issues, and bug reports |
+| [tableau-to-preset](skills/tableau-to-preset/SKILL.md) | Convert a Tableau workbook (.twb/.twbx) to a Preset dashboard via MCP tools |
 
 ## Tool Inventory
 

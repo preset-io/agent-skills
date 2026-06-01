@@ -1,6 +1,6 @@
 ---
 name: tableau-to-preset
-description: Guided workflow for converting a Tableau workbook (.twb or .twbx) to a Preset dashboard via Superset MCP tools. Parses TWB XML, maps chart types, calls generate_chart per worksheet, and assembles with generate_dashboard.
+description: Guided workflow for converting a Tableau workbook (.twb or .twbx) to a Preset dashboard via Superset MCP tools. Parses TWB XML, maps chart types, calls generate_chart per worksheet, and assembles with generate_dashboard. Use only for MCP tool workflows; do not use for direct API work.
 user-invocable: true
 argument-hint: <path/to/workbook.twb|.twbx>
 ---
@@ -36,8 +36,8 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 4. **Audit calculated fields** — run the calculated-fields one-liner; translate or flag each one.
 5. **Parse worksheets** — run the worksheet one-liner; build the chart-type mapping table for the user to review.
 6. **Save charts** — call `generate_chart` per worksheet in order; collect returned chart IDs.
-7. **Parse dashboard layout** — run the zones one-liner; map Tableau pixel coordinates to Superset 12-column grid positions.
-8. **Assemble dashboard** — call `generate_dashboard` with chart IDs and grid positions; report the returned dashboard URL.
+7. **Capture layout notes** — run the zones one-liner; record each worksheet zone's name and relative position as notes for the user (x/y/w/h in Tableau pixels). Do not attempt to map these to a Superset grid — `generate_dashboard` auto-arranges charts.
+8. **Assemble dashboard** — call `generate_dashboard` with chart IDs and the dashboard title; report the returned dashboard URL and the captured layout notes so the user can refine positions in Preset.
 
 ## Retrieve
 

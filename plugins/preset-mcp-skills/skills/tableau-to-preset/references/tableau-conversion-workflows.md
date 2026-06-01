@@ -7,7 +7,18 @@
 **`.twbx`** — ZIP archive; unzip first, then use the extracted `.twb`:
 
 ```bash
-python3 -c "import zipfile; zipfile.ZipFile('workbook.twbx').extractall('/tmp/twbx')"
+python3 -c "
+import zipfile, pathlib
+dest = pathlib.Path('/tmp/twbx')
+dest.mkdir(parents=True, exist_ok=True)
+with zipfile.ZipFile('workbook.twbx') as zf:
+    for member in zf.namelist():
+        target = (dest / member).resolve()
+        if not str(target).startswith(str(dest.resolve())):
+            raise ValueError(f'Unsafe path in archive: {member}')
+    zf.extractall(dest)
+print('Extracted to /tmp/twbx/')
+"
 ls /tmp/twbx/
 ```
 
@@ -104,12 +115,12 @@ for ws in root.findall('.//worksheet'):
 
 ## Phase 5: Chart Type Mapping
 
-| Tableau `mark class` | Preset `viz_type` | `chart_type` discriminator |
+| Tableau `mark class` | Preset `viz_type` | `chart_type` (guidance only — verify with `get_chart_type_schema`) |
 |---|---|---|
-| `bar` | `echarts_timeseries_bar` | `xy` |
-| `line` | `echarts_timeseries` | `xy` |
-| `area` | `echarts_area` | `xy` |
-| `circle` / `shape` | `echarts_bubble_v2` | `xy` |
+| `bar` | `echarts_timeseries_bar` | `bar` |
+| `line` | `echarts_timeseries` | `line` |
+| `area` | `echarts_area` | `area` |
+| `circle` / `shape` | `echarts_bubble_v2` | `scatter` |
 | `pie` | `pie` | `pie` |
 | `text` (crosstab) | `table` | `table` |
 | `text` (with row/col pivots) | `pivot_table` | `pivot_table` |
@@ -118,213 +129,71 @@ for ws in root.findall('.//worksheet'):
 | `map` / `filled map` | **Unsupported — skip** | — |
 | KPI / single value | `big_number` | `big_number` |
 
-For `treemap_v2` and `echarts_gantt`, call `get_chart_type_schema` to confirm required config fields before building the chart.
+Always call `get_chart_type_schema` to confirm the required config keys for any chart type before calling `generate_chart`. The `chart_type` values in the table above are illustrative; the live MCP schema is authoritative.
 
 ---
 
-## Phase 6: `generate_chart` Examples
+## Phase 6: `generate_chart` Workflow
 
-Run `get_dataset_info(datasource_name="my_dataset")` first to confirm available column names and any saved metrics. Replace all placeholder names below with real values from that response.
+### Step 1: Resolve dataset ID
 
-### Bar Chart (Tableau `mark: bar`)
+```
+list_datasets()
+```
+
+Find the dataset matching the Tableau datasource (by name, schema, or connection info from Phase 2). Record its `id`.
+
+### Step 2: Inspect columns and saved metrics
+
+```
+get_dataset_info(dataset_id=<id>)
+```
+
+Use the returned column names and saved metric names. Do not invent columns.
+
+### Step 3: Get the chart config schema
+
+```
+get_chart_type_schema(chart_type="bar")   # replace with the target type
+```
+
+This returns the exact required and optional config fields for the MCP `generate_chart` call. Follow the live schema — do not guess field names.
+
+### Step 4: Call `generate_chart`
+
+The outer wrapper fields below are stable across chart types. The inner `config` must match what `get_chart_type_schema` returns for the specific chart type.
 
 ```json
 {
   "chart_name": "Sales by Category",
-  "datasource_name": "orders",
+  "dataset_id": 42,
+  "save_chart": true,
   "config": {
-    "chart_type": "xy",
-    "viz_type": "echarts_timeseries_bar",
-    "x_axis": "order_date",
-    "metrics": [
-      {
-        "expressionType": "SIMPLE",
-        "column": {"column_name": "sales"},
-        "aggregate": "SUM",
-        "label": "SUM(sales)"
-      }
-    ],
-    "groupby": ["category"]
+    "... fields from get_chart_type_schema ..."
   }
 }
 ```
 
-### Line Chart (Tableau `mark: line`)
+**Illustrative config shapes** (verify each with `get_chart_type_schema` before use):
 
-```json
-{
-  "chart_name": "Revenue Trend",
-  "datasource_name": "orders",
-  "config": {
-    "chart_type": "xy",
-    "viz_type": "echarts_timeseries",
-    "x_axis": "order_date",
-    "metrics": [
-      {
-        "expressionType": "SIMPLE",
-        "column": {"column_name": "revenue"},
-        "aggregate": "SUM",
-        "label": "SUM(revenue)"
-      }
-    ]
-  }
-}
-```
+| Chart | Likely config fields |
+|---|---|
+| Bar / Line / Area | `kind`, `x` (x-axis column), `y` (metric column or saved metric name), `group_by` (series dimension) |
+| Scatter / Bubble | `kind`, `x`, `y`, `group_by` |
+| Pie | `kind`, `groupby` (dimension), `metric` |
+| Table | `kind`, `columns` (dimension list), `metrics` |
+| Pivot table | `kind`, `groupbyRows`, `groupbyColumns`, `metrics` |
+| Big number | `kind`, `metric` |
 
-### Area Chart (Tableau `mark: area`)
+**Saved metric** — if `get_dataset_info` shows a saved metric matching the Tableau measure, pass it by name per the live schema rather than reconstructing the aggregation expression.
 
-```json
-{
-  "chart_name": "Cumulative Orders",
-  "datasource_name": "orders",
-  "config": {
-    "chart_type": "xy",
-    "viz_type": "echarts_area",
-    "x_axis": "order_date",
-    "metrics": [
-      {
-        "expressionType": "SIMPLE",
-        "column": {"column_name": "order_count"},
-        "aggregate": "SUM",
-        "label": "SUM(order_count)"
-      }
-    ],
-    "groupby": ["region"]
-  }
-}
-```
-
-### Scatter / Bubble (Tableau `mark: circle`)
-
-```json
-{
-  "chart_name": "Profit vs Sales",
-  "datasource_name": "orders",
-  "config": {
-    "chart_type": "xy",
-    "viz_type": "echarts_bubble_v2",
-    "x_axis": "sales",
-    "metrics": [
-      {
-        "expressionType": "SIMPLE",
-        "column": {"column_name": "profit"},
-        "aggregate": "SUM",
-        "label": "SUM(profit)"
-      }
-    ],
-    "groupby": ["category"]
-  }
-}
-```
-
-### Pie Chart (Tableau `mark: pie`)
-
-```json
-{
-  "chart_name": "Profit by Region",
-  "datasource_name": "orders",
-  "config": {
-    "chart_type": "pie",
-    "groupby": ["region"],
-    "metrics": [
-      {
-        "expressionType": "SIMPLE",
-        "column": {"column_name": "profit"},
-        "aggregate": "SUM",
-        "label": "SUM(profit)"
-      }
-    ]
-  }
-}
-```
-
-### Table (Tableau `mark: text`, flat list)
-
-```json
-{
-  "chart_name": "Sales Summary",
-  "datasource_name": "orders",
-  "config": {
-    "chart_type": "table",
-    "columns": ["category", "sub_category", "region"],
-    "metrics": [
-      {
-        "expressionType": "SIMPLE",
-        "column": {"column_name": "sales"},
-        "aggregate": "SUM",
-        "label": "SUM(sales)"
-      }
-    ]
-  }
-}
-```
-
-### Pivot Table (Tableau `mark: text`, with row/column pivots)
-
-```json
-{
-  "chart_name": "Regional Category Pivot",
-  "datasource_name": "orders",
-  "config": {
-    "chart_type": "pivot_table",
-    "groupbyRows": ["region"],
-    "groupbyColumns": ["category"],
-    "metrics": [
-      {
-        "expressionType": "SIMPLE",
-        "column": {"column_name": "sales"},
-        "aggregate": "SUM",
-        "label": "SUM(sales)"
-      }
-    ]
-  }
-}
-```
-
-### Big Number / KPI
-
-```json
-{
-  "chart_name": "Total Revenue",
-  "datasource_name": "orders",
-  "config": {
-    "chart_type": "big_number",
-    "metrics": [
-      {
-        "expressionType": "SIMPLE",
-        "column": {"column_name": "revenue"},
-        "aggregate": "SUM",
-        "label": "SUM(revenue)"
-      }
-    ]
-  }
-}
-```
-
-### Using a Preset Saved Metric
-
-When `get_dataset_info` shows a saved metric matching the Tableau measure, reference it with `saved_metric: true` instead of rebuilding the aggregation:
-
-```json
-{
-  "chart_name": "Total Orders",
-  "datasource_name": "orders",
-  "config": {
-    "chart_type": "big_number",
-    "metrics": [
-      {
-        "saved_metric": true,
-        "name": "total_orders",
-        "label": "Total Orders"
-      }
-    ]
-  }
-}
-```
+Record the chart ID returned by each `generate_chart` call before moving to the next worksheet.
 
 ---
 
-## Phase 7: Dashboard Layout
+## Phase 7: Dashboard Layout Notes
+
+`generate_dashboard` auto-arranges charts and does not accept explicit position coordinates. Run the zone one-liner to capture relative layout information as notes for the user to reference when refining positions in the Preset UI.
 
 ### Extract zone coordinates
 
@@ -334,8 +203,8 @@ import xml.etree.ElementTree as ET
 root = ET.parse('workbook.twb').getroot()
 for dash in root.findall('.//dashboard'):
     size = dash.find('size')
-    cw = int(size.get('maxwidth', 1000)) if size is not None else 1000
-    ch = int(size.get('maxheight', 800)) if size is not None else 800
+    cw = size.get('maxwidth', '?') if size is not None else '?'
+    ch = size.get('maxheight', '?') if size is not None else '?'
     print(f'Dashboard: {dash.get(\"name\")}  canvas: {cw}x{ch}')
     for zone in dash.findall('.//zone'):
         name = zone.get('name', '')
@@ -345,36 +214,18 @@ for dash in root.findall('.//dashboard'):
 "
 ```
 
-### Map to Superset 12-column grid
-
-Superset uses a 12-column grid. Tableau canvases default to 1000×800 px. Use these formulas — adjust if your canvas size differs:
-
-```
-col    = round(x / canvas_width * 12)
-width  = max(2, round(w / canvas_width * 12))
-row    = round(y / 100)          # 100 px ≈ 1 Superset row unit (approximate)
-height = max(2, round(h / 100))
-```
-
-Widths must sum to ≤ 12 per visual row. Clamp `col + width` to 12 if it exceeds the grid.
+Present the zone output to the user as a layout reference. After `generate_dashboard` creates the dashboard, direct the user to Preset's drag-and-drop editor to arrange charts to match the original Tableau layout.
 
 ### Call `generate_dashboard`
-
-Use only chart IDs returned by `generate_chart`. The exact schema for `positions` depends on the live MCP tool — check with `get_chart_type_schema` or the Superset MCP source of truth if needed.
 
 ```json
 {
   "dashboard_title": "Sales Overview",
-  "chart_ids": [101, 102, 103],
-  "positions": [
-    {"id": 101, "row": 0, "col": 0,  "width": 6, "height": 4},
-    {"id": 102, "row": 0, "col": 6,  "width": 6, "height": 4},
-    {"id": 103, "row": 4, "col": 0,  "width": 12, "height": 6}
-  ]
+  "chart_ids": [101, 102, 103]
 }
 ```
 
-If `generate_dashboard` does not accept a `positions` field, call it with only `dashboard_title` and `chart_ids`. The user can arrange chart positions in the Preset UI afterwards.
+Report the returned dashboard URL alongside the zone layout notes.
 
 ---
 
@@ -386,6 +237,7 @@ If `generate_dashboard` does not accept a `positions` field, call it with only `
 | LOD INCLUDE / EXCLUDE | Not expressible as a single column; must be restructured as a virtual dataset or separate SQL |
 | Table calculations (`RUNNING_SUM`, `RANK`, `WINDOW_SUM`, etc.) | Computed server-side in Tableau; must be rewritten as window functions in a virtual dataset SQL |
 | Map / filled map charts | No direct `generate_chart` equivalent; skip or ask the user to create `deck_scatter` / `deck_choropleth` manually |
+| Dashboard chart positioning | `generate_dashboard` auto-arranges; exact zone positions from the TWB must be applied manually in the Preset UI |
 | Multi-datasource worksheet blends | Each `generate_chart` targets one Preset dataset; Tableau blends must be pre-joined in a virtual dataset |
 | Dashboard parameter actions | Superset native filters are not set automatically; configure manually after dashboard creation |
 | Dashboard URL / filter actions | Not supported via MCP; configure manually in Preset |

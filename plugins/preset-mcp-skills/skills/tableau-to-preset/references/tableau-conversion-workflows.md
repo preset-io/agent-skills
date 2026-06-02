@@ -11,12 +11,13 @@ python3 -c "
 import zipfile, pathlib
 dest = pathlib.Path('/tmp/twbx')
 dest.mkdir(parents=True, exist_ok=True)
+dest_str = str(dest.resolve()) + '/'
 with zipfile.ZipFile('workbook.twbx') as zf:
     for member in zf.namelist():
-        target = (dest / member).resolve()
-        if not str(target).startswith(str(dest.resolve())):
+        target = str((dest / member).resolve())
+        if not target.startswith(dest_str):
             raise ValueError(f'Unsafe path in archive: {member}')
-    zf.extractall(dest)
+        zf.extract(member, dest)
 print('Extracted to /tmp/twbx/')
 "
 ls /tmp/twbx/

@@ -37,14 +37,17 @@ jobs:
 
           tag="v${version}"
           if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
-            echo "Tag ${tag} already exists; skipping release dispatch"
-            exit 0
+            if [ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]; then
+              echo "Tag ${tag} already exists; skipping release dispatch"
+              exit 0
+            fi
+            echo "Tag ${tag} already exists; dispatching release workflows"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "${tag}" -m "Release ${tag}" "${GITHUB_SHA}"
+            git push origin "refs/tags/${tag}"
           fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "${tag}" -m "Release ${tag}" "${GITHUB_SHA}"
-          git push origin "refs/tags/${tag}"
 
           gh workflow run release.yml --ref master -f "tag=${tag}"
           gh workflow run mirror-public.yml --ref master -f "tag=${tag}"

@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "agent-skills",
+  "name": "preset-agent-skills",
   "description": "Preset agent skill packages split by surface: direct API workflows, MCP tool workflows, and CLI/`sup` workflows.",
   "owner": {
     "name": "Preset",

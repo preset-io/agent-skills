@@ -10,7 +10,7 @@ Guest tokens grant signed embedded access for external viewers. They are securit
 
 Confirm the target workspace supports the endpoint through `/api/v1/_openapi` before relying on the payload shape.
 
-Reusable Python snippets live in `../examples/guest_token_claims.py`; load that file only when implementation detail is needed.
+Reusable Python snippets live in `examples/guest_token_claims.py`; load that file only when implementation detail is needed.
 
 ## Required Confirmation
 

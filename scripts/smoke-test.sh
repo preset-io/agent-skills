@@ -14,6 +14,10 @@ fail() {
 }
 
 command -v jq >/dev/null || fail "jq is required"
+command -v node >/dev/null || fail "node is required"
+
+node scripts/validate-agent-skills.mjs
+node scripts/sync-version.mjs --check
 
 require_file() {
   test -f "$1" || fail "missing file $1"
@@ -143,7 +147,7 @@ require_grep "plugins/preset-mcp-skills/CLAUDE.md" CLAUDE.md
 require_grep "plugins/preset-cli-skills/CLAUDE.md" CLAUDE.md
 check_markdown_links
 
-require_jq '.name == "agent-skills"' .agents/plugins/marketplace.json
+require_jq '.name == "preset-agent-skills"' .agents/plugins/marketplace.json
 require_jq '.interface.displayName == "Preset Agent Skills"' .agents/plugins/marketplace.json
 require_jq '
   [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills", "preset-cli-skills"]
@@ -154,7 +158,7 @@ require_jq '
 require_jq 'all(.plugins[]; .policy.installation == "AVAILABLE" and .policy.authentication == "ON_INSTALL")' .agents/plugins/marketplace.json
 
 require_jq '."$schema" == "https://anthropic.com/claude-code/marketplace.schema.json"' .claude-plugin/marketplace.json
-require_jq '.name == "agent-skills"' .claude-plugin/marketplace.json
+require_jq '.name == "preset-agent-skills"' .claude-plugin/marketplace.json
 require_jq '.owner.name == "Preset"' .claude-plugin/marketplace.json
 require_jq '.description | contains("direct API workflows")' .claude-plugin/marketplace.json
 require_jq '.description | contains("MCP tool workflows")' .claude-plugin/marketplace.json
@@ -638,7 +642,7 @@ require_grep "Pull-and-Diff Substitute" "$CLI_ROOT/skills/preset-cli-mutations/r
 require_grep "preset-cli-mutations" "$CLI_ROOT/skills/preset-cli/SKILL.md"
 require_grep "command-coverage.md" "$CLI_ROOT/skills/preset-cli/SKILL.md"
 require_grep "command-coverage.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
-require_grep "preset-cli/references/safety-policy.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
+require_grep "load \`preset-cli\` and then \`references/safety-policy.md\`" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
 
 # The CLI package must not be documented as a placeholder anywhere.
 if grep -q "intentionally not an installable plugin yet" "$CLI_ROOT/README.md"; then

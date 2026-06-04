@@ -32,4 +32,4 @@ Use for read-only team, workspace, hostname, health, and workspace membership di
 
 - Team/workspace listing, lookup, hostname resolution, health: [references/discovery.md](references/discovery.md)
 - Workspace membership listing: [references/membership.md](references/membership.md)
-- API conventions and environment base URLs: [../preset-api/references/api-conventions.md](../preset-api/references/api-conventions.md)
+- API conventions and environment base URLs: load `preset-api` and then `references/api-conventions.md`.

@@ -34,4 +34,4 @@ Use as the approval and access-review gate for permission-sensitive workflows.
 ## Retrieve
 
 - Role/permission mutation guidance and approval checks: [references/role-permission-changes.md](references/role-permission-changes.md)
-- Approval policy: [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md)
+- Approval policy: load `preset-api` and then `references/safety-policy.md`.

@@ -1,6 +1,6 @@
 {
   "name": "preset-mcp-skills",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "Preset MCP skills for Superset MCP tool workflows only. Do not use for direct API work.",
   "author": {
     "name": "Preset",

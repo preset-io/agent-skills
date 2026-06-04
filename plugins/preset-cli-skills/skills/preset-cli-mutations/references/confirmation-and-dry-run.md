@@ -24,4 +24,4 @@ Every mutating `sup` run leaves a trace in the target workspace's audit log. The
 
 ## Chain to Safety Policy
 
-After the confirmation template is shown and before the mutating run executes, load [../../preset-cli/references/safety-policy.md](../../preset-cli/references/safety-policy.md) so the disclosure, confirmation, and rollback expectations are recorded against the CLI safety policy. This skill is for CLI workflows only; if the user wants direct HTTP mutations, route to the separate `preset-api-skills` package instead.
+After the confirmation template is shown and before the mutating run executes, load `preset-cli` and then `references/safety-policy.md` so the disclosure, confirmation, and rollback expectations are recorded against the CLI safety policy. This skill is for CLI workflows only; if the user wants direct HTTP mutations, route to the separate `preset-api-skills` package instead.

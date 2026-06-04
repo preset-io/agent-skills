@@ -54,7 +54,7 @@ Install or load each package from its plugin directory, not from the repository 
 
 ## Installation
 
-Find your client in the table above, then follow its section below. The GitHub repository is `preset-io/agent-skills`; `agent-skills` is the marketplace name used by plugin install commands.
+Find your client in the table above, then follow its section below. The GitHub repository is `preset-io/agent-skills`; `preset-agent-skills` is the marketplace name used by plugin install commands.
 
 ### Claude Desktop
 
@@ -72,12 +72,12 @@ From any Claude Code session:
 
 ```text
 /plugin marketplace add preset-io/agent-skills
-/plugin install preset-api-skills@agent-skills
-/plugin install preset-mcp-skills@agent-skills
-/plugin install preset-cli-skills@agent-skills
+/plugin install preset-api-skills@preset-agent-skills
+/plugin install preset-mcp-skills@preset-agent-skills
+/plugin install preset-cli-skills@preset-agent-skills
 ```
 
-Updates ship with each tagged release — re-run `/plugin install` to pull the latest.
+Updates ship when we publish a new version — the version is bumped in the plugin manifests and tagged. Run `/plugin update` (or re-run `/plugin install`) to pull it.
 
 ### Claude.ai web
 
@@ -105,12 +105,12 @@ Install the plugin from GitHub:
 
 ```bash
 codex plugin marketplace add preset-io/agent-skills --ref master
-codex plugin add preset-api-skills@agent-skills
-codex plugin add preset-mcp-skills@agent-skills
-codex plugin add preset-cli-skills@agent-skills
+codex plugin add preset-api-skills@preset-agent-skills
+codex plugin add preset-mcp-skills@preset-agent-skills
+codex plugin add preset-cli-skills@preset-agent-skills
 ```
 
-Use a release tag (e.g. `--ref v0.3.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
+Use a release tag (e.g. `--ref v0.4.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
 
 ### Cursor
 
@@ -190,3 +190,25 @@ This repository keeps client metadata next to each package for contributors and 
 - Cursor package metadata: each package's `.cursor-plugin/plugin.json`.
 - Copilot instructions: each package's `.github/copilot-instructions.md`.
 - Claude Desktop/web ZIP generation: [`scripts/build-claude-web-skills.mjs`](scripts/build-claude-web-skills.mjs).
+
+## Validating source skills
+
+Run the repository smoke test before publishing changes:
+
+```bash
+./scripts/smoke-test.sh
+```
+
+It includes `node scripts/validate-agent-skills.mjs`, which checks the source skill folders against the Agent Skills structural rules: required frontmatter, name and description limits, parent-directory name matching, compact `SKILL.md` files, and local Markdown links that stay inside each skill folder.
+
+## Releasing
+
+The package version is single-sourced in the top-level [`VERSION`](VERSION) file and stamped into every provider manifest (the `.claude-plugin`, `.codex-plugin`, and `.cursor-plugin` `plugin.json` for each package). Claude Code and OpenAI Codex cache plugins by this version and only surface an update when it changes, so the manifests must stay in lockstep with the published git tag — other clients track the repo or release tag directly.
+
+To cut a release:
+
+1. Bump [`VERSION`](VERSION) (semver `MAJOR.MINOR.PATCH`).
+2. Run `node scripts/sync-version.mjs` to stamp it into every manifest.
+3. Commit, then tag `vX.Y.Z` (the tag must equal `VERSION`) and push the tag.
+
+`node scripts/sync-version.mjs --check` runs in the smoke test and CI and fails if any manifest drifts from `VERSION`; the release workflow additionally fails if the tag does not match `VERSION`.

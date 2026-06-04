@@ -2,7 +2,7 @@
 
 Use this reference for catalogs, schemas, tables, table metadata, table extra metadata, and database function names.
 
-Reusable Python snippets live in `../examples/table_and_schema_metadata.py`; load that file only when implementation detail is needed.
+Reusable Python snippets live in `examples/table_and_schema_metadata.py`; load that file only when implementation detail is needed.
 
 ## Endpoint Map
 

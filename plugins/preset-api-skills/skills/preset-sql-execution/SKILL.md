@@ -34,4 +34,4 @@ Use for high-impact SQL execution and SQL Lab mutation workflows. SQL can read c
 - SQL execution, results, exports, and query stop approval: [references/sql-execution-and-results-approval.md](references/sql-execution-and-results-approval.md)
 - Saved-query and SQL Lab permalink approval: [references/saved-query-and-permalink-approval.md](references/saved-query-and-permalink-approval.md)
 - SQL execution payload examples: [examples/sql_execution.py](examples/sql_execution.py)
-- Global sensitive-operation policy: [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md)
+- Global sensitive-operation policy: load `preset-api` and then `references/safety-policy.md`.

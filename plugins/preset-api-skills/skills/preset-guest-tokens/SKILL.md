@@ -33,4 +33,4 @@ Use for security-sensitive guest-token payload review and creation.
 ## Retrieve
 
 - Guest-token claims, resources, user payload, RLS, token handling: [references/guest-token-claims.md](references/guest-token-claims.md)
-- Approval policy: [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md)
+- Approval policy: load `preset-api` and then `references/safety-policy.md`.

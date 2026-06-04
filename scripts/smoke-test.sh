@@ -17,6 +17,7 @@ command -v jq >/dev/null || fail "jq is required"
 command -v node >/dev/null || fail "node is required"
 
 node scripts/validate-agent-skills.mjs
+node scripts/sync-version.mjs --check
 
 require_file() {
   test -f "$1" || fail "missing file $1"

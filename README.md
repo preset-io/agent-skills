@@ -77,7 +77,7 @@ From any Claude Code session:
 /plugin install preset-cli-skills@preset-agent-skills
 ```
 
-Updates ship with each tagged release — re-run `/plugin install` to pull the latest.
+Updates ship when we publish a new version — the version is bumped in the plugin manifests and tagged. Run `/plugin update` (or re-run `/plugin install`) to pull it.
 
 ### Claude.ai web
 
@@ -110,7 +110,7 @@ codex plugin add preset-mcp-skills@preset-agent-skills
 codex plugin add preset-cli-skills@preset-agent-skills
 ```
 
-Use a release tag (e.g. `--ref v0.3.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
+Use a release tag (e.g. `--ref v0.4.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
 
 ### Cursor
 
@@ -200,3 +200,15 @@ Run the repository smoke test before publishing changes:
 ```
 
 It includes `node scripts/validate-agent-skills.mjs`, which checks the source skill folders against the Agent Skills structural rules: required frontmatter, name and description limits, parent-directory name matching, compact `SKILL.md` files, and local Markdown links that stay inside each skill folder.
+
+## Releasing
+
+The package version is single-sourced in the top-level [`VERSION`](VERSION) file and stamped into every provider manifest (the `.claude-plugin`, `.codex-plugin`, and `.cursor-plugin` `plugin.json` for each package). Claude Code and OpenAI Codex cache plugins by this version and only surface an update when it changes, so the manifests must stay in lockstep with the published git tag — other clients track the repo or release tag directly.
+
+To cut a release:
+
+1. Bump [`VERSION`](VERSION) (semver `MAJOR.MINOR.PATCH`).
+2. Run `node scripts/sync-version.mjs` to stamp it into every manifest.
+3. Commit, then tag `vX.Y.Z` (the tag must equal `VERSION`) and push the tag.
+
+`node scripts/sync-version.mjs --check` runs in the smoke test and CI and fails if any manifest drifts from `VERSION`; the release workflow additionally fails if the tag does not match `VERSION`.

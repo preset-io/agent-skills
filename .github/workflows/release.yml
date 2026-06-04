@@ -35,10 +35,11 @@ jobs:
           command -v jq
 
       - name: Verify VERSION matches release tag
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
         run: |
-          TAG="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
-          test "v$(cat VERSION)" = "${TAG}" || {
-            echo "VERSION ($(cat VERSION)) does not match release tag (${TAG})" >&2
+          test "v$(cat VERSION)" = "$RELEASE_TAG" || {
+            echo "VERSION ($(cat VERSION)) does not match release tag ($RELEASE_TAG)" >&2
             exit 1
           }
 

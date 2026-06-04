@@ -11,7 +11,7 @@
 
 Production examples use `https://api.app.preset.io/v1`. For sandbox or staging environments, set `PRESET_API_BASE` as described in `preset-api` and use that base URL for Management API calls.
 
-Reusable Python snippets live in `../examples/workspace_discovery.py`; load that file only when implementation detail is needed.
+Reusable Python snippets live in `examples/workspace_discovery.py`; load that file only when implementation detail is needed.
 
 ## Endpoints
 

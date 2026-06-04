@@ -34,4 +34,4 @@ Use for credential-bearing database connection reads and database connection cha
 - Connection configuration routing: [references/connection-configuration.md](references/connection-configuration.md)
 - Credential-bearing configuration reads and redaction: [references/connection-credential-reads.md](references/connection-credential-reads.md)
 - Validation, OAuth, upload, create/update/delete, sync permissions: [references/connection-mutations-and-validation.md](references/connection-mutations-and-validation.md)
-- Approval policy: [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md)
+- Approval policy: load `preset-api` and then `references/safety-policy.md`.

@@ -1,6 +1,6 @@
 ---
 name: preset-cli-mutations
-description: State-changing Preset `sup` CLI workflows: chart/dashboard/dataset push, user push/invite, destructive flags, and cross-workspace sync. Use only for CLI mutation workflows. Do not use for MCP-only work. Do not use for direct HTTP/SDK mutations.
+description: "State-changing Preset `sup` CLI workflows: chart/dashboard/dataset push, user push/invite, destructive flags, and cross-workspace sync. Use only for CLI mutation workflows. Do not use for MCP-only work. Do not use for direct HTTP/SDK mutations."
 ---
 
 # preset-cli-mutations
@@ -42,5 +42,5 @@ Use for state-changing CLI operations: single-workspace writes (push, --force, -
 - Preview and dry-run handling: [references/preview-and-dry-run.md](references/preview-and-dry-run.md)
 - Confirmation template and abort triggers: [references/confirmation-template.md](references/confirmation-template.md)
 - Confirmation overview and audit expectations: [references/confirmation-and-dry-run.md](references/confirmation-and-dry-run.md)
-- Registered command coverage and uncovered mutation routing: [../preset-cli/references/command-coverage.md](../preset-cli/references/command-coverage.md)
-- Approval gates, redaction, abort triggers: [../preset-cli/references/safety-policy.md](../preset-cli/references/safety-policy.md)
+- Registered command coverage and uncovered mutation routing: load `preset-cli` and then `references/command-coverage.md`.
+- Approval gates, redaction, abort triggers: load `preset-cli` and then `references/safety-policy.md`.

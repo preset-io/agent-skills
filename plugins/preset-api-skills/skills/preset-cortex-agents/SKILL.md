@@ -36,4 +36,4 @@ Use for Snowflake Cortex Agent object management and run workflows.
 - List/describe/create/update/delete agents: [references/agent-management.md](references/agent-management.md)
 - SQL create/alter/show/describe/drop: [references/sql-agent-ddl.md](references/sql-agent-ddl.md)
 - `SNOWFLAKE.CORTEX.DATA_AGENT_RUN` SQL wrapper: [references/sql-wrapper.md](references/sql-wrapper.md)
-- Safety and approval checklist: [../preset-snowflake-cortex/references/cortex-safety.md](../preset-snowflake-cortex/references/cortex-safety.md)
+- Safety and approval checklist: load `preset-snowflake-cortex` and then `references/cortex-safety.md`.

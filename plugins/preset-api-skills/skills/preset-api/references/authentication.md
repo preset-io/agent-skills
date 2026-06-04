@@ -29,4 +29,4 @@ default; cache it with a buffer and refresh on HTTP 401.
 
 ## Reusable Python Client
 
-Load [`../examples/preset_client.py`](../examples/preset_client.py) only when reusable client code is needed. It includes Management API v1/v2 helpers, workspace `/api/v1` helpers, `workspace_root()`, and `workspace_root_response()` for server-root endpoints that need status codes, headers, redirects, or non-JSON bodies.
+Load `examples/preset_client.py` only when reusable client code is needed. It includes Management API v1/v2 helpers, workspace `/api/v1` helpers, `workspace_root()`, and `workspace_root_response()` for server-root endpoints that need status codes, headers, redirects, or non-JSON bodies.

@@ -14,6 +14,9 @@ fail() {
 }
 
 command -v jq >/dev/null || fail "jq is required"
+command -v node >/dev/null || fail "node is required"
+
+node scripts/validate-agent-skills.mjs
 
 require_file() {
   test -f "$1" || fail "missing file $1"
@@ -638,7 +641,7 @@ require_grep "Pull-and-Diff Substitute" "$CLI_ROOT/skills/preset-cli-mutations/r
 require_grep "preset-cli-mutations" "$CLI_ROOT/skills/preset-cli/SKILL.md"
 require_grep "command-coverage.md" "$CLI_ROOT/skills/preset-cli/SKILL.md"
 require_grep "command-coverage.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
-require_grep "preset-cli/references/safety-policy.md" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
+require_grep "load \`preset-cli\` and then \`references/safety-policy.md\`" "$CLI_ROOT/skills/preset-cli-mutations/SKILL.md"
 
 # The CLI package must not be documented as a placeholder anywhere.
 if grep -q "intentionally not an installable plugin yet" "$CLI_ROOT/README.md"; then

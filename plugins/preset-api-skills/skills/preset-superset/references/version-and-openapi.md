@@ -2,7 +2,7 @@
 
 Superset workspace API examples should be pinned to the workspace runtime where possible. The public Superset API docs may describe unreleased or broader API surfaces.
 
-Reusable Python snippets live in `../examples/version_and_openapi.py`; load that file only when implementation detail is needed.
+Reusable Python snippets live in `examples/version_and_openapi.py`; load that file only when implementation detail is needed.
 
 ## Capture Workspace Version
 

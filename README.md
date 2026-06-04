@@ -190,3 +190,13 @@ This repository keeps client metadata next to each package for contributors and 
 - Cursor package metadata: each package's `.cursor-plugin/plugin.json`.
 - Copilot instructions: each package's `.github/copilot-instructions.md`.
 - Claude Desktop/web ZIP generation: [`scripts/build-claude-web-skills.mjs`](scripts/build-claude-web-skills.mjs).
+
+## Validating source skills
+
+Run the repository smoke test before publishing changes:
+
+```bash
+./scripts/smoke-test.sh
+```
+
+It includes `node scripts/validate-agent-skills.mjs`, which checks the source skill folders against the Agent Skills structural rules: required frontmatter, name and description limits, parent-directory name matching, compact `SKILL.md` files, and local Markdown links that stay inside each skill folder.

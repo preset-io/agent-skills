@@ -39,7 +39,7 @@ Use for Preset Management API administration beyond read-only workspace discover
 - Audit log lookup and downloads: [references/audit-logs.md](references/audit-logs.md)
 - Role identifiers: [references/role-identifiers.md](references/role-identifiers.md)
 - Unsupported or adjacent Manager endpoints: [references/deferrals.md](references/deferrals.md)
-- Approval policy before writes/downloads: [../preset-api/references/safety-policy.md](../preset-api/references/safety-policy.md)
+- Approval policy before writes/downloads: load `preset-api` and then `references/safety-policy.md`.
 
 ## Do Not
 

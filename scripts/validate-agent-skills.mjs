@@ -140,7 +140,7 @@ function parseYamlScalar(raw) {
 
 function hasUnsafePlainScalar(raw) {
   if (!raw || raw.startsWith('"') || raw.startsWith("'")) return false;
-  return raw.includes(": ") || raw.includes(" #");
+  return /^[{[!*&]/.test(raw) || raw.includes(": ") || raw.includes(" #");
 }
 
 function validateName(name, skillName, file) {

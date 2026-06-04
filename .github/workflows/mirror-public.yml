@@ -7,6 +7,11 @@ on:
     tags:
       - "*"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to mirror and release (e.g. v0.4.0)"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -32,6 +37,7 @@ jobs:
           GH_TOKEN: ${{ secrets.PUBLIC_MIRROR_TOKEN }}
           PUBLIC_REPO: preset-io/agent-skills
           PUBLIC_RELEASE_WORKFLOW: release.yml
+          MIRROR_TAG: ${{ github.event.inputs.tag || '' }}
         run: |
           set -euo pipefail
           # Tag pushes can auto-trigger the public release; wait up to 90s before manual dispatch.
@@ -43,6 +49,21 @@ jobs:
           fi
 
           git remote add public "https://x-access-token:${PUBLIC_MIRROR_TOKEN}@github.com/${PUBLIC_REPO}.git"
+
+          target_ref_type="${GITHUB_REF_TYPE}"
+          target_ref_name="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ -n "${MIRROR_TAG}" ]; then
+            if [[ ! "${MIRROR_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Mirror tag must be semver-prefixed, got ${MIRROR_TAG}"
+              exit 1
+            fi
+            git rev-parse -q --verify "refs/tags/${MIRROR_TAG}^{commit}" >/dev/null || {
+              echo "::error::Tag ${MIRROR_TAG} does not exist in the private repository checkout"
+              exit 1
+            }
+            target_ref_type="tag"
+            target_ref_name="${MIRROR_TAG}"
+          fi
 
           expected_asset_names() {
             local tag="$1"
@@ -242,12 +263,12 @@ jobs:
             return 1
           }
 
-          if [ "${GITHUB_REF_TYPE}" = "branch" ] && [ "${GITHUB_REF_NAME}" = "master" ]; then
+          if [ "${target_ref_type}" = "branch" ] && [ "${target_ref_name}" = "master" ]; then
             git push public HEAD:refs/heads/master --force
             git push public --tags
-          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            git push public "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
-            dispatch_public_release "${GITHUB_REF_NAME}" "${AUTO_RELEASE_WAIT_ATTEMPTS}"
+          elif [ "${target_ref_type}" = "tag" ]; then
+            git push public "refs/tags/${target_ref_name}:refs/tags/${target_ref_name}"
+            dispatch_public_release "${target_ref_name}" "${AUTO_RELEASE_WAIT_ATTEMPTS}"
           else
-            echo "Nothing to mirror for ${GITHUB_REF_TYPE} ${GITHUB_REF_NAME}"
+            echo "Nothing to mirror for ${target_ref_type} ${target_ref_name}"
           fi

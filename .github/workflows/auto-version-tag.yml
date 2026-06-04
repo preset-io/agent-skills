@@ -1,0 +1,50 @@
+name: Auto version tag
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - VERSION
+      - .github/workflows/auto-version-tag.yml
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  tag-and-dispatch:
+    if: github.repository == 'preset-io/preset-agent-skills'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create missing version tag and dispatch releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          version="$(tr -d '[:space:]' < VERSION)"
+          if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::VERSION must be semver MAJOR.MINOR.PATCH, got ${version}"
+            exit 1
+          fi
+
+          tag="v${version}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+            echo "Tag ${tag} already exists; skipping release dispatch"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${tag}" -m "Release ${tag}" "${GITHUB_SHA}"
+          git push origin "refs/tags/${tag}"
+
+          gh workflow run release.yml --ref master -f "tag=${tag}"
+          gh workflow run mirror-public.yml --ref master -f "tag=${tag}"

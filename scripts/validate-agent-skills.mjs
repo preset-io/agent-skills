@@ -176,7 +176,11 @@ function validateOptionalFields(frontmatter, file) {
 }
 
 function validateLineCount(text, file) {
-  const lines = text.split("\n").length;
+  // Count lines independent of a trailing newline: "a\nb\n" is two lines, not
+  // three. A naive split("\n").length over-counts by one for newline-terminated
+  // files and can falsely trip the limit.
+  const normalized = text.endsWith("\n") ? text.slice(0, -1) : text;
+  const lines = normalized === "" ? 0 : normalized.split("\n").length;
   if (lines > MAX_SKILL_MD_LINES) {
     fail(file, `SKILL.md is ${lines} lines; keep it under ${MAX_SKILL_MD_LINES}`);
   }

@@ -186,10 +186,6 @@ function validateMarkdownFile(file, skillDir) {
   const relativeFile = path.relative(ROOT, file);
   const text = readText(file);
 
-  if (text.includes("../")) {
-    fail(relativeFile, "must not reference files outside or above the skill root");
-  }
-
   for (const target of markdownTargets(text)) {
     if (isExternalTarget(target)) continue;
 

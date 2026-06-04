@@ -30,4 +30,4 @@ Wait for explicit confirmation. Read-only SQL still requires approval when execu
 
 Use the workspace OpenAPI for the deployed version before relying on request fields. Keep limits narrow. If SQL lacks a limit and the user only needs a sample, ask for approval to add one before execution.
 
-Reusable payload helpers live in `examples/sql_execution.py`.
+Reusable payload helpers live in [../examples/sql_execution.py](../examples/sql_execution.py).

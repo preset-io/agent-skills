@@ -142,9 +142,9 @@ require_grep "--source plugins/preset-cli-skills/skills" .github/workflows/relea
 require_grep "--out dist/claude-web-flat-cli-skills" .github/workflows/release.yml
 require_grep "dist/claude-web-flat-cli-skills/\\*.zip" .github/workflows/release.yml
 require_grep "root is not itself an installable plugin" CLAUDE.md
-require_grep "plugins/preset-api-skills/CLAUDE.md" CLAUDE.md
-require_grep "plugins/preset-mcp-skills/CLAUDE.md" CLAUDE.md
-require_grep "plugins/preset-cli-skills/CLAUDE.md" CLAUDE.md
+require_grep "plugins/preset-api-skills/AGENTS.md" CLAUDE.md
+require_grep "plugins/preset-mcp-skills/AGENTS.md" CLAUDE.md
+require_grep "plugins/preset-cli-skills/AGENTS.md" CLAUDE.md
 check_markdown_links
 
 require_jq '.name == "preset-agent-skills"' .agents/plugins/marketplace.json
@@ -179,23 +179,22 @@ require_jq '.interface.shortDescription | contains("Direct API-only")' "$API_ROO
 require_jq '.interface.longDescription | contains("MCP-only work must stay on available MCP tooling")' "$API_ROOT/.codex-plugin/plugin.json"
 require_jq '.skills == "./skills/"' "$API_ROOT/.codex-plugin/plugin.json"
 require_jq '.name == "preset-api-skills"' "$API_ROOT/.claude-plugin/plugin.json"
+require_jq '.displayName == "Preset API Skills"' "$API_ROOT/.claude-plugin/plugin.json"
 require_jq '.description | contains("Do not use for MCP-only work")' "$API_ROOT/.claude-plugin/plugin.json"
 require_jq 'has("skills") | not' "$API_ROOT/.claude-plugin/plugin.json"
 require_jq '.name == "Preset API Skills"' "$API_ROOT/.cursor-plugin/plugin.json"
 require_jq '.description | contains("Do not use for MCP-only work")' "$API_ROOT/.cursor-plugin/plugin.json"
 require_jq 'all(.skills[]; .description | contains("Do not use for MCP-only work"))' "$API_ROOT/.cursor-plugin/plugin.json"
 require_file "$API_ROOT/AGENTS.md"
-require_file "$API_ROOT/CLAUDE.md"
+reject_file "$API_ROOT/CLAUDE.md"
 require_file "$API_ROOT/.github/copilot-instructions.md"
 require_file "$API_ROOT/README.md"
 require_file "$API_ROOT/scripts/live-workspace-smoke.sh"
 require_grep "Do not use this package for Preset/Superset MCP tool workflows" "$API_ROOT/AGENTS.md"
-require_grep "Do not use this package for Preset/Superset MCP tool workflows" "$API_ROOT/CLAUDE.md"
 require_grep "Do not use this package for Preset/Superset MCP tool workflows" "$API_ROOT/.github/copilot-instructions.md"
 require_grep "Do not use this package for Preset/Superset MCP tool workflows" "$API_ROOT/README.md"
-require_grep "not plugin-loaded context" "$API_ROOT/AGENTS.md"
-require_grep "not plugin-loaded context" "$API_ROOT/CLAUDE.md"
-require_grep "not plugin-loaded context" "$API_ROOT/README.md"
+require_grep "Claude plugin installs do not load package-level" "$API_ROOT/AGENTS.md"
+require_grep "does not load package-level" "$API_ROOT/README.md"
 require_grep "Claude web/Desktop custom skills" "$API_ROOT/README.md"
 require_grep "scripts/build-claude-web-skills.mjs" "$API_ROOT/README.md"
 require_grep "./plugins/preset-api-skills/scripts/live-workspace-smoke.sh" "$API_ROOT/README.md"
@@ -219,7 +218,6 @@ for skill in "${required_api_skills[@]}"; do
   require_grep "Do not use for MCP-only work" "$file"
   require_dir "$API_ROOT/skills/$skill/references"
   require_grep "skills/$skill/SKILL.md" "$API_ROOT/AGENTS.md"
-  require_grep "skills/$skill/SKILL.md" "$API_ROOT/CLAUDE.md"
   require_grep "skills/$skill/SKILL.md" "$API_ROOT/.github/copilot-instructions.md"
   require_grep "skills/$skill/SKILL.md" "$API_ROOT/README.md"
 done
@@ -447,7 +445,6 @@ if grep -Eq "Invite A User|guarded membership workflows|manage membership|role-u
   "$API_ROOT/skills/preset-workspaces/SKILL.md" \
   "$API_ROOT/skills/preset-workspaces/references/membership.md" \
   "$API_ROOT/AGENTS.md" \
-  "$API_ROOT/CLAUDE.md" \
   "$API_ROOT/.github/copilot-instructions.md" \
   "$API_ROOT/.cursor-plugin/plugin.json"; then
   fail "preset-workspaces membership reference should not duplicate invite workflows"
@@ -462,23 +459,23 @@ require_jq '.description | contains("Do not use for direct API work")' "$MCP_ROO
 require_jq '.interface.shortDescription | contains("MCP-only")' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.skills == "./skills/"' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.name == "preset-mcp-skills"' "$MCP_ROOT/.claude-plugin/plugin.json"
+require_jq '.displayName == "Preset MCP Skills"' "$MCP_ROOT/.claude-plugin/plugin.json"
 require_jq '.description | contains("Do not use for direct API work")' "$MCP_ROOT/.claude-plugin/plugin.json"
 require_jq 'has("skills") | not' "$MCP_ROOT/.claude-plugin/plugin.json"
 require_jq '.name == "Preset MCP Skills"' "$MCP_ROOT/.cursor-plugin/plugin.json"
 require_jq '.description | contains("Do not use for direct API work")' "$MCP_ROOT/.cursor-plugin/plugin.json"
 require_jq 'all(.skills[]; .description | contains("do not use for direct API work"))' "$MCP_ROOT/.cursor-plugin/plugin.json"
 require_file "$MCP_ROOT/AGENTS.md"
-require_file "$MCP_ROOT/CLAUDE.md"
+reject_file "$MCP_ROOT/CLAUDE.md"
 require_file "$MCP_ROOT/.github/copilot-instructions.md"
 require_file "$MCP_ROOT/README.md"
 require_file "$MCP_ROOT/references/tool-inventory.json"
 require_file "$MCP_ROOT/references/tool-inventory.md"
 require_file "$MCP_ROOT/scripts/check-tool-inventory.py"
 require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/AGENTS.md"
-require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/CLAUDE.md"
 require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/.github/copilot-instructions.md"
 require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/README.md"
-require_grep "If MCP lacks a needed capability, stop" "$MCP_ROOT/CLAUDE.md"
+require_grep "If MCP lacks a needed capability, stop" "$MCP_ROOT/AGENTS.md"
 require_grep "superset/superset/mcp_service" "$MCP_ROOT/README.md"
 require_grep "Do not use old shell/frontend constants" "$MCP_ROOT/references/tool-inventory.md"
 
@@ -491,7 +488,6 @@ for skill in "${required_mcp_skills[@]}"; do
   require_grep "do not use for direct API work" "$file"
   require_dir "$MCP_ROOT/skills/$skill/references"
   require_grep "skills/$skill/SKILL.md" "$MCP_ROOT/AGENTS.md"
-  require_grep "skills/$skill/SKILL.md" "$MCP_ROOT/CLAUDE.md"
   require_grep "skills/$skill/SKILL.md" "$MCP_ROOT/.github/copilot-instructions.md"
   require_grep "skills/$skill/SKILL.md" "$MCP_ROOT/README.md"
 done
@@ -551,22 +547,21 @@ require_jq '
     "skills/preset-cli/SKILL.md"
   ]
 ' "$CLI_ROOT/.cursor-plugin/plugin.json"
+require_jq '.displayName == "Preset CLI Skills"' "$CLI_ROOT/.claude-plugin/plugin.json"
 require_file "$CLI_ROOT/AGENTS.md"
-require_file "$CLI_ROOT/CLAUDE.md"
+reject_file "$CLI_ROOT/CLAUDE.md"
 require_file "$CLI_ROOT/.github/copilot-instructions.md"
 require_file "$CLI_ROOT/README.md"
 
-for doc in AGENTS.md CLAUDE.md README.md .github/copilot-instructions.md; do
+for doc in AGENTS.md README.md .github/copilot-instructions.md; do
   require_grep "preset-mcp-skills" "$CLI_ROOT/$doc"
   require_grep "preset-api-skills" "$CLI_ROOT/$doc"
   require_grep "sup" "$CLI_ROOT/$doc"
   require_grep "SUP_PRESET_API_TOKEN" "$CLI_ROOT/$doc"
 done
-require_grep "not plugin-loaded context" "$CLI_ROOT/AGENTS.md"
-require_grep "not plugin-loaded context" "$CLI_ROOT/CLAUDE.md"
-require_grep "not plugin-loaded context" "$CLI_ROOT/README.md"
+require_grep "Claude plugin installs do not load package-level" "$CLI_ROOT/AGENTS.md"
+require_grep "Claude plugin installs do not load package-level" "$CLI_ROOT/README.md"
 require_grep "MCP intent wins over resource type" "$CLI_ROOT/AGENTS.md"
-require_grep "MCP intent wins over resource type" "$CLI_ROOT/CLAUDE.md"
 require_grep "MCP intent wins over resource type" "$CLI_ROOT/.github/copilot-instructions.md"
 require_grep "MCP intent wins over resource type" "$CLI_ROOT/README.md"
 
@@ -580,7 +575,6 @@ for skill in "${required_cli_skills[@]}"; do
   require_grep "Do not use for MCP-only work" "$file"
   require_dir "$CLI_ROOT/skills/$skill/references"
   require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/AGENTS.md"
-  require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/CLAUDE.md"
   require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/.github/copilot-instructions.md"
   require_grep "skills/$skill/SKILL.md" "$CLI_ROOT/README.md"
 done

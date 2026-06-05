@@ -209,6 +209,8 @@ To cut a release:
 
 1. Bump [`VERSION`](VERSION) (semver `MAJOR.MINOR.PATCH`).
 2. Run `node scripts/sync-version.mjs` to stamp it into every manifest.
-3. Commit, then tag `vX.Y.Z` (the tag must equal `VERSION`) and push the tag.
+3. Commit and merge the PR to `master`.
+
+After the merge, the `Auto version tag` workflow creates `vX.Y.Z` when that tag is missing, then dispatches the private release build and the public mirror/release workflow. The tag must equal `VERSION`.
 
 `node scripts/sync-version.mjs --check` runs in the smoke test and CI and fails if any manifest drifts from `VERSION`; the release workflow additionally fails if the tag does not match `VERSION`.

@@ -1,6 +1,6 @@
 # Preset Agent Skills
 
-Agent guidance for working with [Preset](https://preset.io), Apache Superset, Superset MCP tools, and Snowflake Cortex Agents. The skills work across Claude, OpenAI Codex, Cursor, GitHub Copilot, Snowflake Cortex Code CLI, and Gemini CLI from a single source.
+Agent guidance for working with [Preset](https://preset.io), Apache Superset, and Superset MCP tools. The skills work across Claude, OpenAI Codex, Cursor, GitHub Copilot, Snowflake Cortex Code CLI, and Gemini CLI from a single source.
 
 ## What's included
 

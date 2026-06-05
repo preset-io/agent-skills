@@ -55,7 +55,7 @@ This structure keeps package discovery cheap while preserving detailed operation
 | Cursor | `.cursor-plugin/plugin.json` |
 | GitHub Copilot | `.github/copilot-instructions.md` |
 
-Claude Code uses the plugin manifest for package metadata and the `skills/` directory for skill discovery. `CLAUDE.md` mirrors package-level routing guidance for direct repository readers, but it is not plugin-loaded context. Cursor enumerates skill files directly in `.cursor-plugin/plugin.json`; Codex points at the `skills/` directory through `.codex-plugin/plugin.json`.
+Claude Code uses the plugin manifest for package metadata and the `skills/` directory for skill discovery. It does not load package-level `AGENTS.md` or `CLAUDE.md` context from an installed plugin. `AGENTS.md` remains the package-level routing guide for Codex, Gemini CLI imports, and direct repository readers. Cursor enumerates skill files directly in `.cursor-plugin/plugin.json`; Codex points at the `skills/` directory through `.codex-plugin/plugin.json`.
 
 Claude web/Desktop custom skill uploads use a separate flat distribution format:
 one ZIP per skill, one top-level folder, and exactly one `SKILL.md`. The build

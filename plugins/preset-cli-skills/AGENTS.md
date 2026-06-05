@@ -1,6 +1,6 @@
 # Preset CLI Skills
 
-This package contains installable Preset CLI skills for OpenAI Codex and other agent clients.
+This package contains installable Preset CLI skills for OpenAI Codex, Gemini CLI imports, and direct repository readers.
 
 Use these skills only for explicit Preset CLI work driven through the `sup` CLI (PyPI package `superset-sup`). If the user is working through Preset/Superset MCP tools, use the separate `preset-mcp-skills` package instead. If the user wants direct HTTP, SDK, or `requests`/`curl` code paths, use the separate `preset-api-skills` package instead. Do not switch surfaces unless the user explicitly approves the switch.
 
@@ -24,7 +24,8 @@ Detailed examples live in each skill's `references/` directory. Load only the re
 ## Client Entry Points
 
 - OpenAI Codex: `.codex-plugin/plugin.json` plus this `AGENTS.md`.
-- Claude Code: `.claude-plugin/plugin.json` plus `skills/*/SKILL.md`; `CLAUDE.md` mirrors this package guidance for direct repository readers, but it is not plugin-loaded context.
+- Claude Code: `.claude-plugin/plugin.json` plus `skills/*/SKILL.md`; Claude plugin installs do not load package-level `AGENTS.md` or `CLAUDE.md` context.
+- Gemini CLI and direct repository readers: this `AGENTS.md`.
 - Cursor: `.cursor-plugin/plugin.json`.
 - GitHub Copilot: `.github/copilot-instructions.md`.
 

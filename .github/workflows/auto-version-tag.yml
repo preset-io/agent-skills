@@ -6,7 +6,6 @@ on:
       - master
     paths:
       - VERSION
-      - .github/workflows/auto-version-tag.yml
   workflow_dispatch:
 
 permissions:
@@ -16,10 +15,13 @@ permissions:
 jobs:
   tag-and-dispatch:
     if: github.repository == 'preset-io/preset-agent-skills'
+    concurrency:
+      group: version-tag
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full history
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
@@ -43,11 +45,13 @@ jobs:
             fi
             echo "Tag ${tag} already exists; dispatching release workflows"
           else
+            tag_commit="$(git log -1 --first-parent --format=%H -- VERSION)"
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git tag -a "${tag}" -m "Release ${tag}" "${GITHUB_SHA}"
+            git tag -a "${tag}" -m "Release ${tag}" "${tag_commit}"
             git push origin "refs/tags/${tag}"
           fi
 
+          # Tags pushed with github.token do not trigger tag-push workflows, so dispatch explicitly.
           gh workflow run release.yml --ref master -f "tag=${tag}"
           gh workflow run mirror-public.yml --ref master -f "tag=${tag}"

@@ -182,9 +182,9 @@ generate_chart(request={
 |---|---|---|
 | `xy` | `bar` / `line` / `area` | `kind`, `x` (x-axis column), `y` (metric column or saved metric name), `group_by` (series dimension) |
 | `xy` | `scatter` | `kind`, `x`, `y`, `group_by` |
-| `pie` | — | `groupby` (dimension), `metric` |
+| `pie` | — | `dimension`, `metric` |
 | `table` | — | `columns` (dimension list), `metrics` |
-| `pivot_table` | — | `groupbyRows`, `groupbyColumns`, `metrics` |
+| `pivot_table` | — | `rows` (required, dimension list), `columns` (optional cross-tab), `metrics` |
 | `big_number` | — | `metric` |
 
 **Saved metric** — if `get_dataset_info` shows a saved metric matching the Tableau measure, pass it by name per the live schema rather than reconstructing the aggregation expression.

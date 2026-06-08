@@ -163,7 +163,7 @@ This returns the exact required and optional config fields for the MCP `generate
 
 ### Step 4: Call `generate_chart`
 
-The outer wrapper fields below are stable across chart types. The inner `config` must match what `get_chart_type_schema` returns for the specific chart type.
+`config.chart_type` is the Pydantic discriminator — it must be included in every `config` and must match the value passed to `get_chart_type_schema`. Metric and column references use a column-ref object, not a plain string.
 
 ```
 generate_chart(request={
@@ -171,23 +171,35 @@ generate_chart(request={
   "dataset_id": 42,
   "save_chart": true,
   "config": {
-    "... fields from get_chart_type_schema ..."
+    "chart_type": "xy",   # discriminator — required in every config
+    "kind": "bar",
+    "x": "order_date",
+    "y": {"name": "revenue", "aggregate": "SUM"},
+    "group_by": "category"
   }
 })
 ```
 
-**Illustrative config shapes** (verify each with `get_chart_type_schema` before use):
+**Column-ref shapes for metrics:**
 
-| `chart_type` | `kind` | Likely config fields |
+| Metric type | Shape |
+|---|---|
+| Ad-hoc aggregation | `{"name": "revenue", "aggregate": "SUM"}` |
+| Saved metric | `{"name": "total_revenue", "saved_metric": true}` |
+| Simple count | `{"name": "count", "aggregate": "COUNT"}` |
+
+**Illustrative config shapes** (verify each with `get_chart_type_schema` before use — `chart_type` is always required):
+
+| `chart_type` | `kind` | Key config fields (plus `chart_type`) |
 |---|---|---|
-| `xy` | `bar` / `line` / `area` | `kind`, `x` (x-axis column), `y` (metric column or saved metric name), `group_by` (series dimension) |
-| `xy` | `scatter` | `kind`, `x`, `y`, `group_by` |
-| `pie` | — | `dimension`, `metric` |
-| `table` | — | `columns` (dimension list), `metrics` |
-| `pivot_table` | — | `rows` (required, dimension list), `columns` (optional cross-tab), `metrics` |
-| `big_number` | — | `metric` |
+| `xy` | `bar` / `line` / `area` | `kind`, `x` (column name), `y` (column-ref), `group_by` (series dimension) |
+| `xy` | `scatter` | `kind`, `x` (column-ref), `y` (column-ref), `group_by` |
+| `pie` | — | `dimension`, `metric` (column-ref) |
+| `table` | — | `columns` (dimension list), `metrics` (column-ref list) |
+| `pivot_table` | — | `rows` (required, dimension list), `columns` (optional cross-tab), `metrics` (column-ref list) |
+| `big_number` | — | `metric` (column-ref) |
 
-**Saved metric** — if `get_dataset_info` shows a saved metric matching the Tableau measure, pass it by name per the live schema rather than reconstructing the aggregation expression.
+**Saved metric** — if `get_dataset_info` shows a saved metric matching the Tableau measure, use `{"name": "<metric_name>", "saved_metric": true}` rather than reconstructing the aggregation expression.
 
 Record the chart ID returned by each `generate_chart` call before moving to the next worksheet.
 

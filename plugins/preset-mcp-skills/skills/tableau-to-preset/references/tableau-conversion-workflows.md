@@ -12,16 +12,19 @@ import zipfile, pathlib, tempfile
 dest = pathlib.Path(tempfile.mkdtemp(prefix='twbx_'))
 dest_str = str(dest.resolve()) + '/'
 with zipfile.ZipFile('workbook.twbx') as zf:
-    for member in zf.namelist():
+    twb_members = [m for m in zf.namelist() if m.endswith('.twb')]
+    if not twb_members:
+        raise ValueError('No .twb file found in archive')
+    for member in twb_members:
         target = str((dest / member).resolve())
         if not target.startswith(dest_str):
             raise ValueError(f'Unsafe path in archive: {member}')
         zf.extract(member, dest)
-print(str(dest))
+print(str(dest / twb_members[0]))
 "
 ```
 
-The command prints the unique temp directory path. Use that path for all subsequent steps — do not hardcode `/tmp/twbx`. Any `.hyper` or `.tde` data extract files will also appear there, but are not usable in this workflow (see Limitations).
+The command prints the full path to the extracted `.twb` file. Use that path directly for all subsequent parsing steps — `.hyper` and `.tde` data extracts are intentionally skipped since they are not usable in this workflow (see Limitations).
 
 ---
 

@@ -21,7 +21,7 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 
 ## Decision Rules
 
-- `.twbx` input → unzip to `/tmp/twbx/` first, then treat the extracted `.twb` as the workbook path.
+- `.twbx` input → unzip to a unique temp directory (use `tempfile.mkdtemp`); capture the printed path and treat the extracted `.twb` inside it as the workbook path.
 - No matching Preset dataset → surface the Tableau connection details (class, server, dbname, schema) to the user; ask whether to point at an existing dataset or create a virtual one via `create_virtual_dataset`.
 - Unsupported mark type (`map`, `filled map`) → tell the user, skip the worksheet, continue with the rest.
 - LOD INCLUDE / EXCLUDE or table calculation in a calculated field → flag as unsupported; ask the user how to handle before continuing.

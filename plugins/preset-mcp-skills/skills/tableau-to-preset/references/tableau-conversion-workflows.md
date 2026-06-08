@@ -8,9 +8,8 @@
 
 ```bash
 python3 -c "
-import zipfile, pathlib
-dest = pathlib.Path('/tmp/twbx')
-dest.mkdir(parents=True, exist_ok=True)
+import zipfile, pathlib, tempfile
+dest = pathlib.Path(tempfile.mkdtemp(prefix='twbx_'))
 dest_str = str(dest.resolve()) + '/'
 with zipfile.ZipFile('workbook.twbx') as zf:
     for member in zf.namelist():
@@ -18,12 +17,11 @@ with zipfile.ZipFile('workbook.twbx') as zf:
         if not target.startswith(dest_str):
             raise ValueError(f'Unsafe path in archive: {member}')
         zf.extract(member, dest)
-print('Extracted to /tmp/twbx/')
+print(str(dest))
 "
-ls /tmp/twbx/
 ```
 
-The `.twb` file will be in `/tmp/twbx/`. Any `.hyper` or `.tde` data extract files will also appear there, but are not usable in this workflow (see Limitations).
+The command prints the unique temp directory path. Use that path for all subsequent steps — do not hardcode `/tmp/twbx`. Any `.hyper` or `.tde` data extract files will also appear there, but are not usable in this workflow (see Limitations).
 
 ---
 

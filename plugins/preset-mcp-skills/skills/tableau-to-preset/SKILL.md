@@ -36,9 +36,9 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 4. **Audit calculated fields** — run the calculated-fields one-liner; translate or flag each one.
 5. **Parse worksheets** — run the worksheet one-liner; build the chart-type mapping table for the user to review.
 6. **Save charts** — call `generate_chart` per worksheet in order; collect returned chart IDs.
-7. **Capture layout notes** — run the zones one-liner; record each worksheet zone's name and relative position as notes for the user (x/y/w/h in Tableau pixels). Do not attempt to map these to a Superset grid — `generate_dashboard` auto-arranges charts.
+7. **Capture layout notes** — run the zones one-liner; record each dashboard zone's name and relative position as notes for the user (x/y/w/h in Tableau pixels). Do not attempt to map these to a Superset grid — `generate_dashboard` auto-arranges charts.
 8. **Assemble dashboard** — call `generate_dashboard` with chart IDs and the dashboard title; report the returned dashboard URL and the captured layout notes so the user can refine positions in Preset.
 
 ## Retrieve
 
-- TWB parsing commands, chart-type map, tool call examples, grid-mapping math, formula translations, and limitations: [references/tableau-conversion-workflows.md](references/tableau-conversion-workflows.md)
+- TWB parsing commands, chart-type map, tool call examples, layout notes, formula translations, and limitations: [references/tableau-conversion-workflows.md](references/tableau-conversion-workflows.md)

@@ -116,21 +116,21 @@ for ws in root.findall('.//worksheet'):
 
 ## Phase 5: Chart Type Mapping
 
-| Tableau `mark class` | Preset `viz_type` | `chart_type` (guidance only — verify with `get_chart_type_schema`) |
+| Tableau `mark class` | `chart_type` | `kind` |
 |---|---|---|
-| `bar` | `echarts_timeseries_bar` | `bar` |
-| `line` | `echarts_timeseries` | `line` |
-| `area` | `echarts_area` | `area` |
-| `circle` / `shape` | `echarts_bubble_v2` | `scatter` |
-| `pie` | `pie` | `pie` |
-| `text` (crosstab) | `table` | `table` |
-| `text` (with row/col pivots) | `pivot_table` | `pivot_table` |
-| `square` (treemap) | `treemap_v2` | call `get_chart_type_schema` |
-| `gantt` | `echarts_gantt` | call `get_chart_type_schema` |
+| `bar` | `xy` | `bar` |
+| `line` | `xy` | `line` |
+| `area` | `xy` | `area` |
+| `circle` / `shape` | `xy` | `scatter` |
+| `pie` | `pie` | — |
+| `text` (crosstab) | `table` | — |
+| `text` (with row/col pivots) | `pivot_table` | — |
+| `square` (treemap) | **Unsupported — skip** | — |
+| `gantt` | **Unsupported — skip** | — |
 | `map` / `filled map` | **Unsupported — skip** | — |
-| KPI / single value | `big_number` | `big_number` |
+| KPI / single value | `big_number` | — |
 
-Always call `get_chart_type_schema` to confirm the required config keys for any chart type before calling `generate_chart`. The `chart_type` values in the table above are illustrative; the live MCP schema is authoritative.
+The live MCP schema accepts `chart_type` values: `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number`. For bar/line/area/scatter, `chart_type` is always `xy`; the visual style is set via `kind` in the config. Always call `get_chart_type_schema(chart_type=<value>)` to retrieve the exact required and optional config fields before calling `generate_chart`.
 
 ---
 
@@ -147,7 +147,7 @@ Find the dataset matching the Tableau datasource (by name, schema, or connection
 ### Step 2: Inspect columns and saved metrics
 
 ```
-get_dataset_info(dataset_id=<id>)
+get_dataset_info(request={"identifier": <id>})
 ```
 
 Use the returned column names and saved metric names. Do not invent columns.
@@ -155,7 +155,7 @@ Use the returned column names and saved metric names. Do not invent columns.
 ### Step 3: Get the chart config schema
 
 ```
-get_chart_type_schema(chart_type="bar")   # replace with the target type
+get_chart_type_schema(chart_type="xy")   # use "xy" for bar/line/area/scatter; "pie", "table", "pivot_table", "big_number" for others
 ```
 
 This returns the exact required and optional config fields for the MCP `generate_chart` call. Follow the live schema — do not guess field names.
@@ -177,14 +177,14 @@ The outer wrapper fields below are stable across chart types. The inner `config`
 
 **Illustrative config shapes** (verify each with `get_chart_type_schema` before use):
 
-| Chart | Likely config fields |
-|---|---|
-| Bar / Line / Area | `kind`, `x` (x-axis column), `y` (metric column or saved metric name), `group_by` (series dimension) |
-| Scatter / Bubble | `kind`, `x`, `y`, `group_by` |
-| Pie | `kind`, `groupby` (dimension), `metric` |
-| Table | `kind`, `columns` (dimension list), `metrics` |
-| Pivot table | `kind`, `groupbyRows`, `groupbyColumns`, `metrics` |
-| Big number | `kind`, `metric` |
+| `chart_type` | `kind` | Likely config fields |
+|---|---|---|
+| `xy` | `bar` / `line` / `area` | `kind`, `x` (x-axis column), `y` (metric column or saved metric name), `group_by` (series dimension) |
+| `xy` | `scatter` | `kind`, `x`, `y`, `group_by` |
+| `pie` | — | `groupby` (dimension), `metric` |
+| `table` | — | `columns` (dimension list), `metrics` |
+| `pivot_table` | — | `groupbyRows`, `groupbyColumns`, `metrics` |
+| `big_number` | — | `metric` |
 
 **Saved metric** — if `get_dataset_info` shows a saved metric matching the Tableau measure, pass it by name per the live schema rather than reconstructing the aggregation expression.
 

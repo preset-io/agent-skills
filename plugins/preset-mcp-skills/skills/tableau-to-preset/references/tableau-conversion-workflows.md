@@ -162,15 +162,15 @@ This returns the exact required and optional config fields for the MCP `generate
 
 The outer wrapper fields below are stable across chart types. The inner `config` must match what `get_chart_type_schema` returns for the specific chart type.
 
-```json
-{
+```
+generate_chart(request={
   "chart_name": "Sales by Category",
   "dataset_id": 42,
   "save_chart": true,
   "config": {
     "... fields from get_chart_type_schema ..."
   }
-}
+})
 ```
 
 **Illustrative config shapes** (verify each with `get_chart_type_schema` before use):
@@ -217,11 +217,11 @@ Present the zone output to the user as a layout reference. After `generate_dashb
 
 ### Call `generate_dashboard`
 
-```json
-{
+```
+generate_dashboard(request={
   "dashboard_title": "Sales Overview",
   "chart_ids": [101, 102, 103]
-}
+})
 ```
 
 Report the returned dashboard URL alongside the zone layout notes.

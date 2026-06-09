@@ -524,6 +524,8 @@ reject_grep "skills/preset-superset/SKILL.md" "$MCP_ROOT"
 reject_grep "curl -s" "$MCP_ROOT"
 reject_grep "import requests" "$MCP_ROOT"
 reject_grep "python requests" "$MCP_ROOT/skills"
+reject_grep "</content>" "$MCP_ROOT"
+reject_grep "</invoke>" "$MCP_ROOT"
 
 required_cli_skills=(
   preset-cli

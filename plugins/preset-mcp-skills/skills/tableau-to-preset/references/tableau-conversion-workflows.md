@@ -352,5 +352,3 @@ Pass only the chart IDs returned for the target dashboard's in-scope worksheets.
 | Multi-datasource worksheet blends | Each `generate_chart` targets one Preset dataset; Tableau blends must be pre-joined in a virtual dataset |
 | Dashboard parameter / filter actions | Superset native filters are not set automatically; configure manually after dashboard creation |
 | Tableau Server-side formatting (number formats, color palettes) | Not carried over; apply in Preset chart settings after creation |
-</content>
-</invoke>

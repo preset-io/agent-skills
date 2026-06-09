@@ -163,7 +163,7 @@ This returns the exact required and optional config fields for the MCP `generate
 
 ### Step 4: Call `generate_chart`
 
-`config.chart_type` is the Pydantic discriminator — it must be included in every `config` and must match the value passed to `get_chart_type_schema`. Metric and column references use a column-ref object, not a plain string.
+`config.chart_type` is the Pydantic discriminator — it must be included in every `config` and must match the value passed to `get_chart_type_schema`. All axis, dimension, and metric fields use **column-ref objects**, not plain strings. `y` and `metrics` are **lists** of column-refs; `x`, `dimension`, `group_by`, `rows`, and `columns` are single column-refs or lists of column-refs per the schema.
 
 ```
 generate_chart(request={
@@ -171,33 +171,33 @@ generate_chart(request={
   "dataset_id": 42,
   "save_chart": true,
   "config": {
-    "chart_type": "xy",   # discriminator — required in every config
+    "chart_type": "xy",                              # discriminator — required in every config
     "kind": "bar",
-    "x": "order_date",
-    "y": {"name": "revenue", "aggregate": "SUM"},
-    "group_by": "category"
+    "x": {"name": "order_date"},                     # ColumnRef — no aggregate for dimensions/axes
+    "y": [{"name": "revenue", "aggregate": "SUM"}],  # List[ColumnRef]
+    "group_by": {"name": "category"}                 # ColumnRef
   }
 })
 ```
 
-**Column-ref shapes for metrics:**
+**Column-ref shapes:**
 
-| Metric type | Shape |
+| Use | Shape |
 |---|---|
-| Ad-hoc aggregation | `{"name": "revenue", "aggregate": "SUM"}` |
+| Dimension / axis (no aggregation) | `{"name": "order_date"}` |
+| Ad-hoc metric | `{"name": "revenue", "aggregate": "SUM"}` |
 | Saved metric | `{"name": "total_revenue", "saved_metric": true}` |
-| Simple count | `{"name": "count", "aggregate": "COUNT"}` |
 
-**Illustrative config shapes** (verify each with `get_chart_type_schema` before use — `chart_type` is always required):
+**Illustrative config shapes** (verify each with `get_chart_type_schema` before use — `chart_type` is always required inside `config`):
 
-| `chart_type` | `kind` | Key config fields (plus `chart_type`) |
+| `chart_type` | `kind` | Key config fields |
 |---|---|---|
-| `xy` | `bar` / `line` / `area` | `kind`, `x` (column name), `y` (column-ref), `group_by` (series dimension) |
-| `xy` | `scatter` | `kind`, `x` (column-ref), `y` (column-ref), `group_by` |
-| `pie` | — | `dimension`, `metric` (column-ref) |
-| `table` | — | `columns` (dimension list), `metrics` (column-ref list) |
-| `pivot_table` | — | `rows` (required, dimension list), `columns` (optional cross-tab), `metrics` (column-ref list) |
-| `big_number` | — | `metric` (column-ref) |
+| `xy` | `bar` / `line` / `area` | `kind`, `x` (ColumnRef), `y` (List[ColumnRef]), `group_by` (ColumnRef) |
+| `xy` | `scatter` | `kind`, `x` (ColumnRef), `y` (List[ColumnRef]), `group_by` (ColumnRef) |
+| `pie` | — | `dimension` (ColumnRef), `metric` (ColumnRef) |
+| `table` | — | `columns` (List[ColumnRef] — dimensions), `metrics` (List[ColumnRef]) |
+| `pivot_table` | — | `rows` (List[ColumnRef], required), `columns` (List[ColumnRef], optional), `metrics` (List[ColumnRef]) |
+| `big_number` | — | `metric` (ColumnRef) |
 
 **Saved metric** — if `get_dataset_info` shows a saved metric matching the Tableau measure, use `{"name": "<metric_name>", "saved_metric": true}` rather than reconstructing the aggregation expression.
 

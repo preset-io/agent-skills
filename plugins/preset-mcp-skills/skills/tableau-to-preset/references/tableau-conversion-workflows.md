@@ -236,13 +236,13 @@ for ws in root.findall('.//worksheet'):
 "
 ```
 
-**Mapping Tableau filters to MCP filters** (confirm the exact filter field name and shape with `get_chart_type_schema` — it varies by chart type):
+**Mapping Tableau filters to MCP filters** (confirm the exact shape with `get_chart_type_schema` before sending; across chart types the field is `filters` and each entry is a `{"column", "op", "value"}` object):
 
 | Parser output | MCP simple filter | Notes |
 |---|---|---|
-| `category -> IN [Furniture, Technology]` | `{"col": "category", "op": "IN", "val": ["Furniture", "Technology"]}` | Categorical, inclusive |
-| `category -> NOT IN [...]` | `{"col": "category", "op": "NOT IN", "val": [...]}` | Categorical, exclusive |
-| `sales -> range min=0 max=1000` | `{"col": "sales", "op": ">=", "val": 0}` + `{"col": "sales", "op": "<=", "val": 1000}` | Numeric range → two bound filters |
+| `category -> IN [Furniture, Technology]` | `{"column": "category", "op": "IN", "value": ["Furniture", "Technology"]}` | Categorical, inclusive |
+| `category -> NOT IN [...]` | `{"column": "category", "op": "NOT IN", "value": [...]}` | Categorical, exclusive |
+| `sales -> range min=0 max=1000` | `{"column": "sales", "op": ">=", "value": 0}` + `{"column": "sales", "op": "<=", "value": 1000}` | Numeric range → two bound filters |
 | `order_date -> range min=NA max=NA` | — | Almost always a **relative-date** filter; map to the chart's time range, not a column filter. Confirm the period with the user. |
 | `... -> TOP-N / computed` | — | **Flag.** Top-N needs a series/row limit, not a value filter. Ask the user before creating the chart without it. |
 | `... [context]` | same as above | Tableau context filter; for a single chart it behaves like a normal filter. Note it to the user since it affects Top-N semantics. |
@@ -312,14 +312,14 @@ generate_chart(request={
     "x": {"name": "order_date"},                     # ColumnRef — no aggregate for dimensions/axes
     "y": [{"name": "revenue", "aggregate": "SUM"}],  # List[ColumnRef]
     "group_by": [{"name": "category"}],              # List[ColumnRef]
-    "filters": [                                     # from Phase 6 — confirm field name/shape via schema
-      {"col": "category", "op": "IN", "val": ["Furniture", "Technology"]}
+    "filters": [                                     # from Phase 6 — column/op/value objects
+      {"column": "category", "op": "IN", "value": ["Furniture", "Technology"]}
     ]
   }
 })
 ```
 
-The `filters` field name and entry shape vary by chart type — `get_chart_type_schema` (Step 3) returns the authoritative form. The shape above is illustrative; verify before sending.
+The `filters` entry shape is `{"column", "op", "value"}` across chart types — `get_chart_type_schema` (Step 3) returns the authoritative form. Verify before sending.
 
 **Column-ref shapes:**
 

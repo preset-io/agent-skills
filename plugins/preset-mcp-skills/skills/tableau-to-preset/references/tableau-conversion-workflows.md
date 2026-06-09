@@ -28,7 +28,56 @@ The command prints the full path to the extracted `.twb` file. Use that path dir
 
 ---
 
-## Phase 2: Datasource Parsing
+## Phase 2: Dashboard Mapping & Scope
+
+Decide *what to convert* before generating anything. A Tableau workbook usually contains more worksheets than any single dashboard shows — hidden helper sheets, tooltip sheets, and worksheets that belong to other dashboards. Converting every worksheet creates orphan Preset charts and can stitch the wrong sheets into the dashboard. Parse the dashboards first; the chosen dashboard's worksheet zones define the conversion scope **and** the layout notes.
+
+```bash
+python3 -c "
+import xml.etree.ElementTree as ET
+root = ET.parse('workbook.twb').getroot()
+
+all_ws = {ws.get('name', '') for ws in root.findall('.//worksheet')}
+referenced = set()
+dashboards = root.findall('.//dashboard')
+
+if not dashboards:
+    print('No dashboards defined — workbook is worksheet-only.')
+for dash in dashboards:
+    size = dash.find('size')
+    cw = size.get('maxwidth', '?') if size is not None else '?'
+    ch = size.get('maxheight', '?') if size is not None else '?'
+    print(f'Dashboard: {dash.get(\"name\")!r}  canvas: {cw}x{ch}')
+    for zone in dash.findall('.//zone'):
+        name = zone.get('name')
+        # A worksheet zone carries a name and no type-v2; filters, legends,
+        # parameters, text, and layout containers all set type-v2.
+        if name and zone.get('type-v2') is None:
+            referenced.add(name)
+            x, y, w, h = zone.get('x'), zone.get('y'), zone.get('w'), zone.get('h')
+            print(f'  worksheet: {name!r}  x={x} y={y} w={w} h={h}')
+    print()
+
+orphans = sorted(all_ws - referenced)
+if orphans:
+    print('Worksheets NOT on any dashboard (hidden/supporting):')
+    for o in orphans:
+        print(f'  {o!r}')
+"
+```
+
+How to use the output:
+
+- **One dashboard** → its listed worksheets are the conversion scope; the `x/y/w/h` values are the layout notes for Phase 9.
+- **Several dashboards** → list them and ask the user which one to convert; scope every later phase (calculated-field audit, worksheet parsing, filter audit, chart creation) to that dashboard's worksheets.
+- **No dashboards** → the workbook is worksheet-only; treat every worksheet as in scope and ask the user for a dashboard title.
+- **Orphan worksheets** → list them and ask before converting; default to skipping. They are usually tooltip/helper sheets that should not become standalone Preset charts.
+
+The `x/y/w/h` zone values are Tableau canvas pixels. Keep them as layout notes — `generate_dashboard` auto-arranges charts and does not accept explicit coordinates (see Phase 9).
+
+---
+
+## Phase 3: Datasource Parsing
 
 ```bash
 python3 -c "
@@ -53,7 +102,7 @@ Record `caption` (display name), `class` (connector type: `snowflake`, `bigquery
 
 ---
 
-## Phase 3: Calculated Field Audit
+## Phase 4: Calculated Field Audit
 
 ```bash
 python3 -c "
@@ -90,7 +139,9 @@ for ds in root.findall('.//datasource'):
 
 ---
 
-## Phase 4: Worksheet Parsing
+## Phase 5: Worksheet Parsing
+
+Parse only the worksheets in scope from Phase 2.
 
 ```bash
 python3 -c "
@@ -115,7 +166,69 @@ for ws in root.findall('.//worksheet'):
 
 ---
 
-## Phase 5: Chart Type Mapping
+## Phase 6: Worksheet Filter Audit
+
+A worksheet's marks are only half the chart — its filters decide *which rows* render. A dimension, date-range, or Top-N filter left behind changes every number on the chart even when the mark type and metrics are correct. Extract each in-scope worksheet's filters, carry the translatable ones into the chart config (Phase 8), and flag the rest instead of dropping them.
+
+```bash
+python3 -c "
+import xml.etree.ElementTree as ET
+root = ET.parse('workbook.twb').getroot()
+Q = chr(34)
+
+def clean(col):
+    seg = col.split('].[')[-1].rstrip(']').lstrip('[')
+    parts = seg.split(':')
+    return parts[1] if len(parts) >= 3 else seg
+
+for ws in root.findall('.//worksheet'):
+    fs = ws.findall('.//filter')
+    if not fs:
+        continue
+    print('worksheet:', repr(ws.get('name', '')))
+    for f in fs:
+        col = clean(f.get('column', ''))
+        cls = f.get('class', '')
+        ctx = ' [context]' if f.get('context') == 'true' else ''
+        funcs = {g.get('function') for g in f.iter('groupfilter')}
+        if 'top' in funcs or 'filter' in funcs:
+            print('  ', col, '-> TOP-N / computed -- COMPLEX, flag to user' + ctx)
+            continue
+        if cls == 'categorical':
+            members = [g.get('member', '').replace(Q, '') for g in f.findall(\".//groupfilter[@function='member']\")]
+            mode = None
+            for g in f.iter('groupfilter'):
+                for v in g.attrib.values():
+                    if v in ('inclusive', 'exclusive'):
+                        mode = v
+            op = 'NOT IN' if mode == 'exclusive' else 'IN'
+            print('  ', col, '->', op, members, ctx)
+        elif cls == 'quantitative':
+            mn = f.find('min'); mx = f.find('max')
+            mn = mn.text if mn is not None else 'NA'
+            mx = mx.text if mx is not None else 'NA'
+            print('  ', col, '-> range min=' + mn + ' max=' + mx + ctx)
+        else:
+            print('  ', col, '->', cls, 'filter -- review manually' + ctx)
+"
+```
+
+**Mapping Tableau filters to MCP filters** (confirm the exact filter field name and shape with `get_chart_type_schema` — it varies by chart type):
+
+| Parser output | MCP simple filter | Notes |
+|---|---|---|
+| `category -> IN [Furniture, Technology]` | `{"col": "category", "op": "IN", "val": ["Furniture", "Technology"]}` | Categorical, inclusive |
+| `category -> NOT IN [...]` | `{"col": "category", "op": "NOT IN", "val": [...]}` | Categorical, exclusive |
+| `sales -> range min=0 max=1000` | `{"col": "sales", "op": ">=", "val": 0}` + `{"col": "sales", "op": "<=", "val": 1000}` | Numeric range → two bound filters |
+| `order_date -> range min=NA max=NA` | — | Almost always a **relative-date** filter; map to the chart's time range, not a column filter. Confirm the period with the user. |
+| `... -> TOP-N / computed` | — | **Flag.** Top-N needs a series/row limit, not a value filter. Ask the user before creating the chart without it. |
+| `... [context]` | same as above | Tableau context filter; for a single chart it behaves like a normal filter. Note it to the user since it affects Top-N semantics. |
+
+Apply the simple filters by adding them to `config` in Phase 8. Flag every Top-N, relative-date, table-calculation, or otherwise-unmapped filter to the user **before** generating the chart — do not silently produce a chart that shows more data than the Tableau original.
+
+---
+
+## Phase 7: Chart Type Mapping
 
 | Tableau `mark class` | `chart_type` | `kind` |
 |---|---|---|
@@ -135,7 +248,7 @@ The live MCP schema accepts `chart_type` values: `xy`, `table`, `pie`, `pivot_ta
 
 ---
 
-## Phase 6: `generate_chart` Workflow
+## Phase 8: `generate_chart` Workflow
 
 ### Step 1: Resolve dataset ID
 
@@ -143,7 +256,7 @@ The live MCP schema accepts `chart_type` values: `xy`, `table`, `pie`, `pivot_ta
 list_datasets()
 ```
 
-Find the dataset matching the Tableau datasource (by name, schema, or connection info from Phase 2). Record its `id`.
+Find the dataset matching the Tableau datasource (by name, schema, or connection info from Phase 3). Record its `id`.
 
 ### Step 2: Inspect columns and saved metrics
 
@@ -159,11 +272,11 @@ Use the returned column names and saved metric names. Do not invent columns.
 get_chart_type_schema(chart_type="xy")   # use "xy" for bar/line/area/scatter; "pie", "table", "pivot_table", "big_number" for others
 ```
 
-This returns the exact required and optional config fields for the MCP `generate_chart` call. Follow the live schema — do not guess field names.
+This returns the exact required and optional config fields — including the filter field — for the MCP `generate_chart` call. Follow the live schema; do not guess field names.
 
 ### Step 4: Call `generate_chart`
 
-`config.chart_type` is the Pydantic discriminator — it must be included in every `config` and must match the value passed to `get_chart_type_schema`. All axis, dimension, and metric fields use **column-ref objects**, not plain strings. `y` and `metrics` are **lists** of column-refs; `x`, `dimension`, `group_by`, `rows`, and `columns` are single column-refs or lists of column-refs per the schema.
+`config.chart_type` is the Pydantic discriminator — it must be included in every `config` and must match the value passed to `get_chart_type_schema`. All axis, dimension, and metric fields use **column-ref objects**, not plain strings. `y` and `metrics` are **lists** of column-refs; `x`, `dimension`, `group_by`, `rows`, and `columns` are single column-refs or lists of column-refs per the schema. Carry the worksheet's translatable filters (Phase 6) into the config's filter field.
 
 ```
 generate_chart(request={
@@ -175,10 +288,15 @@ generate_chart(request={
     "kind": "bar",
     "x": {"name": "order_date"},                     # ColumnRef — no aggregate for dimensions/axes
     "y": [{"name": "revenue", "aggregate": "SUM"}],  # List[ColumnRef]
-    "group_by": {"name": "category"}                 # ColumnRef
+    "group_by": {"name": "category"},                # ColumnRef
+    "filters": [                                     # from Phase 6 — confirm field name/shape via schema
+      {"col": "category", "op": "IN", "val": ["Furniture", "Technology"]}
+    ]
   }
 })
 ```
+
+The `filters` field name and entry shape vary by chart type — `get_chart_type_schema` (Step 3) returns the authoritative form. The shape above is illustrative; verify before sending.
 
 **Column-ref shapes:**
 
@@ -205,32 +323,9 @@ Record the chart ID returned by each `generate_chart` call before moving to the 
 
 ---
 
-## Phase 7: Dashboard Layout Notes
+## Phase 9: `generate_dashboard` & Layout Notes
 
-`generate_dashboard` auto-arranges charts and does not accept explicit position coordinates. Run the zone one-liner to capture relative layout information as notes for the user to reference when refining positions in the Preset UI.
-
-### Extract zone coordinates
-
-```bash
-python3 -c "
-import xml.etree.ElementTree as ET
-root = ET.parse('workbook.twb').getroot()
-for dash in root.findall('.//dashboard'):
-    size = dash.find('size')
-    cw = size.get('maxwidth', '?') if size is not None else '?'
-    ch = size.get('maxheight', '?') if size is not None else '?'
-    print(f'Dashboard: {dash.get(\"name\")}  canvas: {cw}x{ch}')
-    for zone in dash.findall('.//zone'):
-        name = zone.get('name', '')
-        x, y, w, h = zone.get('x'), zone.get('y'), zone.get('w'), zone.get('h')
-        if name and x and w:
-            print(f'  {name!r}: x={x} y={y} w={w} h={h}')
-"
-```
-
-Present the zone output to the user as a layout reference. After `generate_dashboard` creates the dashboard, direct the user to Preset's drag-and-drop editor to arrange charts to match the original Tableau layout.
-
-### Call `generate_dashboard`
+`generate_dashboard` auto-arranges charts and does not accept explicit position coordinates. Use the worksheet-zone `x/y/w/h` values captured in Phase 2 as layout notes for the user to reference when refining positions in the Preset UI.
 
 ```
 generate_dashboard(request={
@@ -239,7 +334,7 @@ generate_dashboard(request={
 })
 ```
 
-Report the returned dashboard URL alongside the zone layout notes.
+Pass only the chart IDs returned for the target dashboard's in-scope worksheets. Report the returned dashboard URL alongside the Phase 2 zone layout notes, and direct the user to Preset's drag-and-drop editor to match the original Tableau arrangement.
 
 ---
 
@@ -250,9 +345,12 @@ Report the returned dashboard URL alongside the zone layout notes.
 | `.hyper` / `.tde` data extracts | No MCP tool to import Tableau extract data; the Preset dataset must be a live database connection |
 | LOD INCLUDE / EXCLUDE | Not expressible as a single column; must be restructured as a virtual dataset or separate SQL |
 | Table calculations (`RUNNING_SUM`, `RANK`, `WINDOW_SUM`, etc.) | Computed server-side in Tableau; must be rewritten as window functions in a virtual dataset SQL |
+| Top-N / computed worksheet filters | Not a simple value filter; needs a series/row limit configured manually — flag to the user |
+| Relative-date filters | Map to the chart's time range rather than a column filter; confirm the period with the user |
 | Map / filled map charts | No direct `generate_chart` equivalent; skip or ask the user to create `deck_scatter` / `deck_choropleth` manually |
 | Dashboard chart positioning | `generate_dashboard` auto-arranges; exact zone positions from the TWB must be applied manually in the Preset UI |
 | Multi-datasource worksheet blends | Each `generate_chart` targets one Preset dataset; Tableau blends must be pre-joined in a virtual dataset |
-| Dashboard parameter actions | Superset native filters are not set automatically; configure manually after dashboard creation |
-| Dashboard URL / filter actions | Not supported via MCP; configure manually in Preset |
+| Dashboard parameter / filter actions | Superset native filters are not set automatically; configure manually after dashboard creation |
 | Tableau Server-side formatting (number formats, color palettes) | Not carried over; apply in Preset chart settings after creation |
+</content>
+</invoke>

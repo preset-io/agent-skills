@@ -98,6 +98,7 @@ required_mcp_skills=(
   preset-mcp-sqllab
   preset-mcp-datasets
   preset-mcp-troubleshooting
+  tableau-to-preset
 )
 
 require_file README.md
@@ -501,7 +502,8 @@ require_jq '
     "skills/preset-mcp-sqllab/SKILL.md",
     "skills/preset-mcp-troubleshooting/SKILL.md",
     "skills/preset-mcp-visualization/SKILL.md",
-    "skills/preset-mcp/SKILL.md"
+    "skills/preset-mcp/SKILL.md",
+    "skills/tableau-to-preset/SKILL.md"
   ]
 ' "$MCP_ROOT/.cursor-plugin/plugin.json"
 # Intentional drift alarm: update this count when MCP tools are added or removed.
@@ -522,6 +524,8 @@ reject_grep "skills/preset-superset/SKILL.md" "$MCP_ROOT"
 reject_grep "curl -s" "$MCP_ROOT"
 reject_grep "import requests" "$MCP_ROOT"
 reject_grep "python requests" "$MCP_ROOT/skills"
+reject_grep "</content>" "$MCP_ROOT"
+reject_grep "</invoke>" "$MCP_ROOT"
 
 required_cli_skills=(
   preset-cli

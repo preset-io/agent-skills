@@ -23,6 +23,7 @@ Use the `skills/*/SKILL.md` files as the canonical instructions:
 - `skills/preset-mcp-sqllab/SKILL.md` - SQL execution, SQL Lab links, and saved SQL queries through MCP.
 - `skills/preset-mcp-datasets/SKILL.md` - dataset inspection, semantic-layer querying, and virtual dataset creation.
 - `skills/preset-mcp-troubleshooting/SKILL.md` - health checks, validation errors, permission errors, response-size issues, and bug reports.
+- `skills/tableau-to-preset/SKILL.md` - guided workflow for converting a Tableau workbook (.twb/.twbx) to a Preset dashboard via MCP tools.
 
 ## Source Of Truth
 

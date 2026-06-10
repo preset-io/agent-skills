@@ -18,5 +18,6 @@ Skill routing:
 - `skills/preset-mcp-sqllab/SKILL.md` for SQL execution, SQL Lab links, and saved SQL queries.
 - `skills/preset-mcp-datasets/SKILL.md` for dataset inspection, semantic-layer querying, and virtual dataset creation.
 - `skills/preset-mcp-troubleshooting/SKILL.md` for health checks, validation errors, permission errors, response-size issues, and bug reports.
+- `skills/tableau-to-preset/SKILL.md` for converting a Tableau workbook (.twb/.twbx) to a Preset dashboard via MCP tools.
 
 The live Superset MCP server under `superset/superset/mcp_service` is the source of truth for tools and schemas.

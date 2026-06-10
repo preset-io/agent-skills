@@ -44,6 +44,11 @@
       "name": "preset-mcp-troubleshooting",
       "path": "skills/preset-mcp-troubleshooting/SKILL.md",
       "description": "Troubleshoot Superset MCP health, validation, permission, response-size, and bug-report workflows; do not use for direct API work."
+    },
+    {
+      "name": "tableau-to-preset",
+      "path": "skills/tableau-to-preset/SKILL.md",
+      "description": "Convert a Tableau workbook (.twb/.twbx) to a Preset dashboard via Superset MCP tools; do not use for direct API work."
     }
   ]
 }

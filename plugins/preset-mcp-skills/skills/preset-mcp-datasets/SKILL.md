@@ -25,8 +25,8 @@ Use for dataset-centered MCP workflows.
 
 ## Workflow Order
 
-1. Find the dataset by ID/UUID or list/search first.
-2. Inspect columns and metrics before data or chart workflows.
+1. Find the dataset with a single list/search call (use a search filter and sufficient `page_size`); do not re-list.
+2. Inspect columns and metrics with one `get_dataset_info` call before data or chart workflows.
 3. Query semantic-layer results only when the user asks for data.
 4. Save virtual datasets only when persistence is requested.
 

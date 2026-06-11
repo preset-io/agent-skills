@@ -9,27 +9,27 @@ Use for chart and Explore workflows through MCP.
 
 ## Always
 
-- Prefer `generate_explore_link` for interactive exploration and unsaved previews.
-- Use `generate_chart` only when the user wants a saved chart or the workflow explicitly needs persistence.
-- Use `get_dataset_info` and `get_chart_type_schema` before building nontrivial chart configs.
+- Treat "create", "make", "build", or "add" a chart as saved-chart intent: use `generate_chart` directly.
+- Use `generate_explore_link` for "show", "visualize", "explore", or "preview" requests with no save intent.
+- Use `get_dataset_info` once to resolve exact column and metric names before building the config.
+- Use `get_chart_type_schema` only for unfamiliar or complex chart types, or after a config validation error — not for simple bar, line, pie, table, or big-number charts.
 - Use saved metrics as saved metrics; do not treat metric names as raw columns.
 - Never fabricate URLs. Use URLs returned by MCP tools.
 
 ## Decision Rules
 
-- Use `generate_explore_link` for "show", "visualize", "explore", or "preview" requests.
-- Use `generate_chart` with save semantics only for saved chart intent.
+- Creation intent ("create/make/build a chart"): `generate_chart`. Do not substitute an unsaved Explore link.
+- Preview intent ("show/visualize/explore/preview"): `generate_explore_link`.
 - Use `update_chart` to change an existing saved chart.
 - Use `update_chart_preview` only for cached preview form data.
 - Route adding charts to dashboards to `preset-mcp-dashboard`.
 
 ## Workflow Order
 
-1. Resolve dataset and available columns/metrics.
-2. Discover chart schema for the intended chart type when needed.
-3. Generate an Explore link for review unless the user explicitly asked to save.
-4. Save or update only when persistence is requested.
-5. Report success based on the tool response, not assumption.
+1. Resolve the dataset and its exact columns/metrics with one `get_dataset_info` call.
+2. Build the config and call the tool matching the user's intent (create → `generate_chart`).
+3. If the call returns a validation error, do not retry the same config blindly: fetch `get_chart_type_schema` once, fix the config against it, and retry once.
+4. Report success based on the tool response, not assumption.
 
 ## Retrieve
 

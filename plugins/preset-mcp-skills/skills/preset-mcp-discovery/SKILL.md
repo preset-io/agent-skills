@@ -9,29 +9,25 @@ Use for MCP metadata discovery that does not require result data or persistent c
 
 ## Always
 
-- Use `preset-mcp` for surface routing if there is any MCP/API ambiguity.
-- Start with the narrowest list, detail, health, or schema tool.
+- Use the single narrowest tool that answers the question; discovery calls are for missing IDs, names, or schemas — not a mandatory ladder.
+- Do not repeat a list call you already made; reuse earlier results instead of re-listing with different parameters.
 - Treat live MCP schemas as authoritative for filter, sort, pagination, and request wrapper fields.
 - Do not expose hidden dataset, database, schema, or SQL details after permission errors.
 
 ## Decision Rules
 
-- Use `health_check` for basic service availability.
-- Use `get_instance_info` for workspace/instance overview.
-- Use `list_*` tools to find IDs before `get_*_info` tools.
-- Use `get_schema` for valid filter/sort/select fields.
-- Use `get_chart_type_schema` before creating or updating complex chart configs.
+- Use `health_check` and `get_instance_info` only when the user asks about service health or the workspace itself.
+- Use `list_*` tools once to find IDs when the identifier is missing; pick a `page_size` that covers the request in one call.
+- Use `get_*_info` for details of a specific known object.
+- Use `get_schema` only when a request fails or valid filter/sort/select fields are genuinely unknown.
 
 ## Workflow Order
 
-1. Use `health_check` for service availability or MCP health questions.
-2. Use `get_instance_info` for workspace or instance overview.
-3. Identify the object type: chart, dashboard, dataset, database, schema, or instance.
-4. List/search first when the identifier is missing.
-5. Use `get_schema` when valid fields, filters, sort keys, or request shape are needed.
-6. Fetch details only for the specific object needed.
-7. Route to `preset-mcp-data` for result rows, chart data, previews, or rendered SQL.
-8. Route to mutation-focused skills before creating or updating objects.
+1. If the needed ID or name is already known, skip listing and act on it.
+2. Otherwise list/search once for the object type in question.
+3. Fetch details only for the specific object needed.
+4. Route to `preset-mcp-data` for result rows, chart data, previews, or rendered SQL.
+5. Route to mutation-focused skills before creating or updating objects.
 
 ## Retrieve
 

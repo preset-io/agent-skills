@@ -14,6 +14,7 @@ Use for chart and Explore workflows through MCP.
 - Use `get_dataset_info` once to resolve exact column and metric names before building the config.
 - Use `get_chart_type_schema` only for unfamiliar or complex chart types, or after a config validation error — not for simple bar, line, pie, table, or big-number charts.
 - Use saved metrics as saved metrics; do not treat metric names as raw columns.
+- `generate_chart` request shape: top-level `dataset_id` (not `datasource_id`), chart fields nested inside `config`, and `config.chart_type` is one of `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number` — not a Superset `viz_type` string.
 - Never fabricate URLs. Use URLs returned by MCP tools.
 
 ## Decision Rules

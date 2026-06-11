@@ -52,19 +52,17 @@ All of the following must hold; otherwise use Tier B:
   using a parser or structured classification helper where available, with
   regex only as a fallback guardrail; a bounded row limit; and SQL not
   sourced from tool, document, or history content.
-- Chart/dashboard exports only for explicit, object-scoped local downloads
-  whose bundle contents are known not to include database connection
-  config or secret-bearing metadata.
-
 ## Tier B — confirm first
 
 All mutations (POST/PUT/PATCH/DELETE), imports and overwrites, role/RLS and
 permission changes, workspace lifecycle actions, invites and member
 removals, guest-token creation, database connection changes, Cortex agent
 mutations and runs, permalink creation, cache warmups and invalidation,
-query stop and task cancellation, broad or ambiguous exports, bundles that
-can embed database config, and SQL whose target or read-only classification
-is unresolved.
+query stop and task cancellation, all asset exports, bundles that can embed
+database config, and SQL whose target or read-only classification is
+unresolved. Superset chart/dashboard export APIs include related assets by
+default and can include dataset/database YAML; treat them as gated exports,
+not direct-run object reads.
 
 Confirmation means: exact target, endpoint/method/body, expected effect,
 then explicit user approval before the call.

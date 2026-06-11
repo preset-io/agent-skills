@@ -12,8 +12,7 @@ Use for dashboard and chart inspection in a resolved Preset workspace.
 - Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known. Consult `preset-superset` only when version drift matters.
 - Run metadata, composition, and favorite reads/changes directly.
 - Run chart data, screenshots, and thumbnails directly when the user asked in their own message: row limit as a request parameter (default 100 rows, hard cap 1000 without explicit confirmation), output summarized in the transcript or written to a user-named local file — no raw row dumps.
-- Treat object-scoped chart/dashboard exports the user explicitly requested as direct local downloads when the bundle cannot contain database config; confirm broad or ambiguous exports.
-- Confirm before cache warmups/invalidation and dashboard/chart mutations; summarize workspace, IDs or UUIDs, request body, and expected effect before writes.
+- Confirm before chart/dashboard exports, cache warmups/invalidation, and dashboard/chart mutations; Superset exports can include related dataset/database YAML, so summarize workspace, IDs or UUIDs, request body or object IDs, destination, and expected effect/disclosure before writes or downloads.
 
 ## Decision Rules
 
@@ -26,7 +25,7 @@ Use for dashboard and chart inspection in a resolved Preset workspace.
 1. Identify workspace, dashboard, chart, dataset, and request identifiers.
 2. Inspect metadata and composition.
 3. Fetch requested chart data, screenshots, or thumbnails with parameterized limits and summarized output.
-4. Confirm before cache warmup/invalidation, broad exports, or mutation calls.
+4. Confirm before exports, cache warmup/invalidation, or mutation calls.
 
 ## Retrieve
 

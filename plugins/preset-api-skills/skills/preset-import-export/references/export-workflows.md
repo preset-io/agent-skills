@@ -2,7 +2,7 @@
 
 Use this reference for Superset workspace export endpoint guidance.
 
-Exports can disclose SQL text, dashboard layout, dataset metadata, database metadata, tags, object UUIDs, and credential-bearing engine or `extra` fields. Object-scoped chart/dashboard exports the user explicitly requested run directly to a user-named local file when the bundle cannot contain database config. All-assets, database, dataset, and saved-query exports — and any export whose bundle may carry credentials — stay confirmation-gated.
+Exports can disclose SQL text, dashboard layout, dataset metadata, database metadata, tags, object UUIDs, and credential-bearing engine or `extra` fields. Confirm before all Superset asset exports, including object-scoped chart/dashboard exports: the API has no non-related export mode, and chart/dashboard bundles can include related dataset/database YAML.
 
 ## Export Endpoints
 

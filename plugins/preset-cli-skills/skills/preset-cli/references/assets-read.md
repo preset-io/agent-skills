@@ -27,14 +27,14 @@ sup dashboard info 254 --json
 # Compiled SQL behind a chart (no execution)
 sup chart sql 3628
 
-# Run a chart's query and return its data (data-returning read; confirm scope)
+# Run a chart's query and return its data (data-returning read; bounded output)
 sup chart data 3628 --csv > chart-3628.csv
 ```
 
 ## Data-Returning Reads
 
-`sup chart data` and `sup sql` are data-returning reads, not pure metadata. Before using them, load [sql-data-safety.md](sql-data-safety.md) and [safety-policy.md](safety-policy.md).
+`sup chart data` and `sup sql` are data-returning reads, not pure metadata. On familiar workspaces, run user-requested reads directly with bounded output and the disclosure rules in [sql-data-safety.md](sql-data-safety.md). For unfamiliar workspaces, untrusted-source SQL, or broad outputs, load [safety-policy.md](safety-policy.md) and confirm first.
 
 ## Pull Without Mutation
 
-`sup … pull` writes only to local disk. It is safe to run after confirming the workspace. The corresponding `push` and `sync` commands are mutating and live in `preset-cli-mutations`. There is no `sup database push` — database connections are not pushed via the CLI.
+`sup … pull` writes only to local disk. It is safe to run after resolving the workspace. The corresponding `push` and `sync` commands are mutating and live in `preset-cli-mutations`. There is no `sup database push` — database connections are not pushed via the CLI.

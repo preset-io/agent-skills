@@ -33,6 +33,25 @@ const checks = [
     file: "plugins/preset-cli-skills/skills/preset-cli/references/safety-policy.md",
     mustContain: ["<!-- gate-policy v2 -->"],
   },
+  {
+    file: "plugins/preset-cli-skills/skills/preset-cli/references/assets-read.md",
+    mustContain: ["bounded output"],
+    mustNotContain: [
+      "confirm scope",
+      "Before using them, load [sql-data-safety.md](sql-data-safety.md) and [safety-policy.md](safety-policy.md)",
+      "safe to run after confirming the workspace",
+    ],
+  },
+  {
+    file: "plugins/preset-cli-skills/skills/preset-cli/references/workspace-and-config.md",
+    mustContain: ["Resolve the workspace before data-returning reads"],
+    mustNotContain: ["Always confirm the workspace before running anything that returns data"],
+  },
+  {
+    file: "plugins/preset-cli-skills/skills/preset-cli/references/sql-data-safety.md",
+    mustContain: ["run directly with explicit output bounds"],
+    mustNotContain: ["After the scope check, load [safety-policy.md](safety-policy.md)"],
+  },
   // MCP package: guard its intent-proportional language against regression.
   {
     file: "plugins/preset-mcp-skills/skills/preset-mcp/references/tool-categories.md",

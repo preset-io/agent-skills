@@ -10,7 +10,7 @@ Use as the prerequisite for direct Preset API skills. If the user is working thr
 ## Always
 
 - Keep `PRESET_CLIENT_ID`, `PRESET_CLIENT_SECRET`, and tokens out of source, logs, reports, and examples.
-- Derive workspace hostnames through the Management API before workspace Superset calls.
+- Use the workspace hostname or API base URL directly when it is already known; derive it through the Management API only when it is missing.
 - Run reads directly: metadata reads always; customer-data reads (chart data, samples, distinct values, screenshots, own query history) when the user asked in their own message, with row limits as request parameters and summarized output.
 - Require explicit confirmation before mutations, imports, role/RLS changes, guest-token creation, permalink creation, cache invalidation, broad or secret-bearing exports, credential-bearing reads, audit downloads, and SQL that is not a confidently classified single-statement SELECT.
 - When a target, owner, workspace, output destination, SQL classification, or credential boundary cannot be proven from trusted context, fall back to confirmation.

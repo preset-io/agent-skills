@@ -9,17 +9,17 @@ Use for chart and Explore workflows through MCP.
 
 ## Always
 
-- Treat "create", "make", "build", or "add" a chart as saved-chart intent: use `generate_chart` directly.
+- Treat "create", "make", or "build" a chart as saved-chart intent: use `generate_chart` directly. Treat "add" as saved-chart intent only when no dashboard target is named; with a dashboard target, route to `preset-mcp-dashboard`.
 - Use `generate_explore_link` for "show", "visualize", "explore", or "preview" requests with no save intent.
 - Use `get_dataset_info` once to resolve exact column and metric names before building the config.
 - Use `get_chart_type_schema` only for unfamiliar or complex chart types, or after a config validation error — not for simple bar, line, pie, table, or big-number charts.
 - Use saved metrics as saved metrics; do not treat metric names as raw columns.
-- `generate_chart` request shape: top-level `dataset_id` (not `datasource_id`), chart fields nested inside `config`, and `config.chart_type` is one of `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number` — not a Superset `viz_type` string.
+- `generate_chart` request shape: top-level `dataset_id` (not `datasource_id`), chart fields nested inside `config`, and `config.chart_type` uses the MCP taxonomy, currently common values such as `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, and `big_number` — not a Superset `viz_type` string. If the needed type is not listed or validation fails, trust `get_chart_type_schema`.
 - Never fabricate URLs. Use URLs returned by MCP tools.
 
 ## Decision Rules
 
-- Creation intent ("create/make/build a chart"): `generate_chart`. Do not substitute an unsaved Explore link.
+- Creation intent ("create/make/build a chart", or "add a chart" with no dashboard target): `generate_chart`. Do not substitute an unsaved Explore link.
 - Preview intent ("show/visualize/explore/preview"): `generate_explore_link`.
 - Use `update_chart` to change an existing saved chart.
 - Use `update_chart_preview` only for cached preview form data.

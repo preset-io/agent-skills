@@ -23,7 +23,7 @@ Use for MCP metadata discovery that does not require result data or persistent c
 
 ## Workflow Order
 
-1. If the needed ID or name is already known, skip listing and act on it.
+1. If the needed ID, UUID, slug, or other schema-accepted identifier is already known, skip listing and act on it. Resolve a bare display name with one list/search call.
 2. Otherwise list/search once for the object type in question.
 3. Fetch details only for the specific object needed.
 4. Route to `preset-mcp-data` for result rows, chart data, previews, or rendered SQL.

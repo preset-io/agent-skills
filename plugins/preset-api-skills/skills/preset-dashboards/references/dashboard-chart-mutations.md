@@ -1,6 +1,8 @@
 # Dashboard And Chart Mutations
 
-Use this reference for dashboard/chart operations that change workspace metadata, user state, cache state, or import/export state.
+Use this reference for dashboard/chart operations that change workspace metadata, cache state, or import/export state.
+
+Run directly: favorite create/delete (own-user state, trivially reversible) with an explicit object target; object-scoped chart/dashboard exports the user requested to a user-named local file when the bundle cannot contain database connection config or secret-bearing metadata.
 
 Do not run these without explicit confirmation:
 
@@ -9,8 +11,7 @@ Do not run these without explicit confirmation:
 | Create/update/delete | dashboard/chart `POST`, `PUT`, `DELETE` |
 | Dashboard layout mutations | filters, colors, chart customizations |
 | Copies and imports | dashboard copy, dashboard/chart import |
-| Exports | dashboard/chart export, export as example |
-| Favorites | favorite create/delete changes user state |
+| Broad or secret-bearing exports | all-assets export, exports whose bundle may carry database config |
 | Cache and screenshot generation | chart warm up cache, chart `cache_screenshot`, dashboard `cache_dashboard_screenshot` |
 
 Before a dashboard or chart mutation, summarize:

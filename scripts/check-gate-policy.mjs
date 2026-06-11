@@ -39,7 +39,8 @@ const checks = [
     mustContain: ["smallest set of calls"],
     mustNotContain: ["Prefer core and discovery tools before data or mutation tools"],
   },
-  // Stale-language sentinels in de-gated skills.
+  // Stale-language sentinels in de-gated skills and their references. A
+  // de-gated read must not be re-gated by a reference the skill still links.
   {
     file: "plugins/preset-api-skills/skills/preset-dashboards/SKILL.md",
     mustNotContain: ["Stop before chart data retrieval"],
@@ -51,6 +52,24 @@ const checks = [
   {
     file: "plugins/preset-api-skills/skills/preset-sql-execution/SKILL.md",
     mustNotContain: ["Stop before any SQL execution, result retrieval"],
+  },
+  {
+    file: "plugins/preset-api-skills/skills/preset-sqllab/references/routing-essentials.md",
+    mustContain: ["Run directly:"],
+    mustNotContain: ["Stop before sensitive read, result retrieval"],
+  },
+  {
+    file: "plugins/preset-api-skills/skills/preset-sqllab/references/sql-execution.md",
+    mustContain: ["Direct path:"],
+  },
+  {
+    file: "plugins/preset-api-skills/skills/preset-dashboards/references/dashboard-composition.md",
+    mustNotContain: ["get explicit confirmation before fetching data"],
+  },
+  {
+    file: "plugins/preset-api-skills/skills/preset-dashboards/references/dashboard-chart-mutations.md",
+    mustContain: ["Run directly:"],
+    mustNotContain: ["favorite create/delete changes user state"],
   },
 ];
 

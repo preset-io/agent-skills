@@ -45,4 +45,4 @@ Useful composition endpoints:
 | Get dashboard datasets | `GET /api/v1/dashboard/{id_or_slug}/datasets` |
 | Get dashboard tabs | `GET /api/v1/dashboard/{id_or_slug}/tabs` |
 
-Composition reads are metadata reads. If the user asks for actual chart results, load [chart-data.md](chart-data.md) and get explicit confirmation before fetching data.
+Composition reads are metadata reads. If the user asks for actual chart results, load [chart-data.md](chart-data.md); a user-requested chart-data read runs directly with a parameterized row limit (default 100, hard cap 1000 without confirmation) and summarized output.

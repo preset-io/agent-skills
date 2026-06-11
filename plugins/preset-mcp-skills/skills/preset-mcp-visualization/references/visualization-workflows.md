@@ -1,18 +1,20 @@
 # Visualization Workflows
 
-## Explore First
+## Create a Chart
 
-For most visualization requests:
+For "create", "make", "build", or "add" a chart with no dashboard target:
 
-1. `list_datasets` or `get_dataset_info`
-2. `get_chart_type_schema` when config details are uncertain
-3. `generate_explore_link`
+1. `list_datasets` or `get_dataset_info` to resolve exact columns and metrics
+2. `generate_chart`
+3. On a validation error, `get_chart_type_schema` once, fix the config, retry once
 
-This creates a reviewable interactive URL without permanently saving a chart.
+Check the response for success or error before claiming the chart exists.
 
-## Save Chart
+When a dashboard target is named, route to `preset-mcp-dashboard` instead.
 
-Use `generate_chart` only when the user wants a saved chart. Check the response for success or error before claiming the chart exists.
+## Preview Without Saving
+
+For "show", "visualize", "explore", or "preview" requests with no save intent, use `generate_explore_link` instead of `generate_chart`. This creates a reviewable interactive URL without permanently saving a chart.
 
 ## Update Chart
 

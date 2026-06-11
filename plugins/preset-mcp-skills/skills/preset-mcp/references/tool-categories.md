@@ -10,4 +10,4 @@ Use the live Superset MCP server as the source of truth. Current durable categor
 | `explore` | UI link generation | `generate_explore_link`, `open_sql_lab_with_context` |
 | `mutate` | Persistent or cached workspace changes | `generate_chart`, `update_chart`, `update_chart_preview`, `generate_dashboard`, `add_chart_to_existing_dashboard`, `execute_sql`, `save_sql_query`, `create_virtual_dataset` |
 
-Prefer core and discovery tools before data or mutation tools. Defer data and mutation tools until the user request actually needs them.
+Use the smallest set of calls that fulfills the request. Reach for discovery tools only when an ID, name, or schema is actually missing; go directly to data or mutation tools when the user's intent already calls for them.

@@ -11,7 +11,7 @@ Use for dataset-centered MCP workflows.
 
 - Use `list_datasets` and `get_dataset_info` for dataset discovery.
 - Respect permission-denied responses; do not work around them with chart, dashboard, SQL, or API calls.
-- Use saved metrics and dimensions from `get_dataset_info`; do not invent columns or metric expressions.
+- Use saved metrics and dimensions from `get_dataset_info`; `query_dataset` accepts saved metrics only, not ad-hoc expressions. When no saved metric fits, compute the aggregate with `execute_sql` (route to `preset-mcp-sqllab`) instead of guessing metric names or stopping to ask.
 - Use `query_dataset` for semantic-layer data results.
 - Use `create_virtual_dataset` only when the user wants to save SQL as a chartable dataset.
 
@@ -25,8 +25,8 @@ Use for dataset-centered MCP workflows.
 
 ## Workflow Order
 
-1. Find the dataset by ID/UUID or list/search first.
-2. Inspect columns and metrics before data or chart workflows.
+1. Find the dataset with one list/search call (use a search filter and sufficient `page_size`); paginate or refine the filter only when the target is not in the returned page.
+2. Inspect columns and metrics with one `get_dataset_info` call before data or chart workflows.
 3. Query semantic-layer results only when the user asks for data.
 4. Save virtual datasets only when persistence is requested.
 

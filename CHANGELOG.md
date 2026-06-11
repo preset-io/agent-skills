@@ -27,6 +27,9 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ### Changed
 
+- **preset-mcp-skills** - made workflow gates intent-proportional after live agentic A/B testing showed the skills slowed MCP sessions and added approval prompts: chart-creation intent now uses `generate_chart` directly (Explore links reserved for preview intent), SQL resolves dataset schema before executing once, tool schemas are consulted only after validation errors, the discovery ladder and re-listing mandates are gone, and the router defaults to MCP in MCP-connected sessions instead of asking.
+- **preset-mcp-datasets** - documented `query_dataset`'s saved-metrics-only contract; metric-less aggregates route to `execute_sql` instead of stopping to ask.
+- **preset-mcp-visualization** - documented the `generate_chart` request-shape pitfalls (`dataset_id`, nested `config`, MCP `chart_type` taxonomy) that caused the dominant validation-retry loop.
 - Moved the existing API skills, client manifests, and API live smoke script into `plugins/preset-api-skills`.
 - Converted the seed API guidance into a skill-package layout under `plugins/preset-api-skills/skills/*/SKILL.md`.
 - Moved detailed API examples into on-demand `references/` files for each skill.

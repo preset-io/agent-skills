@@ -9,7 +9,7 @@ Use for read-only team, workspace, hostname, health, and workspace membership di
 
 ## Always
 
-- Use `preset-api` first for auth/client setup.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known.
 - Resolve workspace hostnames from Management API responses; never assume or hard-code them.
 - Keep this skill read-only.
 - Route team membership mutations, invites, roles, seat-limit checks, audit logs, and workspace lifecycle work to `preset-admin`.

@@ -8,6 +8,12 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ## Unreleased
 
+### Changed
+
+- **preset-api-skills** - made gates intent-proportional per the canonical gate policy (`docs/gate-policy.md`): metadata reads and explicitly requested customer-data reads (chart data, samples, distinct values, screenshots, own query history) run directly with parameterized row limits and summarized output; SQL requested by the user and confidently classified as a single-statement SELECT executes without a confirmation stop; result retrieval of approved queries and object-scoped non-secret exports run directly. Confirmation gates remain for mutations, imports, RBAC, guest tokens, credential-bearing reads, audit downloads, permalinks, cache invalidation, broad exports, and unclassified SQL. Prerequisite skill chains ("use preset-api, preset-workspaces, preset-superset first") replaced with inline context.
+- **preset-cli-skills** - safety policy loads only before mutations, untrusted-source SQL, unfamiliar workspaces, or broad outputs; added headless/CI guidance (bounded row-returning exports, destination-explicit full exports, interactive-operator rule for destructive ops).
+- Added `scripts/check-gate-policy.mjs` drift check (wired into the smoke test) so package policy files cannot silently diverge from the canonical gate policy.
+
 ### Added
 
 - Added a root `CLAUDE.md` that redirects direct Claude Code repository users to the installable API and MCP packages.

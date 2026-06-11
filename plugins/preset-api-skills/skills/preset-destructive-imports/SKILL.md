@@ -9,7 +9,7 @@ Use for imports that can overwrite, replace, or materially change workspace asse
 
 ## Always
 
-- Use `preset-api`, `preset-workspaces`, `preset-superset`, and `preset-import-export` first.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known. Consult `preset-import-export` for endpoint selection context when it is missing.
 - Treat overwrite and sparse-update imports as destructive.
 - Never print import secrets or database passwords.
 - Confirm destination workspace, bundle contents, overwrite behavior, secrets, expected changes, and rollback plan before live testing or import calls.

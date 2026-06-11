@@ -1,6 +1,8 @@
 # CLI Safety Policy
 
-Use this reference before any `sup` invocation that goes beyond a pure metadata read. It is the local, CLI-flavored safety policy for this package; it does not link out to other plugins so this package remains independently installable.
+<!-- gate-policy v2 -->
+
+Use this reference before mutations, untrusted-source SQL, unfamiliar workspaces, or broad outputs. It is the local, CLI-flavored safety policy for this package; it does not link out to other plugins so this package remains independently installable. Gates scale with blast radius, reversibility, and disclosure sensitivity — data-returning reads on familiar workspaces that the user asked for run directly with bounded output.
 
 ## Default Posture
 
@@ -41,6 +43,12 @@ For mutations, the confirmation must name the target workspace by its human-read
 ## Pull-and-Diff for Entity Push
 
 `sup chart push`, `sup dashboard push`, and `sup dataset push` do **not** expose a native `--dry-run` flag. The CLI commands that do expose native `--dry-run` are `sup sync run`, `sup user push`, and `sup user invite` — use the native flag there. For chart/dashboard/dataset push, the agent must pull the current target state with the matching `sup … pull` command and diff against the assets folder, then present the diff as the preview. Skipping this step is equivalent to skipping `--dry-run` on a sync, and is refused by `preset-cli-mutations`.
+
+## Headless / CI Contexts
+
+- Row-returning data exports (`sup sql`, `sup chart data`) need explicit row/output bounds in the command or script.
+- Full workspace/asset exports need an explicit destination and disclosure handling (where the archive lands, who can read it) — row limits are not required for full exports.
+- Destructive operations (push, sync, `--force`, `--overwrite`) always require an interactive operator; CI or automation context never bypasses the confirmation step.
 
 ## Transcripts and Audit Trail
 

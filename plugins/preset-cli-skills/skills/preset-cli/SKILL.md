@@ -18,7 +18,7 @@ Use as the foundation for shell, scripting, CI/CD, and agent-driven Preset workf
 ## Decision Rules
 
 - Classify CLI vs MCP vs direct API intent before acting; if MCP or direct API was requested, defer to that plugin.
-- Distinguish metadata reads from data-returning reads (e.g. `sup sql`, `sup chart data`) — load safety policy before non-metadata reads.
+- Run metadata reads and explicitly requested data-returning reads (e.g. `sup sql`, `sup chart data`) on familiar workspaces directly with bounded output; load safety policy before mutations, untrusted-source SQL, unfamiliar workspaces, or broad outputs.
 - Choose output format based on the downstream consumer: `--json` for automation, `--csv` for files, default Rich for humans, `--porcelain` for shell pipelines.
 - If a command group is not named on this card, load command coverage before composing commands.
 - For mutating intent, stop and load `preset-cli-mutations` rather than continuing on this card.

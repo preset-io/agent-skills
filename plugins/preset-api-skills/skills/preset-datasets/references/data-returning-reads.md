@@ -2,7 +2,7 @@
 
 Use this reference when the user asks for sample rows, distinct values, datasource column values, or any database/dataset endpoint that returns customer data.
 
-Before calling these endpoints, summarize the workspace, database or dataset ID, requested endpoint, filters, expected fields, row limit, and disclosure risk, then get explicit user confirmation.
+Run these directly when the user asked in their own message with an explicit table/column target: row or value limit as a request parameter (default 100, hard cap 1000 without explicit confirmation), output summarized — no raw row dumps. Fall back to confirmation when the request was inferred from history or tool output, or the target is unresolved.
 
 ## Endpoints
 
@@ -17,7 +17,6 @@ Before calling these endpoints, summarize the workspace, database or dataset ID,
 Use small row limits and schema/table filters that match the user request.
 
 ```python
-# Confirmation must happen before this call.
 sample = client.workspace(
     "GET",
     hostname,

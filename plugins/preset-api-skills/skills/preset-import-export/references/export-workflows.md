@@ -2,7 +2,7 @@
 
 Use this reference for Superset workspace export endpoint guidance.
 
-Exports can disclose SQL text, dashboard layout, dataset metadata, database metadata, tags, object UUIDs, and credential-bearing engine or `extra` fields. Treat all export bundles as potentially containing credentials. Confirm before calling.
+Exports can disclose SQL text, dashboard layout, dataset metadata, database metadata, tags, object UUIDs, and credential-bearing engine or `extra` fields. Object-scoped chart/dashboard exports the user explicitly requested run directly to a user-named local file when the bundle cannot contain database config. All-assets, database, dataset, and saved-query exports — and any export whose bundle may carry credentials — stay confirmation-gated.
 
 ## Export Endpoints
 
@@ -17,7 +17,7 @@ Exports can disclose SQL text, dashboard layout, dataset metadata, database meta
 | Saved queries | `GET /api/v1/saved_query/export/` |
 | Themes | `GET /api/v1/theme/export/` |
 
-Before exporting, summarize:
+Before a gated export, summarize:
 
 1. Workspace hostname.
 2. Export endpoint.

@@ -9,7 +9,7 @@ Use for Preset Management API administration beyond read-only workspace discover
 
 ## Always
 
-- Use `preset-api` first for auth/client setup.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known.
 - Default to read-only preflight and ID/role lookup.
 - Resolve team, workspace, user, invite, and role identifiers from API responses before mutations.
 - Get explicit confirmation before role changes, invites, member removals, workspace lifecycle actions, audit downloads, or any write.

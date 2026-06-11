@@ -2,7 +2,7 @@
 
 Use this reference for SQL Lab result retrieval, CSV/JSON exports, and cached result handling.
 
-SQL result endpoints can expose customer data. Use `preset-sql-execution` before result retrieval or export.
+SQL result endpoints expose customer data. Retrieve results of a query approved or executed in the current workflow directly with summarized output; use `preset-sql-execution` for exports and queries outside the current workflow.
 
 ## Endpoints
 
@@ -12,7 +12,7 @@ SQL result endpoints can expose customer data. Use `preset-sql-execution` before
 | Export result CSV | `GET /api/v1/sqllab/export/{client_id}/` |
 | Streaming CSV export | `POST /api/v1/sqllab/export_streaming/` |
 
-Before fetching or exporting results, summarize:
+Before exporting results, or fetching results of queries outside the current workflow, summarize:
 
 1. Workspace hostname.
 2. Query ID or client ID.

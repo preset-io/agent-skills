@@ -11,7 +11,7 @@ Use for dataset-centered MCP workflows.
 
 - Use `list_datasets` and `get_dataset_info` for dataset discovery.
 - Respect permission-denied responses; do not work around them with chart, dashboard, SQL, or API calls.
-- Use saved metrics when they exist; when they don't, build ad-hoc aggregates (SUM/AVG/COUNT) over physical columns from `get_dataset_info`. Never invent column names; ask only when the needed column itself is missing.
+- Use saved metrics and dimensions from `get_dataset_info`; `query_dataset` accepts saved metrics only, not ad-hoc expressions. When no saved metric fits, compute the aggregate with `execute_sql` (route to `preset-mcp-sqllab`) instead of guessing metric names or stopping to ask.
 - Use `query_dataset` for semantic-layer data results.
 - Use `create_virtual_dataset` only when the user wants to save SQL as a chartable dataset.
 

@@ -11,7 +11,7 @@ Use for Superset MCP intent, MCP tool routing, and MCP/API surface-boundary deci
 
 - Stay on MCP tools for MCP intent.
 - Treat `superset/superset/mcp_service` as the only source of truth for MCP tool names, schemas, tags, annotations, prompts, resources, and RBAC metadata.
-- Follow the live MCP tool schema when calling a tool; these skills are workflow guidance, not schema definitions.
+- Call tools directly with the obvious parameters; fetch a tool's schema only after a validation error. These skills are workflow guidance, not schema definitions.
 - Do not use direct Preset Management API, Superset REST API, Snowflake Cortex API, curl, Python requests, exports, or database calls from this package.
 - If MCP cannot satisfy the request, stop and explain the missing MCP capability. Do not switch surfaces.
 
@@ -27,7 +27,7 @@ Use for Superset MCP intent, MCP tool routing, and MCP/API surface-boundary deci
 
 1. Identify whether the user requested MCP or direct API.
 2. For MCP, choose the narrowest MCP domain skill.
-3. Use the live MCP tool schema for parameters.
+3. Call the tool with the obvious parameters; consult its schema only after a validation error.
 4. If MCP lacks a requested capability, explain the missing MCP capability.
 5. Ask before changing surfaces and stop before API calls.
 

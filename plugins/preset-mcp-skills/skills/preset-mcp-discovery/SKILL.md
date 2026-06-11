@@ -11,7 +11,7 @@ Use for MCP metadata discovery that does not require result data or persistent c
 
 - Use the single narrowest tool that answers the question; discovery calls are for missing IDs, names, or schemas — not a mandatory ladder.
 - Do not repeat a list call you already made; reuse earlier results instead of re-listing with different parameters.
-- Treat live MCP schemas as authoritative for filter, sort, pagination, and request wrapper fields.
+- When a call fails on filter, sort, pagination, or request wrapper fields, fix it against the live tool schema rather than guessing again.
 - Do not expose hidden dataset, database, schema, or SQL details after permission errors.
 
 ## Decision Rules

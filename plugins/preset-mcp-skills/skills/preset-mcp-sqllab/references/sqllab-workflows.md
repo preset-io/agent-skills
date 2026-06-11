@@ -6,4 +6,6 @@
 | Generate SQL Lab URL | `open_sql_lab_with_context` |
 | Persist a saved query | `save_sql_query` |
 
-`execute_sql` is tagged `mutate` and marked destructive by MCP annotations because SQL can have side effects. Do not assume a query is safe only because it starts with `SELECT`; validate the user's intent and target.
+`execute_sql` is tagged `mutate` by MCP annotations because SQL can have side effects. Run a read-only `SELECT` directly once the target database and table are resolved; confirm first only for statements that write or alter data (INSERT/UPDATE/DELETE/DDL) or when multiple targets plausibly match.
+
+Resolve exact table and column names with `get_dataset_info` before writing SQL — guessed names and casing are the main cause of failed executions.

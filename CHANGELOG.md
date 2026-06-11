@@ -8,6 +8,12 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ## Unreleased
 
+### Changed
+
+- **preset-mcp-skills** - made workflow gates intent-proportional after live agentic A/B testing showed the skills slowed MCP sessions and added approval prompts: chart-creation intent now uses `generate_chart` directly (Explore links reserved for preview intent), SQL resolves dataset schema before executing once, tool schemas are consulted only after validation errors, the discovery ladder and re-listing mandates are gone, and the router defaults to MCP in MCP-connected sessions instead of asking.
+- **preset-mcp-datasets** - documented `query_dataset`'s saved-metrics-only contract; metric-less aggregates route to `execute_sql` instead of stopping to ask.
+- **preset-mcp-visualization** - pinned the `generate_chart` request shape (`dataset_id`, nested `config`, `chart_type` taxonomy) to eliminate the dominant validation-retry loop.
+
 ### Added
 
 - Added a root `CLAUDE.md` that redirects direct Claude Code repository users to the installable API and MCP packages.

@@ -20,12 +20,12 @@ Use when the user needs data returned through MCP tools.
 - Use `get_chart_data` for existing chart result data.
 - Use `get_chart_preview` for renderable existing chart previews.
 - Use `get_chart_sql` to inspect rendered chart SQL without executing it.
-- Use `query_dataset` for semantic-layer metrics, dimensions, filters, and time ranges.
+- Use `query_dataset` for semantic-layer metrics, dimensions, filters, and time ranges (saved metrics only; route ad-hoc aggregates to `preset-mcp-sqllab`).
 - Route chart creation to `preset-mcp-visualization`.
 
 ## Workflow Order
 
-1. Confirm the user asked for result data, preview content, SQL text, or semantic-layer output.
+1. Classify which output the request needs: result data, preview content, SQL text, or semantic-layer output. Do not ask the user to re-confirm an explicit data request.
 2. Resolve the object and schema through discovery if needed.
 3. Choose `get_chart_data`, `get_chart_sql`, `get_chart_preview`, or `query_dataset` according to the requested output.
 4. Request a small result with narrow fields, row limits, and the least revealing format.

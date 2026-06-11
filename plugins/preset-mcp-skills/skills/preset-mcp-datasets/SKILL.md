@@ -25,7 +25,7 @@ Use for dataset-centered MCP workflows.
 
 ## Workflow Order
 
-1. Find the dataset with a single list/search call (use a search filter and sufficient `page_size`); do not re-list.
+1. Find the dataset with one list/search call (use a search filter and sufficient `page_size`); paginate or refine the filter only when the target is not in the returned page.
 2. Inspect columns and metrics with one `get_dataset_info` call before data or chart workflows.
 3. Query semantic-layer results only when the user asks for data.
 4. Save virtual datasets only when persistence is requested.

@@ -33,6 +33,12 @@ const checks = [
     file: "plugins/preset-cli-skills/skills/preset-cli/references/safety-policy.md",
     mustContain: ["<!-- gate-policy v2 -->"],
   },
+  // MCP package: guard its intent-proportional language against regression.
+  {
+    file: "plugins/preset-mcp-skills/skills/preset-mcp/references/tool-categories.md",
+    mustContain: ["smallest set of calls"],
+    mustNotContain: ["Prefer core and discovery tools before data or mutation tools"],
+  },
   // Stale-language sentinels in de-gated skills.
   {
     file: "plugins/preset-api-skills/skills/preset-dashboards/SKILL.md",

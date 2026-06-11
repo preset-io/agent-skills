@@ -7,7 +7,12 @@ Saved queries include SQL text. Read the user's own saved queries directly when 
 ```python
 import rison
 
-q = rison.dumps({"page": 0, "page_size": 25})
+me = client.workspace("GET", hostname, "/me/")["result"]
+q = rison.dumps({
+    "page": 0,
+    "page_size": 25,
+    "filters": [{"col": "created_by", "opr": "rel_o_m", "value": me["id"]}],
+})
 saved = client.workspace("GET", hostname, f"/saved_query/?q={q}")["result"]
 ```
 

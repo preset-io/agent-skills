@@ -1,9 +1,12 @@
 # Gate Policy (canonical, v2)
 
-Source of truth for confirmation gating across all skill packages
-(`preset-api-skills`, `preset-mcp-skills`, `preset-cli-skills`). Package
-policy files restate these tiers; `scripts/check-gate-policy.mjs` verifies
-they have not drifted.
+Source of truth for confirmation gating across all skill packages.
+The `preset-api-skills` and `preset-cli-skills` policy files restate these
+tiers verbatim; the `preset-mcp-skills` package follows the same
+blast-radius principle with MCP-specific wording (its gates went
+intent-proportional in a prior change). `scripts/check-gate-policy.mjs`
+verifies the API and CLI policy sentinels and guards the MCP package
+against regression of its intent-proportional language.
 
 Core principle: gates scale with blast radius, reversibility, and disclosure
 sensitivity — never with "the operation returns data" or "the call is an

@@ -27,6 +27,7 @@ const checks = [
       "100 history records",
       "SQL result exports",
       "all asset exports",
+      "existing screenshots/thumbnails",
     ],
   },
   {
@@ -38,6 +39,7 @@ const checks = [
       "hard cap 1000 rows/values or 100 history records",
       "SQL result exports",
       "all asset exports",
+      "existing screenshots/thumbnails",
     ],
     mustNotContain: [
       "Require explicit confirmation before mutations, data-returning reads",
@@ -46,22 +48,22 @@ const checks = [
   },
   {
     file: "plugins/preset-api-skills/AGENTS.md",
-    mustContain: ["all asset exports", "single-statement SELECT"],
+    mustContain: ["all asset exports", "single-statement SELECT", "existing screenshots/thumbnails"],
     mustNotContain: ["broad or secret-bearing exports"],
   },
   {
     file: "plugins/preset-api-skills/README.md",
-    mustContain: ["all asset exports", "single-statement SELECT"],
+    mustContain: ["all asset exports", "single-statement SELECT", "existing screenshots/thumbnails"],
     mustNotContain: ["broad exports", "broad or secret-bearing exports"],
   },
   {
     file: "plugins/preset-api-skills/.github/copilot-instructions.md",
-    mustContain: ["all asset exports", "single-statement SELECT"],
+    mustContain: ["all asset exports", "single-statement SELECT", "existing screenshots/thumbnails"],
     mustNotContain: ["broad or secret-bearing exports"],
   },
   {
     file: "plugins/preset-api-skills/skills/preset-api/SKILL.md",
-    mustContain: ["all asset exports", "trusted context"],
+    mustContain: ["all asset exports", "trusted context", "existing screenshots/thumbnails"],
     mustNotContain: ["broad or secret-bearing exports"],
   },
   {

@@ -28,7 +28,7 @@ direct-run.
 
 ## Tier A* — run directly WITH constraints (customer-data reads and SQL)
 
-Applies to chart data, table samples, distinct values, rendered
+Applies to chart data, table samples, distinct values, existing
 screenshots/thumbnails, own query history and saved-query reads, and
 read-only SQL.
 

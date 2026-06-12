@@ -9,7 +9,7 @@ Use for security-sensitive guest-token payload review and creation.
 
 ## Always
 
-- Use `preset-api`, `preset-workspaces`, `preset-superset`, and `preset-embedding` first.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known. Consult `preset-embedding` for embedded-config context when it is missing.
 - Use `preset-embedded-rls` when row-level security clauses are present.
 - Require explicit confirmation before `POST /api/v1/security/guest_token/`.
 - Confirm dashboard/resource UUID, user claims, RLS clauses, token handling, and expiration expectations.

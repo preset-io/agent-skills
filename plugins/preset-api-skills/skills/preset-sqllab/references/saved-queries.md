@@ -2,12 +2,17 @@
 
 Use this reference for saved-query reads and mutation routing.
 
-Saved queries can include SQL text. Before listing or retrieving saved query records, summarize the workspace, endpoint, page size or saved query ID, and expected SQL-text exposure, then get explicit user confirmation.
+Saved queries include SQL text. Read the user's own saved queries directly when they asked in their own message AND a created_by/owner filter is applied before SQL-bearing fields are fetched (default page 25 records, hard cap 100 without explicit confirmation). Other users' saved queries, or reads where owner filtering cannot be applied first, stay confirmation-gated as SQL-text disclosure.
 
 ```python
 import rison
 
-q = rison.dumps({"page": 0, "page_size": 25})
+me = client.workspace("GET", hostname, "/me/")["result"]
+q = rison.dumps({
+    "page": 0,
+    "page_size": 25,
+    "filters": [{"col": "created_by", "opr": "rel_o_m", "value": me["id"]}],
+})
 saved = client.workspace("GET", hostname, f"/saved_query/?q={q}")["result"]
 ```
 

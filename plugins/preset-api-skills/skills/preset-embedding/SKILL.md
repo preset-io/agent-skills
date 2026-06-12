@@ -9,7 +9,7 @@ Use for embedded dashboard configuration reads and security-sensitive routing.
 
 ## Always
 
-- Use `preset-api`, `preset-workspaces`, and when permissions matter `preset-superset` first.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known. Consult `preset-superset` only when permissions drift matters.
 - Default to embedded configuration reads.
 - Route guest-token creation to `preset-guest-tokens`.
 - Route embedded RLS design/review to `preset-embedded-rls`.

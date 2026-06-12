@@ -1,12 +1,15 @@
 # CLI Safety Policy
 
-Use this reference before any `sup` invocation that goes beyond a pure metadata read. It is the local, CLI-flavored safety policy for this package; it does not link out to other plugins so this package remains independently installable.
+<!-- gate-policy v2 -->
+
+Use this reference before mutations, SQL that is not a pure single-statement `SELECT`, untrusted-source SQL, unfamiliar workspaces, or broad outputs. It is the local, CLI-flavored safety policy for this package; it does not link out to other plugins so this package remains independently installable. Gates scale with blast radius, reversibility, and disclosure sensitivity — data-returning reads on familiar workspaces that the user asked for run directly with bounded output.
 
 ## Default Posture
 
 - Default to non-destructive reads: `sup … list`, `sup … info`, `sup … pull`, `sup workspace show`, `sup config show`.
 - Treat `sup chart data` and `sup sql` as data-returning reads: they can expose customer data even though they do not change workspace state.
 - Treat every push, sync, `--force`, and `--overwrite` invocation as state-changing. Refuse to execute these directly from `preset-cli`; route to `preset-cli-mutations`, which loads its confirmation template by construction.
+- A familiar workspace is one the user named in the current session or the active workspace verified with `sup config show` / `sup workspace show`; if the workspace cannot be proven from that context, treat it as unfamiliar.
 
 ## Confirmation Required
 
@@ -16,7 +19,7 @@ Before any of the following, summarize the exact target, payload, and expected e
 - Any `--force` or `--overwrite` invocation.
 - `sup sync run` against any target workspace.
 - `sup chart data <id>` or `sup chart data <id> --csv|--json` on an unfamiliar workspace (data-returning read).
-- `sup sql "<query>"` that runs against an unfamiliar workspace, or any SQL statement that is not a pure `SELECT`.
+- `sup sql "<query>"` that runs against an unfamiliar workspace, or any SQL statement that is not a pure single-statement `SELECT`.
 - Exporting query rows or chart data to a destination other than a local file the user already named.
 
 For mutations, the confirmation must name the target workspace by its human-readable name. If `--force` or `--overwrite` is part of the planned command, the confirmation must also contain the literal flag strings.
@@ -41,6 +44,12 @@ For mutations, the confirmation must name the target workspace by its human-read
 ## Pull-and-Diff for Entity Push
 
 `sup chart push`, `sup dashboard push`, and `sup dataset push` do **not** expose a native `--dry-run` flag. The CLI commands that do expose native `--dry-run` are `sup sync run`, `sup user push`, and `sup user invite` — use the native flag there. For chart/dashboard/dataset push, the agent must pull the current target state with the matching `sup … pull` command and diff against the assets folder, then present the diff as the preview. Skipping this step is equivalent to skipping `--dry-run` on a sync, and is refused by `preset-cli-mutations`.
+
+## Headless / CI Contexts
+
+- Row-returning data exports (`sup sql`, `sup chart data`) need explicit row/output bounds in the command or script.
+- Full workspace/asset exports need an explicit destination and disclosure handling (where the archive lands, who can read it) — row limits are not required for full exports.
+- Destructive operations (push, sync, `--force`, `--overwrite`) always require an interactive operator; CI or automation context never bypasses the confirmation step.
 
 ## Transcripts and Audit Trail
 

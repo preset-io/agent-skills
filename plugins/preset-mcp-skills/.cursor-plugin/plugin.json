@@ -1,6 +1,6 @@
 {
   "name": "Preset MCP Skills",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "AI agent skills for Superset MCP tool workflows only. Do not use for direct API work.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/agent-skills",

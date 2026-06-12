@@ -9,9 +9,8 @@ Use for workspace asset import/export endpoint selection and disclosure review.
 
 ## Always
 
-- Use `preset-api`, `preset-workspaces`, and `preset-superset` first.
-- Treat imports as mutations and exports as potential disclosure of SQL, metadata, UUIDs, tags, and credential-bearing fields.
-- Require confirmation naming workspace, endpoint, object IDs or bundle, and expected disclosure or mutation.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known.
+- Treat imports as mutations, and exports as potential disclosure of SQL, metadata, UUIDs, tags, related dataset/database YAML, and credential-bearing fields — confirmation-gated, naming workspace, endpoint, object IDs or bundle, destination, and expected disclosure or mutation.
 - Route overwrite, sparse-update, all-assets restore, database import, and secret-bearing import to `preset-destructive-imports`.
 
 ## Decision Rules
@@ -26,7 +25,7 @@ Use for workspace asset import/export endpoint selection and disclosure review.
 1. Inspect request and bundle metadata.
 2. Choose export or import path.
 3. Prepare disclosure or mutation approval summary.
-4. Stop before export or import execution.
+4. Confirm before any export or import execution.
 
 ## Retrieve
 

@@ -9,7 +9,7 @@ Use as the approval and access-review gate for permission-sensitive workflows.
 
 ## Always
 
-- Use `preset-api` first.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known.
 - Use this skill alongside `preset-admin` role identifier and membership references for Management API role work.
 - Use `preset-superset` for workspace current-user roles, permissions, and OpenAPI availability.
 - Treat role and permission changes as `permission_write`.

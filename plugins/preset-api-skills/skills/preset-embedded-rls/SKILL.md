@@ -9,7 +9,7 @@ Use before guest-token creation when embedded viewers need row-level security.
 
 ## Always
 
-- Use `preset-api`, `preset-workspaces`, and metadata skills only when column validation is required.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known. Consult metadata skills only when column validation is required.
 - Do not invent tenant identifiers, filters, dataset columns, or access rules.
 - Treat RLS clauses as permission controls that can leak or hide customer data.
 - Confirm every clause and intended viewer population before token creation.

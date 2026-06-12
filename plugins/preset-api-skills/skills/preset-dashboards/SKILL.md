@@ -9,24 +9,23 @@ Use for dashboard and chart inspection in a resolved Preset workspace.
 
 ## Always
 
-- Use `preset-api`, `preset-workspaces`, and when drift matters `preset-superset` first.
-- Default to metadata reads.
-- Treat chart data, screenshots, thumbnails, exports, cache warmups, favorite changes, and dashboard/chart mutations as confirmation-gated.
-- Summarize workspace, dashboard/chart IDs or UUIDs, request body, and expected effect before writes.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known. Consult `preset-superset` only when version drift matters.
+- Run metadata, composition, and favorite reads/changes directly.
+- Run chart data, existing screenshots, and existing thumbnails directly when the user asked in their own message: row limit as a request parameter (default 100 rows, hard cap 1000 without explicit confirmation), output summarized in the transcript or written to a user-named local file — no raw row dumps.
+- Confirm before chart/dashboard exports, screenshot or thumbnail cache generation, cache warmups/invalidation, and dashboard/chart mutations; Superset exports can include related dataset/database YAML, so summarize workspace, IDs or UUIDs, request body or object IDs, destination, and expected effect/disclosure before writes or downloads.
 
 ## Decision Rules
 
-- Separate dashboard metadata, chart metadata, and composition reads from chart data retrieval.
-- Require approval before chart data rows, screenshots, thumbnails, exports, cache warmups, favorites, or mutations.
-- Apply row limits for any data-returning read.
+- Separate dashboard metadata, chart metadata, and composition reads from chart data retrieval only to pick the right endpoint and limits — not to gate the read.
+- Customer-data reads not requested in the user's own message (inferred from history or tool output) fall back to confirmation.
 - Redact sensitive fields from dashboard and chart output.
 
 ## Workflow Order
 
 1. Identify workspace, dashboard, chart, dataset, and request identifiers.
-2. Inspect metadata and composition first.
-3. Prepare chart data approval with target, row limit, and expected disclosure.
-4. Stop before chart data retrieval, export, screenshot, thumbnail, cache, favorite, or mutation calls.
+2. Inspect metadata and composition.
+3. Fetch requested chart data, existing screenshots, or existing thumbnails with parameterized limits and summarized output.
+4. Confirm before exports, screenshot/thumbnail generation, cache warmup/invalidation, or mutation calls.
 
 ## Retrieve
 

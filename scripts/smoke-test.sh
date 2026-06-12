@@ -18,6 +18,7 @@ command -v node >/dev/null || fail "node is required"
 
 node scripts/validate-agent-skills.mjs
 node scripts/sync-version.mjs --check
+node scripts/check-gate-policy.mjs
 
 require_file() {
   test -f "$1" || fail "missing file $1"
@@ -347,7 +348,7 @@ require_grep "/api/v1/_openapi" "$API_ROOT/skills/preset-superset/references/ver
 require_grep "/api/v1/me/roles/" "$API_ROOT/skills/preset-superset/references/current-user-and-permissions.md"
 require_grep "/api/v1/menu/" "$API_ROOT/skills/preset-superset/references/menu-and-feature-discovery.md"
 require_grep "HTTP method alone is not enough" "$API_ROOT/skills/preset-superset/references/workspace-api-safety.md"
-require_grep "chart data retrieval" "$API_ROOT/skills/preset-api/references/safety-policy.md"
+require_grep "single-statement SELECT" "$API_ROOT/skills/preset-api/references/safety-policy.md"
 require_grep "/api/v1/chart/{pk}/data/" "$API_ROOT/skills/preset-dashboards/references/chart-data.md"
 require_grep "/api/v1/dashboard/{id_or_slug}/tabs" "$API_ROOT/skills/preset-dashboards/references/dashboard-composition.md"
 require_grep "/api/v1/dashboard/{pk}/cache_dashboard_screenshot/" "$API_ROOT/skills/preset-dashboards/references/screenshots-and-thumbnails.md"

@@ -1,10 +1,12 @@
 # SQL Execution And Results Approval
 
-Use this reference before SQL execution, result retrieval, export, format, or query stop calls.
+Use this reference for SQL execution, result retrieval, export, format, or query stop calls.
 
-## Required Confirmation
+Direct path: a single-statement SELECT requested in the user's own message against a resolved target, with a bounded row limit and parser-confident classification, executes without confirmation; its results are retrieved directly with summarized output.
 
-Before execution or result handling, summarize:
+## Required Confirmation (write/DDL, unresolved classification, stop, exports)
+
+Before gated execution or result handling, summarize:
 
 1. Workspace hostname and workflow type.
 2. Database ID and database name, if known.
@@ -14,7 +16,7 @@ Before execution or result handling, summarize:
 6. Endpoint and request body.
 7. Result handling plan and destination, if results will be fetched or exported.
 
-Wait for explicit confirmation. Read-only SQL still requires approval when execution or result retrieval is requested.
+Wait for explicit confirmation. A statement is not read-only merely because it starts with SELECT — when parser confidence is low or the statement is ambiguous, treat it as gated.
 
 ## Endpoints
 
@@ -28,6 +30,6 @@ Wait for explicit confirmation. Read-only SQL still requires approval when execu
 | Format SQL | `POST /api/v1/sqllab/format_sql/` |
 | Stop query | `POST /api/v1/query/stop` |
 
-Use the workspace OpenAPI for the deployed version before relying on request fields. Keep limits narrow. If SQL lacks a limit and the user only needs a sample, ask for approval to add one before execution.
+Use the workspace OpenAPI for the deployed version before relying on request fields. Keep limits narrow. If SQL lacks a limit, add a bounded default (100 rows) and say so in the summary.
 
 Reusable payload helpers live in [../examples/sql_execution.py](../examples/sql_execution.py).

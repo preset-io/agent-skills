@@ -1,6 +1,6 @@
 {
   "name": "Preset API Skills",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "AI agent skills for explicit direct API workflows only. Do not use for MCP-only work.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/agent-skills",

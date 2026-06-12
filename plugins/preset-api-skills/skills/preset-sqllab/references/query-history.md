@@ -2,12 +2,17 @@
 
 Use this reference for SQL Lab query history reads.
 
-Query history can include SQL text. Before listing or retrieving query records, summarize the workspace, endpoint, page size or query ID, and expected SQL-text exposure, then get explicit user confirmation.
+Query history includes SQL text. Read the user's own history directly when they asked in their own message AND a current-user/owner filter is applied before SQL-bearing fields are fetched (default page 25 records, hard cap 100 without explicit confirmation). Other users' history, or any read where owner filtering cannot be applied first, stays confirmation-gated as SQL-text disclosure.
 
 ```python
 import rison
 
-q = rison.dumps({"page": 0, "page_size": 25})
+me = client.workspace("GET", hostname, "/me/")["result"]
+q = rison.dumps({
+    "page": 0,
+    "page_size": 25,
+    "filters": [{"col": "user", "opr": "rel_o_m", "value": me["id"]}],
+})
 queries = client.workspace("GET", hostname, f"/query/?q={q}")["result"]
 ```
 

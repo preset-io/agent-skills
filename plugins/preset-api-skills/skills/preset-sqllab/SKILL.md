@@ -9,15 +9,15 @@ Use for SQL Lab capability and query metadata workflows in a resolved Preset wor
 
 ## Always
 
-- Use `preset-api`, `preset-workspaces`, and when drift or permissions matter `preset-superset` first.
-- Default to SQL Lab bootstrap/capability metadata.
-- Query history and saved-query reads can expose SQL text; get confirmation before listing or retrieving them.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known. Consult `preset-superset` only when permissions drift matters.
+- Run SQL Lab bootstrap/capability metadata reads directly.
+- Run the user's own query history and saved-query reads directly when they asked in their own message AND current-user/owner filtering is applied before SQL-bearing fields are fetched (default page 25 records, hard cap 100 without explicit confirmation). If an endpoint returns SQL text before ownership is proven, keep the read confirmation-gated as SQL-text disclosure.
 - Route execution, result retrieval/export, query stop, saved-query mutation, and permalinks to `preset-sql-execution`.
 
 ## Decision Rules
 
-- Distinguish query history metadata from SQL text, result retrieval, and execution.
-- Require approval before reading SQL text, retrieving results, exporting results, stopping queries, or executing SQL.
+- Distinguish query history metadata from SQL text, result retrieval, and execution to pick the right endpoint and filters.
+- Other users' history or SQL text, and any history read where owner filtering cannot be applied first, require confirmation.
 - Route saved query, history, result, stop, permalink, and execution requests separately.
 - Avoid SQL execution from this skill.
 
@@ -25,8 +25,8 @@ Use for SQL Lab capability and query metadata workflows in a resolved Preset wor
 
 1. Inspect SQL Lab bootstrap state.
 2. Route history, saved query, result, stop, permalink, and execution request.
-3. Prepare approval for sensitive read or execution.
-4. Stop before SQL text, result retrieval, export, stop, permalink, saved-query mutation, or execution.
+3. Fetch owner-filtered history or saved queries the user asked for with parameterized page limits.
+4. Confirm before unowned SQL-text reads; route execution-family operations to `preset-sql-execution`.
 
 ## Retrieve
 

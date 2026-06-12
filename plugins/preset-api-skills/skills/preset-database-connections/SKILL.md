@@ -9,7 +9,7 @@ Use for credential-bearing database connection reads and database connection cha
 
 ## Always
 
-- Use `preset-api`, `preset-workspaces`, and `preset-superset` first.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known.
 - Prefer `preset-datasets` metadata before reading connection configuration.
 - Treat connection configuration as credential-bearing even on `GET`.
 - Get explicit confirmation before configuration reads, validation, OAuth, upload, create, update, or delete.

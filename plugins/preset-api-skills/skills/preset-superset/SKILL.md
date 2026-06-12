@@ -9,7 +9,7 @@ Use before domain-specific workspace API calls when endpoint drift, permissions,
 
 ## Always
 
-- Use `preset-api` for auth/client setup and `preset-workspaces` for hostname resolution.
+- Auth and conventions come from `preset-api` (JWT exchange, base URLs, Rison); resolve the workspace hostname through the Management API when it is not already known.
 - Send bearer tokens only to workspace hostnames resolved from the Preset Management API.
 - Prefer the workspace `/api/v1/_openapi` and `/version` over generic Superset docs.
 - Keep this skill read-only discovery.

@@ -8,7 +8,7 @@ Use this reference when listing workspaces, switching the active workspace, or o
 sup config show          # Active workspace, target workspace, auth status
 ```
 
-`sup config show` is the safe first call when an agent needs to verify which workspace will receive subsequent commands. Always confirm the workspace before running anything that returns data or could be construed as state-changing in the future. There is no `sup config list`; use `show` for current settings.
+`sup config show` is the safe first call when an agent needs to verify which workspace will receive subsequent commands. Resolve the workspace before data-returning reads; a familiar workspace is one the user named in the current session or the active workspace verified with `sup config show` / `sup workspace show`. Confirm for unfamiliar workspaces, broad outputs, or operations that could be construed as state-changing. There is no `sup config list`; use `show` for current settings.
 
 Do not run a "dump all env vars" command in agent transcripts. `SUP_PRESET_API_TOKEN` and `SUP_PRESET_API_SECRET` are sensitive; if a user needs to debug their environment, ask them to run `env | grep SUP_` themselves, locally, and to redact any token/secret values before sharing the output. The agent should not enumerate `SUP_*` environment variables on the user's behalf.
 

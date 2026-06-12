@@ -10,9 +10,10 @@ Use as the prerequisite for direct Preset API skills. If the user is working thr
 ## Always
 
 - Keep `PRESET_CLIENT_ID`, `PRESET_CLIENT_SECRET`, and tokens out of source, logs, reports, and examples.
-- Derive workspace hostnames through the Management API before workspace Superset calls.
-- Default to metadata reads.
-- Require explicit confirmation before mutations, data-returning reads, SQL text reads, credential-bearing reads, SQL execution, imports, exports, role/RLS changes, or guest-token creation.
+- Use the workspace hostname or API base URL directly when it is already known from trusted context (for example, an earlier Management API response or user-supplied configuration); derive it through the Management API when provenance is missing.
+- Run reads directly: metadata reads always; customer-data reads (chart data, samples, distinct values, existing screenshots/thumbnails, own query history) when the user asked in their own message, with row limits as request parameters and summarized output.
+- Require explicit confirmation before mutations, imports, role/RLS changes, guest-token creation, permalink creation, screenshot/thumbnail cache generation, cache invalidation, all asset exports, credential-bearing reads, audit downloads, and SQL that is not a confidently classified single-statement SELECT.
+- When a target, owner, workspace, output destination, SQL classification, or credential boundary cannot be proven from trusted context, fall back to confirmation.
 
 ## Decision Rules
 
@@ -27,10 +28,10 @@ Use as the prerequisite for direct Preset API skills. If the user is working thr
 
 1. Resolve base URL and credentials.
 2. Plan paginated Rison requests.
-3. Classify follow-up risk before data, credential, SQL, token, export, import, or mutation calls.
+3. Classify each follow-up call by gate tier: reads run directly (with limits for customer data); mutations, credential reads, and unclassified SQL require confirmation.
 4. Reject unapproved MCP fallback if the requested workflow is direct API.
 5. Ask before changing surfaces and stop before MCP calls.
-6. Continue the direct API plan unless the direct API operation itself requires confirmation.
+6. Continue the direct API plan unless the operation is confirmation-gated by the safety policy.
 7. Redact credentials and tokens in all output.
 
 ## Retrieve

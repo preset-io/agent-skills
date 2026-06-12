@@ -1,7 +1,7 @@
 {
   "name": "preset-api-skills",
   "displayName": "Preset API Skills",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Preset API skills for explicit direct API workflows only. Do not use for MCP-only work.",
   "author": {
     "name": "Preset",

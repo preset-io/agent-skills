@@ -9,7 +9,7 @@ Use for Snowflake Cortex Agent object management and run workflows.
 
 ## Always
 
-- Use `preset-snowflake-cortex` first for account, auth, role, warehouse, database/schema, privileges, and safety context.
+- Account, auth, role, warehouse, database/schema, privilege, and safety context comes from `preset-snowflake-cortex`; consult it when that context is missing.
 - Prefer read-only list/describe before mutations.
 - Require confirmation of query, role, tools, budget, and output handling before any run.
 - Require rollback planning before create, update, replace, or delete.

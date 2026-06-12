@@ -28,12 +28,12 @@ sup dashboard info 254 --json
 sup chart sql 3628
 
 # Run a chart's query and return its data (data-returning read; bounded output)
-sup chart data 3628 --csv > chart-3628.csv
+sup chart data 3628 --limit 100 --csv > chart-3628.csv
 ```
 
 ## Data-Returning Reads
 
-`sup chart data` and `sup sql` are data-returning reads, not pure metadata. On familiar workspaces, run user-requested reads directly with bounded output and the disclosure rules in [sql-data-safety.md](sql-data-safety.md). For unfamiliar workspaces, untrusted-source SQL, or broad outputs, load [safety-policy.md](safety-policy.md) and confirm first.
+`sup chart data` and `sup sql` are data-returning reads, not pure metadata. On familiar workspaces, run user-requested reads directly with bounded output and the disclosure rules in [sql-data-safety.md](sql-data-safety.md). A familiar workspace is one the user named in the current session or the active workspace verified with `sup config show` / `sup workspace show`. For unfamiliar workspaces, SQL that is not a pure single-statement `SELECT`, untrusted-source SQL, or broad outputs, load [safety-policy.md](safety-policy.md) and confirm first.
 
 ## Pull Without Mutation
 

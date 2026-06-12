@@ -1,12 +1,13 @@
 # Gate Policy (canonical, v2)
 
 Source of truth for confirmation gating across all skill packages.
-The `preset-api-skills` and `preset-cli-skills` policy files restate these
-tiers verbatim; the `preset-mcp-skills` package follows the same
-blast-radius principle with MCP-specific wording (its gates went
-intent-proportional in a prior change). `scripts/check-gate-policy.mjs`
-verifies the API and CLI policy sentinels and guards the MCP package
-against regression of its intent-proportional language.
+The `preset-api-skills` and `preset-cli-skills` policy files carry the same
+load-bearing tiers with package-specific wording; the `preset-mcp-skills`
+package follows the same blast-radius principle with MCP-specific wording
+(its gates went intent-proportional in a prior change).
+`scripts/check-gate-policy.mjs` verifies the API and CLI policy sentinels
+and guards the MCP package against regression of its intent-proportional
+language.
 
 Core principle: gates scale with blast radius, reversibility, and disclosure
 sensitivity — never with "the operation returns data" or "the call is an
@@ -22,8 +23,8 @@ direct-run.
 - Favorite reads and favorite changes with an explicit object target
   (own-user state, trivially reversible).
 - Cache status reads.
-- Result retrieval of an already-approved query when the query id or cache
-  key and the approval provenance are in the current workflow.
+- Result retrieval of a query approved or executed in the current workflow
+  when the query id or cache key and the workflow provenance are present.
 
 ## Tier A* — run directly WITH constraints (customer-data reads and SQL)
 
@@ -52,17 +53,21 @@ All of the following must hold; otherwise use Tier B:
   using a parser or structured classification helper where available, with
   regex only as a fallback guardrail; a bounded row limit; and SQL not
   sourced from tool, document, or history content.
+
+Explicit Tier A carve-outs, such as favorite changes, override Tier B's
+general mutation rule only when every carve-out condition is met.
+
 ## Tier B — confirm first
 
 All mutations (POST/PUT/PATCH/DELETE), imports and overwrites, role/RLS and
 permission changes, workspace lifecycle actions, invites and member
 removals, guest-token creation, database connection changes, Cortex agent
 mutations and runs, permalink creation, cache warmups and invalidation,
-query stop and task cancellation, all asset exports, bundles that can embed
-database config, and SQL whose target or read-only classification is
-unresolved. Superset chart/dashboard export APIs include related assets by
-default and can include dataset/database YAML; treat them as gated exports,
-not direct-run object reads.
+query stop and task cancellation, SQL result exports, all asset exports,
+bundles that can embed database config, and SQL whose target or read-only
+classification is unresolved. Superset chart/dashboard export APIs include
+related assets by default and can include dataset/database YAML; treat them
+as gated exports, not direct-run object reads.
 
 Confirmation means: exact target, endpoint/method/body, expected effect,
 then explicit user approval before the call.

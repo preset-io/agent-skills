@@ -4,7 +4,7 @@ Use this reference before `sup sql`, `sup chart data`, or any CLI command that r
 
 ## Scope Checks
 
-For familiar workspaces and user-requested reads, run directly with explicit output bounds. Before running a data-returning read on an unfamiliar workspace, confirm:
+For familiar workspaces and user-requested reads, run directly with explicit output bounds. A familiar workspace is one the user named in the current session or the active workspace verified with `sup config show` / `sup workspace show`; if the workspace cannot be proven from that context, treat it as unfamiliar. Before running a data-returning read on an unfamiliar workspace, confirm:
 
 - The workspace and chart/query target.
 - The expected row volume.
@@ -25,4 +25,4 @@ Treat `sup sql` as read-only by default. Refuse `INSERT`, `UPDATE`, `DELETE`, `T
 
 `sup chart data` returns a chart's query results. Treat it like `sup sql`: use a small limit, prefer file output for larger exports, and summarize rather than pasting raw payloads.
 
-Load [safety-policy.md](safety-policy.md) before untrusted-source SQL, unfamiliar workspaces, broad outputs, or any mutation.
+Load [safety-policy.md](safety-policy.md) before SQL that is not a pure single-statement `SELECT`, untrusted-source SQL, unfamiliar workspaces, broad outputs, or any mutation.

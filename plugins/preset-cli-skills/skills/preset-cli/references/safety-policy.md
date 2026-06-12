@@ -2,13 +2,14 @@
 
 <!-- gate-policy v2 -->
 
-Use this reference before mutations, untrusted-source SQL, unfamiliar workspaces, or broad outputs. It is the local, CLI-flavored safety policy for this package; it does not link out to other plugins so this package remains independently installable. Gates scale with blast radius, reversibility, and disclosure sensitivity — data-returning reads on familiar workspaces that the user asked for run directly with bounded output.
+Use this reference before mutations, SQL that is not a pure single-statement `SELECT`, untrusted-source SQL, unfamiliar workspaces, or broad outputs. It is the local, CLI-flavored safety policy for this package; it does not link out to other plugins so this package remains independently installable. Gates scale with blast radius, reversibility, and disclosure sensitivity — data-returning reads on familiar workspaces that the user asked for run directly with bounded output.
 
 ## Default Posture
 
 - Default to non-destructive reads: `sup … list`, `sup … info`, `sup … pull`, `sup workspace show`, `sup config show`.
 - Treat `sup chart data` and `sup sql` as data-returning reads: they can expose customer data even though they do not change workspace state.
 - Treat every push, sync, `--force`, and `--overwrite` invocation as state-changing. Refuse to execute these directly from `preset-cli`; route to `preset-cli-mutations`, which loads its confirmation template by construction.
+- A familiar workspace is one the user named in the current session or the active workspace verified with `sup config show` / `sup workspace show`; if the workspace cannot be proven from that context, treat it as unfamiliar.
 
 ## Confirmation Required
 
@@ -18,7 +19,7 @@ Before any of the following, summarize the exact target, payload, and expected e
 - Any `--force` or `--overwrite` invocation.
 - `sup sync run` against any target workspace.
 - `sup chart data <id>` or `sup chart data <id> --csv|--json` on an unfamiliar workspace (data-returning read).
-- `sup sql "<query>"` that runs against an unfamiliar workspace, or any SQL statement that is not a pure `SELECT`.
+- `sup sql "<query>"` that runs against an unfamiliar workspace, or any SQL statement that is not a pure single-statement `SELECT`.
 - Exporting query rows or chart data to a destination other than a local file the user already named.
 
 For mutations, the confirmation must name the target workspace by its human-readable name. If `--force` or `--overwrite` is part of the planned command, the confirmation must also contain the literal flag strings.

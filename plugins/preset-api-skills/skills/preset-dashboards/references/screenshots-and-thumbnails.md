@@ -17,7 +17,7 @@ Thumbnail and screenshot endpoints depend on workspace feature flags and backgro
 
 ## Safety Notes
 
-Screenshot and thumbnail reads disclose rendered chart content — treat them like chart-data reads: run directly when the user asked in their own message; fall back to confirmation when the request was inferred or the dashboard is an unresolved target.
+Existing screenshot and thumbnail reads disclose rendered chart content — treat them like chart-data reads: run directly when the user asked in their own message; fall back to confirmation when the request was inferred or the dashboard is an unresolved target.
 
 Cache creation can enqueue work. `cache_screenshot` is a `GET` endpoint but still triggers background work, so treat it as confirmation-gated.
 

@@ -20,22 +20,61 @@ const normalize = (s) => s.toLowerCase().replace(/\s+/g, " ");
 const checks = [
   {
     file: "docs/gate-policy.md",
-    mustContain: CANONICAL_SENTENCES,
-  },
-  {
-    file: "plugins/preset-api-skills/skills/preset-api/references/safety-policy.md",
-    mustContain: ["<!-- gate-policy v2 -->", ...CANONICAL_SENTENCES],
-    mustNotContain: [
-      "Require explicit confirmation before mutations, data-returning reads",
+    mustContain: [
+      ...CANONICAL_SENTENCES,
+      "single-statement SELECT",
+      "1000 rows/values",
+      "100 history records",
+      "SQL result exports",
+      "all asset exports",
     ],
   },
   {
+    file: "plugins/preset-api-skills/skills/preset-api/references/safety-policy.md",
+    mustContain: [
+      "<!-- gate-policy v2 -->",
+      ...CANONICAL_SENTENCES,
+      "single-statement SELECT",
+      "hard cap 1000 rows/values or 100 history records",
+      "SQL result exports",
+      "all asset exports",
+    ],
+    mustNotContain: [
+      "Require explicit confirmation before mutations, data-returning reads",
+      "broad or secret-bearing exports",
+    ],
+  },
+  {
+    file: "plugins/preset-api-skills/AGENTS.md",
+    mustContain: ["all asset exports", "single-statement SELECT"],
+    mustNotContain: ["broad or secret-bearing exports"],
+  },
+  {
+    file: "plugins/preset-api-skills/README.md",
+    mustContain: ["all asset exports", "single-statement SELECT"],
+    mustNotContain: ["broad exports", "broad or secret-bearing exports"],
+  },
+  {
+    file: "plugins/preset-api-skills/.github/copilot-instructions.md",
+    mustContain: ["all asset exports", "single-statement SELECT"],
+    mustNotContain: ["broad or secret-bearing exports"],
+  },
+  {
+    file: "plugins/preset-api-skills/skills/preset-api/SKILL.md",
+    mustContain: ["all asset exports", "trusted context"],
+    mustNotContain: ["broad or secret-bearing exports"],
+  },
+  {
     file: "plugins/preset-cli-skills/skills/preset-cli/references/safety-policy.md",
-    mustContain: ["<!-- gate-policy v2 -->"],
+    mustContain: ["<!-- gate-policy v2 -->", "pure single-statement `SELECT`", "familiar workspace"],
+  },
+  {
+    file: "plugins/preset-cli-skills/skills/preset-cli/SKILL.md",
+    mustContain: ["pure single-statement `SELECT`", "Non-`SELECT` SQL"],
   },
   {
     file: "plugins/preset-cli-skills/skills/preset-cli/references/assets-read.md",
-    mustContain: ["bounded output"],
+    mustContain: ["bounded output", "--limit 100", "familiar workspace"],
     mustNotContain: [
       "confirm scope",
       "Before using them, load [sql-data-safety.md](sql-data-safety.md) and [safety-policy.md](safety-policy.md)",
@@ -44,12 +83,12 @@ const checks = [
   },
   {
     file: "plugins/preset-cli-skills/skills/preset-cli/references/workspace-and-config.md",
-    mustContain: ["Resolve the workspace before data-returning reads"],
+    mustContain: ["Resolve the workspace before data-returning reads", "familiar workspace"],
     mustNotContain: ["Always confirm the workspace before running anything that returns data"],
   },
   {
     file: "plugins/preset-cli-skills/skills/preset-cli/references/sql-data-safety.md",
-    mustContain: ["run directly with explicit output bounds"],
+    mustContain: ["run directly with explicit output bounds", "pure single-statement `SELECT`", "familiar workspace"],
     mustNotContain: ["After the scope check, load [safety-policy.md](safety-policy.md)"],
   },
   // MCP package: guard its intent-proportional language against regression.
@@ -70,7 +109,11 @@ const checks = [
   },
   {
     file: "plugins/preset-api-skills/skills/preset-sql-execution/SKILL.md",
-    mustNotContain: ["Stop before any SQL execution, result retrieval"],
+    mustContain: ["result exports"],
+    mustNotContain: [
+      "Stop before any SQL execution, result retrieval",
+      "result exports beyond the current workflow's queries",
+    ],
   },
   {
     file: "plugins/preset-api-skills/skills/preset-sqllab/references/routing-essentials.md",

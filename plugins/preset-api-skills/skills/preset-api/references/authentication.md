@@ -18,6 +18,22 @@ export PRESET_CLIENT_SECRET="your-api-token-secret"
 
 Store long-lived API credentials in a secrets manager such as AWS Secrets Manager, HashiCorp Vault, GitHub Actions secrets, or the approved secret store for your environment. Rotate API keys periodically from the Preset management console and scope each key to the minimum permissions required.
 
+To check whether the relevant environment variables are available without
+printing secret values, use a shell-portable `printenv` loop:
+
+```bash
+for var_name in PRESET_CLIENT_ID PRESET_CLIENT_SECRET PRESET_API_BASE PRESET_TOKEN; do
+  if [ -n "$(printenv "$var_name")" ]; then
+    printf '%s: set (value hidden)\n' "$var_name"
+  else
+    printf '%s: unset\n' "$var_name"
+  fi
+done
+```
+
+Avoid bash-only indirect expansion such as `${!var_name}` because agent shells
+may run the command under zsh.
+
 ## Token Exchange
 
 Exchange credentials with `POST https://api.app.preset.io/v1/auth/` using a JSON

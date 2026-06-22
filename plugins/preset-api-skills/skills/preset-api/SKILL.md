@@ -10,6 +10,7 @@ Use as the prerequisite for direct Preset API skills. If the user is working thr
 ## Always
 
 - Keep `PRESET_CLIENT_ID`, `PRESET_CLIENT_SECRET`, and tokens out of source, logs, reports, and examples.
+- When checking whether credential environment variables are present, use a zsh-safe `printenv "$VAR_NAME"` pattern. Do not use bash-only indirect expansion such as `${!var}`.
 - Read and format JSON responses with `curl ... | jq`, not inline `python -c` parsers — on Python ≤3.11 an escaped quote inside an f-string expression (e.g. `f"{d[\"x\"]}"`) raises `SyntaxError`. For reusable parsing, load `examples/preset_client.py` instead of improvising.
 - Use the workspace hostname or API base URL directly when it is already known from trusted context (for example, an earlier Management API response or user-supplied configuration); derive it through the Management API when provenance is missing.
 - Run reads directly: metadata reads always; customer-data reads (chart data, samples, distinct values, existing screenshots/thumbnails, own query history) when the user asked in their own message, with row limits as request parameters and summarized output.

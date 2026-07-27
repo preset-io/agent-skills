@@ -2,9 +2,13 @@
 
 ## Phase 1: File Extraction
 
-**`.twb`** — plain XML; parse directly.
+Do not trust the suffix. `.twb` is normally XML and `.twbx` is normally ZIP, but
+real public repositories contain plain XML files named `.twbx`. Check the signature
+first: ZIP begins `PK`; XML begins with an XML declaration, comment, doctype, or
+`<workbook`. Reject HTML, Git LFS pointers, README text, and placeholders rather than
+reporting them as workbooks.
 
-**`.twbx`** — ZIP archive; unzip first, then use the extracted `.twb`:
+**ZIP-packaged workbook** — extract the `.twb` member:
 
 ```bash
 python3 -c "
@@ -24,7 +28,10 @@ print(str(dest / twb_members[0]))
 "
 ```
 
-The command prints the full path to the extracted `.twb` file. Use that path directly for all subsequent parsing steps — `.hyper` and `.tde` data extracts are intentionally skipped since they are not usable in this workflow (see Limitations).
+The command prints the full path to the extracted `.twb` file. Use that path directly
+for all subsequent parsing steps. If a supposed `.twbx` is XML, use that original path
+directly. `.hyper` and `.tde` data extracts are intentionally skipped since they are not
+usable in this workflow (see Limitations).
 
 ---
 
@@ -48,11 +55,14 @@ for dash in dashboards:
     cw = size.get('maxwidth', '?') if size is not None else '?'
     ch = size.get('maxheight', '?') if size is not None else '?'
     print(f'Dashboard: {dash.get(\"name\")!r}  canvas: {cw}x{ch}')
+    seen = set()
     for zone in dash.findall('.//zone'):
         name = zone.get('name')
         # A worksheet zone carries a name and no type-v2; filters, legends,
         # parameters, text, and layout containers all set type-v2.
-        if name and zone.get('type-v2') is None:
+        key = tuple(zone.get(k) for k in ('name', 'x', 'y', 'w', 'h'))
+        if name and zone.get('type-v2') is None and key not in seen:
+            seen.add(key)
             referenced.add(name)
             x, y, w, h = zone.get('x'), zone.get('y'), zone.get('w'), zone.get('h')
             print(f'  worksheet: {name!r}  x={x} y={y} w={w} h={h}')
@@ -73,7 +83,19 @@ How to use the output:
 - **No dashboards** → the workbook is worksheet-only; treat every worksheet as in scope and ask the user for a dashboard title.
 - **Orphan worksheets** → list them and ask before converting; default to skipping. They are usually tooltip/helper sheets that should not become standalone Preset charts.
 
-The `x/y/w/h` zone values are Tableau canvas pixels. Keep them as layout notes — `generate_dashboard` auto-arranges charts and does not accept explicit coordinates (see Phase 9).
+Zone values are not reliably pixels: modern workbooks often use a 0–100000
+coordinate space and may repeat zones in device layouts. Deduplicate identical
+`(name,x,y,w,h)` tuples. For sanity checking, let `W` and `H` be the selected
+dashboard's coordinate extents and compute a 12-column note:
+
+- `grid_x = floor(12 * x / W)`
+- `grid_w = max(1, ceil(12 * w / W))`, clamped so `grid_x + grid_w <= 12`
+- `normalized_y = y / H`, `normalized_h = h / H`
+
+The result is sane when values remain in bounds, nonzero sheets are visible, and
+the relative ordering/overlap matches Tableau. Floating overlays may legitimately
+overlap. `generate_dashboard` still auto-arranges and does not accept these
+coordinates, so retain both original and normalized notes for manual refinement.
 
 ---
 
@@ -106,6 +128,21 @@ for ds in root.findall('datasources/datasource'):
 
 Record `caption` (display name), `class` (connector type: `snowflake`, `bigquery_v2`, `postgres`, `redshift`, etc.), `server`, `dbname`, `schema`, and `table`. Use these to identify the matching Preset dataset.
 
+Datasource count alone does not prove a blend. For each in-scope worksheet, collect
+the datasource prefixes used by shelves, encodings, filters, and referenced
+calculations:
+
+- One datasource per sheet, different datasources across sheets → resolve a separate
+  Preset dataset for each sheet; charts may coexist on the dashboard.
+- Several physical connections inside one Tableau federated datasource → reproduce
+  its join/union in one Preset physical or virtual dataset.
+- References to more than one logical datasource in one worksheet → Tableau
+  blend/cross-source calculation. One `generate_chart` cannot reproduce it. Require a
+  reviewed pre-join in a virtual dataset and document grain, join keys, and null
+  behavior.
+- Extract-only source with no matching staging dataset → data-access gap. Do not infer
+  columns from a merely similar domain or import the embedded extract through MCP.
+
 ---
 
 ## Phase 4: Calculated Field Audit
@@ -136,14 +173,36 @@ This lists datasource-level calculated fields. Translate only the calculated fie
 | `DATETRUNC('year', [Order Date])` | `DATE_TRUNC('year', order_date)` |
 | `DATEDIFF('day', [Start Date], [End Date])` | `DATEDIFF(day, start_date, end_date)` (dialect-specific) |
 | `IIF([Profit] > 0, 'Positive', 'Negative')` | `CASE WHEN profit > 0 THEN 'Positive' ELSE 'Negative' END` |
+| `IF ... THEN ... ELSEIF ... THEN ... ELSE ... END` | Ordered `CASE WHEN ... THEN ... WHEN ... THEN ... ELSE ... END` |
+| `SUM([Sales])`, `AVG([Sales])`, `MIN`, `MAX`, `COUNT` | Same aggregate after resolving the physical column |
+| `COUNTD([Customer])` | `COUNT(DISTINCT customer)` |
 | `{ FIXED [Region] : SUM([Sales]) }` | Subquery or virtual dataset (see below) |
+| `{ FIXED : COUNT([Order ID]) }` | Global aggregate joined/windowed into a virtual dataset; not a chart-level metric when mixed with row detail |
 | `ISNULL([Field])` | `field IS NULL` |
+| `NOT ISNULL([Field])` | `field IS NOT NULL` |
 | `STR([Number Field])` | `CAST(number_field AS VARCHAR)` |
 | `INT([String Field])` | `CAST(string_field AS INTEGER)` |
+| `ABS([A] - [B])` | `ABS(a - b)` |
+| `REPLACE([Text], '\\n', CHAR(10))` | `REPLACE(text, '\\n', <dialect newline expression>)`; dialect-specific, test in the virtual dataset |
+| `[Measure] / 12`, `[Flag] * 22500` | Same arithmetic after resolving referenced calculated fields; guard division by zero where applicable |
 
-**LOD FIXED** expressions can often be recreated as a virtual dataset subquery. Use `create_virtual_dataset` to save the SQL, then build charts against that dataset.
+**LOD FIXED** expressions can often be recreated as a virtual dataset subquery.
+Preserve the LOD grain: a scoped FIXED groups by exactly its declared dimensions and
+joins back at that grain; an unscoped FIXED is a global aggregate. A bare Tableau
+aggregate such as `{ MIN([begin]) }` is also an LOD expression, not an ordinary row
+calculation. Use `create_virtual_dataset` to save reviewed SQL, then build charts
+against that dataset.
 
-**LOD INCLUDE / EXCLUDE** and table calculations (`RUNNING_SUM`, `RANK`, `WINDOW_SUM`, etc.) are not supported — flag these to the user before continuing.
+**LOD INCLUDE / EXCLUDE** and table calculations (`TOTAL`, `RUNNING_SUM`, `RANK`,
+`WINDOW_SUM`, etc.) require a virtual dataset rewrite with explicit grouping/window
+semantics. Flag them; do not make a textual function substitution. Spatial functions
+(`MAKEPOINT`, `MAKELINE`) are not translatable to an MCP-generated map chart.
+
+Resolve calculations recursively. Tableau shelves frequently refer to internal names
+such as `Calculation_057...`; use the datasource `<column name=... caption=...>` map
+before matching Preset columns. Detect cycles and report any unresolved generated
+field. Tableau `=` is equality; preserve boolean `AND`/`OR` precedence with
+parentheses when emitting SQL.
 
 ---
 
@@ -162,20 +221,51 @@ for ws in root.findall('.//worksheet'):
     name = ws.get('name', '')
     if scope is not None and name not in scope:
         continue
-    mark = ws.find('.//mark')
-    mark_class = mark.get('class', 'unknown') if mark is not None else 'unknown'
+    marks = [m.get('class', 'unknown').lower() for m in ws.findall('.//mark')]
     rows_el = ws.find('.//rows')
     cols_el = ws.find('.//cols')
     rows = rows_el.text.strip() if rows_el is not None and rows_el.text else ''
     cols = cols_el.text.strip() if cols_el is not None and cols_el.text else ''
-    print(f'worksheet: {name!r}  mark: {mark_class}')
+    print(f'worksheet: {name!r}  marks: {marks or [\"unknown\"]}')
     print(f'  cols: {cols}')
     print(f'  rows: {rows}')
+    for enc in ws.findall('.//encodings/*'):
+        print(f'  encoding: {enc.tag} field={enc.get(\"field\", \"\")}')
     print()
 "
 ```
 
-`cols` and `rows` are Tableau shelf expressions like `[datasource].[field:type]` or `SUM([datasource].[sales:qk])`. Parse these to identify x-axis, y-axis metrics, and grouping fields. The `nk` / `ok` / `qk` suffixes encode data type and aggregation role — strip them and the datasource prefix to get the raw field name.
+`cols` and `rows` are Tableau shelf expressions like `[datasource].[field:type]`,
+`SUM([datasource].[sales:qk])`, nested `/` shelf hierarchies, parenthesized `+`
+dual axes, or arithmetic expressions. Do not recover fields with a single
+`split(':')`: parse every bracketed reference, then resolve it through datasource
+column names/captions. The `nk` / `ok` / `qk` suffix is metadata, not necessarily
+part of the physical name. `:Measure Names`, `:Measure Values`, `Latitude
+(generated)`, and `Longitude (generated)` are Tableau-generated constructs and must
+not be sent to Preset as invented columns.
+
+Every `<mark>` matters. Repeated mark cards can represent per-axis formatting or a
+dual-axis/layered view. Pair each mark card with its enclosing pane/axis when possible;
+if the XML does not expose an unambiguous pairing, flag it rather than choosing the
+first card.
+
+### Inferring `Automatic`
+
+`Automatic` means Tableau chose a mark from field roles. Apply these rules in order:
+
+1. No row/column dimension and one measure on Text → `big_number`.
+2. One categorical dimension plus one measure → `xy/bar`.
+3. Temporal dimension plus one or more measures → `xy/line`.
+4. Two continuous measures → `xy/scatter`.
+5. Dimensions on both row and column shelves with measures on Text/Measure Values →
+   `pivot_table`; row detail only → `table`.
+6. Generated latitude/longitude or geographic roles → geographic, unsupported by the
+   current MCP generator.
+7. Several measures displayed as a formatted KPI panel, or any remaining ambiguity →
+   `handlebars` fallback after documenting the lost interaction/formatting.
+
+Record that this is an inference in the conversion review. A literal `Automatic`
+must never be treated as a valid Preset chart type.
 
 ---
 
@@ -262,16 +352,57 @@ Apply the simple filters by adding them to `config` in Phase 8. Flag every Top-N
 | `pie` | `pie` | — |
 | `text` (crosstab) | `table` | — |
 | `text` (with row/col pivots) | `pivot_table` | — |
-| `square` (treemap) | **Unsupported — skip** | — |
-| `gantt` | **Unsupported — skip** | — |
+| `text` (formatted KPI/sparkline/custom crosstab) | `handlebars` fallback | — |
+| `automatic` | Infer from shelves/encodings; never map literally | — |
+| multiple bar/line/area cards on one temporal axis | `mixed_timeseries` when exactly two compatible query series | — |
+| `shape` with two continuous axes | `xy` | `scatter` (shape glyph is lost) |
+| `shape` with custom glyphs or no continuous x/y | `handlebars` fallback | — |
+| `square` used as a heatmap with row/column dimensions | `pivot_table` (conditional formatting must be reapplied) | — |
+| `square` used as a treemap | `handlebars` fallback | — |
+| `gantt` | `handlebars` fallback for a static interval view; otherwise flag | — |
 | `map` / `filled map` | **Unsupported — skip** | — |
 | KPI / single value | `big_number` | — |
 
-The live MCP schema accepts `chart_type` values: `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number`. For bar/line/area/scatter, `chart_type` is always `xy`; the visual style is set via `kind` in the config. Always call `get_chart_type_schema(chart_type=<value>)` to retrieve the exact required and optional config fields before calling `generate_chart`.
+The live MCP schema also exposes `histogram`, `box_plot`, and `waterfall`; use them
+only when worksheet semantics match, not merely because a mark looks similar.
+For bar/line/area/scatter, `chart_type` is always `xy`; visual style is `kind`.
+Always call `get_chart_type_schema(chart_type=<value>)` before `generate_chart`.
+
+### Dual-axis and Measure Names decision
+
+- Shared temporal x-axis, exactly two measure series, compatible grains, and line/bar
+  semantics → inspect `mixed_timeseries` schema and preserve each query separately.
+- Same measure duplicated only for label/shape formatting → create one structured
+  series and note the lost secondary formatting; do not double count it.
+- Different axes/grains, more than two independently formatted layers, or generated
+  Measure Names/Values that cannot be resolved → handlebars fallback or flag.
+- A compound shelf such as `(measure_a + measure_b)` or several mark cards is evidence
+  to inspect, not proof that a clean dual-axis mapping exists.
 
 ---
 
 ## Phase 8: `generate_chart` Workflow
+
+### Handlebars fallback
+
+Use `chart_type: handlebars` when the data query is expressible against one Preset
+dataset but the presentation is not faithfully represented by a structured chart:
+formatted multi-KPI cards, sparkline-style tables, custom crosstabs, custom shape
+legends, simple treemaps, or static Gantt-like interval lists. It is a fallback, not
+a way to hide unsupported semantics.
+
+1. Resolve and inspect the dataset as usual.
+2. Call `get_chart_type_schema(chart_type="handlebars")`; follow its live
+   `query_mode`, metric/grouping or raw-column requirements.
+3. Keep the template presentation-only. Use returned `{{data}}` and supported helpers;
+   do not embed SQL, scripts, remote assets, secrets, or workbook-authored HTML.
+4. Carry supported filters into the config.
+5. State explicitly that Tableau tooltips, actions, custom glyphs, responsive device
+   layouts, and pixel-perfect formatting are not preserved.
+
+Do **not** use handlebars to fake a map, execute table-calculation semantics in the
+browser, join/blend datasources, or conceal an unresolved field. Those require a
+virtual dataset rewrite, manual chart work, or an explicit unsupported result.
 
 ### Step 1: Resolve dataset ID
 
@@ -366,12 +497,16 @@ Pass only the chart IDs returned for the target dashboard's in-scope worksheets.
 | Limitation | Detail |
 |---|---|
 | `.hyper` / `.tde` data extracts | No MCP tool to import Tableau extract data; the Preset dataset must be a live database connection |
-| LOD INCLUDE / EXCLUDE | Not expressible as a single column; must be restructured as a virtual dataset or separate SQL |
-| Table calculations (`RUNNING_SUM`, `RANK`, `WINDOW_SUM`, etc.) | Computed server-side in Tableau; must be rewritten as window functions in a virtual dataset SQL |
+| LOD INCLUDE / EXCLUDE | Not an inline formula substitution; requires an explicit-grain virtual dataset rewrite and validation |
+| Table calculations (`TOTAL`, `RUNNING_SUM`, `RANK`, `WINDOW_SUM`, etc.) | Partition/addressing semantics are not fully encoded by the formula alone; rewrite and validate as window functions in a virtual dataset |
 | Top-N / computed worksheet filters | Not a simple value filter; needs a series/row limit configured manually — flag to the user |
 | Relative-date filters | Map to the chart's time range rather than a column filter; confirm the period with the user |
-| Map / filled map charts | No direct `generate_chart` equivalent; skip or ask the user to create `deck_scatter` / `deck_choropleth` manually |
+| Maps and Tableau spatial functions | No direct MCP-generated map equivalent; generated lat/lon, geographic roles, `MAKEPOINT`, and `MAKELINE` must be flagged, not coerced to scatter |
 | Dashboard chart positioning | `generate_dashboard` auto-arranges; exact zone positions from the TWB must be applied manually in the Preset UI |
 | Multi-datasource worksheet blends | Each `generate_chart` targets one Preset dataset; Tableau blends must be pre-joined in a virtual dataset |
+| Sets, parameters, Measure Names/Values, bins, and generated fields | Some can be remodeled, but there is no general automatic translation; resolve explicitly or flag |
+| Custom shapes, annotations, reference lines, trend models, forecasting | Structured mapping does not preserve them; handlebars only helps with static presentation, not analytical behavior |
+| Dual axis with incompatible grains or more than two layers | `mixed_timeseries` is not a general layered-grammar replacement; use fallback or manual rebuild |
 | Dashboard parameter / filter actions | Superset native filters are not set automatically; configure manually after dashboard creation |
+| Device-specific/floating layouts | Normalized layout notes are advisory; automatic dashboard assembly cannot preserve Tableau containers or responsive device layouts |
 | Tableau Server-side formatting (number formats, color palettes) | Not carried over; apply in Preset chart settings after creation |

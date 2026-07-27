@@ -1,7 +1,9 @@
 # Tableau-to-Preset hardening report
 
-Test date: 2026-07-27  
-Branch: `tableau-skill-hardening`  
+Test date: 2026-07-27
+
+Branch: `tableau-skill-hardening`
+
 Corpus: 10 real public workbooks, 46 worksheets, 9 dashboards, 7 of the 8
 requested complexity families
 

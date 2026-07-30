@@ -47,7 +47,8 @@ The `sup` entry point ships in the `superset-sup` PyPI package and authenticates
 - Claude Code: `.claude-plugin/plugin.json` plus `skills/*/SKILL.md`; Claude plugin installs do not load package-level `AGENTS.md` or `CLAUDE.md` context.
 - Claude web/Desktop custom skills: build per-skill ZIPs with `node scripts/build-claude-web-skills.mjs --source plugins/preset-cli-skills/skills --out dist/claude-web-flat-cli-skills`.
 - OpenAI Codex: `.codex-plugin/plugin.json` plus `AGENTS.md`.
-- Gemini CLI and direct repository readers: `AGENTS.md`.
+- Gemini CLI: `skills/*/SKILL.md`; `AGENTS.md` is only for legacy context imports.
+- Direct repository readers: `AGENTS.md`.
 - Cursor: `.cursor-plugin/plugin.json`.
 - GitHub Copilot: `.github/copilot-instructions.md`.
 

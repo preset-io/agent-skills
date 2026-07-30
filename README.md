@@ -50,7 +50,7 @@ Install or load each package from its plugin directory, not from the repository 
 | Cursor | Project rule | Remote Rule (GitHub) import |
 | GitHub Copilot | Repo-local instructions | Copy `copilot-instructions.md` |
 | Snowflake Cortex Code CLI | Custom skills | `cortex skill add` / `/skill add` |
-| Gemini CLI | `GEMINI.md` context import | `@`-import package `AGENTS.md` files |
+| Gemini CLI | Native Agent Skills | `gemini skills install` |
 
 ## Installation
 
@@ -150,7 +150,31 @@ Use the API package for direct Preset/Superset API and Snowflake Cortex Agent wo
 
 ### Gemini CLI
 
-Gemini CLI uses `GEMINI.md` context files rather than installable skill packages. Clone the public repo, then import the package instructions from your global or project `GEMINI.md`:
+Gemini CLI v0.27.0 and later natively discovers Agent Skills. Install each
+package's `skills/` directory from the public repository:
+
+```bash
+gemini skills install https://github.com/preset-io/agent-skills.git \
+  --path plugins/preset-api-skills/skills
+gemini skills install https://github.com/preset-io/agent-skills.git \
+  --path plugins/preset-mcp-skills/skills
+gemini skills install https://github.com/preset-io/agent-skills.git \
+  --path plugins/preset-cli-skills/skills
+```
+
+These commands install user-scoped skills under `~/.gemini/skills/`, making
+them available in every project. Add `--scope workspace` to install them under
+the current project's `.gemini/skills/` instead. Workspace skills load only
+when the project is trusted.
+
+Run `gemini skills list` to verify the install. If Gemini CLI is already
+running, use `/skills reload` to discover the new or updated skills.
+
+#### Legacy Gemini CLI fallback
+
+Gemini CLI versions before v0.27.0 do not have stable native Agent Skills
+support. For those versions, clone the repository and import the package routing
+guides from your global or project `GEMINI.md`:
 
 ```bash
 git clone https://github.com/preset-io/agent-skills.git
@@ -169,7 +193,7 @@ Run `/memory refresh` in Gemini CLI after updating `GEMINI.md`.
 - Claude Desktop and Claude.ai web: download the latest release ZIPs and upload or replace the skills again.
 - Claude Code and OpenAI Codex: re-run the install commands, or pin to a newer release tag when you want deterministic installs.
 - Snowflake Cortex Code CLI: re-run `/skill add` for the Git URL, or pull the local clone and re-run `cortex skill add`.
-- Gemini CLI: pull the latest repo contents, then run `/memory refresh`.
+- Gemini CLI v0.27.0 and later: re-run the `gemini skills install` commands, then use `/skills reload` in a running session. Legacy installs: pull the latest repo contents, then run `/memory refresh`.
 
 ## Verifying the install
 
@@ -179,7 +203,7 @@ Ask your AI tool something the installed skills are designed for, for example:
 > "Using Superset MCP tools, list dashboards."
 > "Using the Preset CLI, show me the `sup` command to export dashboards as JSON."
 
-The tool should reference one of the Preset skills or package instruction files (such as `preset-workspaces`, `preset-api`, `preset-mcp-discovery`, or `preset-cli`). If it doesn't, the plugin, skill, or context instructions are not loaded — re-check the install steps for your client.
+The tool should reference one of the Preset skills or package instruction files (such as `preset-workspaces`, `preset-api`, `preset-mcp-discovery`, or `preset-cli`). Gemini CLI users can also confirm discovery with `gemini skills list`. If the expected skills do not appear, re-check the install steps for your client.
 
 ## Repository Layout
 

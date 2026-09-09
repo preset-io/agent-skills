@@ -669,4 +669,6 @@ while IFS= read -r path; do
   require_file "$CLI_ROOT/$path"
 done < <(jq -r '.skills[].path' "$CLI_ROOT/.cursor-plugin/plugin.json")
 
+python3 scripts/test-tableau-parsers.py
+
 echo "Smoke test passed."

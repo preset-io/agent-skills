@@ -104,10 +104,10 @@ def real_connections(ds):
     if outer is None:
         return []
     if outer.get('class') != 'federated':
-        return [outer]
-    inner = [nc.find('connection') for nc in outer.findall('.//named-connection')]
-    inner = [c for c in inner if c is not None]
-    return inner or [outer]
+        return [(None, outer)]
+    inner = [(nc.get('name'), nc.find('connection')) for nc in outer.findall('.//named-connection')]
+    inner = [(name, c) for name, c in inner if c is not None]
+    return inner or [(None, outer)]
 
 for ds in root.findall('datasources/datasource'):
     if ds.get('name', '').startswith('Parameters'):
@@ -116,8 +116,13 @@ for ds in root.findall('datasources/datasource'):
     # Federated datasources put the table on <relation type='table'>, not on
     # the connection element.
     relations = [r for r in outer.findall('.//relation') if r.get('type') == 'table'] if outer is not None else []
-    for conn in real_connections(ds):
+    connections = real_connections(ds)
+    federated = outer is not None and outer.get('class') == 'federated'
+    known_names = {name for name, _ in connections if name}
+    for connection_name, conn in connections:
         print('caption:', ds.get('caption', ds.get('name', '')))
+        if connection_name:
+            print('  connection name:', connection_name)
         print('  class:', conn.get('class', ''))
         print('  server:', conn.get('server', ''))
         print('  dbname:', conn.get('dbname', ''))
@@ -126,14 +131,20 @@ for ds in root.findall('datasources/datasource'):
         if conn.get('filename'):
             print('  filename:', conn.get('filename'))
         for rel in relations:
+            if federated and (not connection_name or rel.get('connection') != connection_name):
+                continue
             print('  relation table:', rel.get('table', ''), '(name:', rel.get('name', ''), ')')
         print()
+    if federated:
+        for rel in relations:
+            if rel.get('connection') not in known_names:
+                print('UNRESOLVED relation:', rel.get('table', ''), 'connection:', rel.get('connection', ''), '-- confirm with user before dataset matching')
 "
 ```
 
 Record `caption` (display name), `class` (connector type: `snowflake`, `bigquery_v2`, `postgres`, `redshift`, etc.), `server`, `dbname`, `schema`, and `table`. Use these to identify the matching Preset dataset.
 
-**Federated wrappers.** A `class='federated'` connection is a container, not the real connection — its `server` / `dbname` / `schema` / `table` are always empty. The parser above unwraps it to the underlying `<named-connection>`. If the unwrapped class is a file connector (`excel-direct`, `textscan`, `hyper`) rather than a database, the workbook is extract- or file-backed: there is no live connection to match a Preset dataset against. Surface this to the user and ask which existing Preset dataset to target (see Limitations).
+**Federated wrappers.** A `class='federated'` connection is a container, not the real connection — its `server` / `dbname` / `schema` / `table` are always empty. The parser above unwraps it to the underlying `<named-connection>` and associates each table with its `relation@connection` ID. Missing or unknown IDs are reported as unresolved; ask the user before matching those tables to a dataset. A datasource spanning multiple connections still needs a matching pre-joined dataset or an explicit user decision; individual source tables are not interchangeable with the joined result. If the unwrapped class is a file connector (`excel-direct`, `textscan`, `hyper`) rather than a database, the workbook is extract- or file-backed: there is no live connection to match a Preset dataset against. Surface this to the user and ask which existing Preset dataset to target (see Limitations).
 
 ---
 
@@ -182,6 +193,7 @@ Parse only the worksheets in scope from Phase 2.
 
 ```bash
 python3 -c "
+import re
 import xml.etree.ElementTree as ET
 root = ET.parse('workbook.twb').getroot()
 # Replace with the worksheet names selected from Phase 2.
@@ -197,6 +209,12 @@ def infer_mark(cols, rows):
     blob = cols + ' ' + rows
     if 'Latitude (generated)' in blob or 'Longitude (generated)' in blob:
         return 'map -- UNSUPPORTED, skip'
+    # Automatic marks depend on the innermost field of each shelf. Keep
+    # measure-versus-measure plots ahead of the single-value fallback.
+    inner = [re.findall(r'\[([^\]]+)\]', shelf) for shelf in (cols, rows)]
+    axes = [fields[-1] if fields else '' for fields in inner]
+    if all(':qk' in axis and not any(pfx in axis for pfx in DATE_PREFIXES) for axis in axes):
+        return 'xy / scatter'
     n_meas = blob.count(':qk')
     n_dims = blob.count(':nk')
     if n_meas == 0:
@@ -339,6 +357,7 @@ Apply the simple filters by adding them to `config` in Phase 8. Flag every Top-N
 | Shelf signal | Inferred | `chart_type` / `kind` |
 |---|---|---|
 | `Latitude (generated)` / `Longitude (generated)` present | map | **Unsupported — skip** |
+| Non-date continuous measures as the innermost fields on both shelves | scatter plot | `xy` / `scatter` |
 | No measure (`:qk`) on either shelf | table | `table` |
 | A date prefix present (`tyr:`, `tmn:`, `wk:`, `mn:`, …) with a measure | time series | `xy` / `line` |
 | Measure but no dimension (`:nk`) | KPI | `big_number` |

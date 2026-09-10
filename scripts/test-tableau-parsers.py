@@ -53,13 +53,83 @@ class TableauParsers(unittest.TestCase):
                 self.assertNotIn('big_number', result)
                 self.assertIn('INFERRED, confirm with user', result)
 
+    def test_map_worksheet_resolves_geo_dimension_and_measure(self):
+        # A map must convert, not vanish: the geographic dimension carries a
+        # semantic-role attribute and the measure is the summed column-instance.
+        xml = """<workbook><worksheets><worksheet name="Profit BY STATE"><table><view>
+          <mapsources><mapsource name="Tableau"/></mapsources>
+          <datasource-dependencies datasource="ds">
+            <column datatype="string" name="[State]" role="dimension" semantic-role="[State].[Name]" type="nominal"/>
+            <column caption="YTD Profit" datatype="real" name="[Calc_1]" role="measure" type="quantitative"/>
+            <column-instance column="[Calc_1]" derivation="Sum" name="[sum:Calc_1:qk]" pivot="key" type="quantitative"/>
+          </datasource-dependencies>
+        </view></table></worksheet></worksheets></workbook>"""
+        result = parse(7, xml)
+        self.assertIn('is map: True', result)
+        self.assertIn("geo dimensions: ['State']", result)
+        self.assertIn('YTD Profit', result)
+
+    def test_top_n_filter_exposes_count_and_direction(self):
+        # N and direction are evidence, not proof of an equivalent selection.
+        filters = ("""<filter class='categorical' column='[ds].[State]'>"""
+                   """<groupfilter function='order' column='[ds].[State]'>"""
+                   """<groupfilter function='top' count='10' direction='DESC'/>"""
+                   """</groupfilter></filter>""")
+        result = parse(6, worksheet('[ds].[none:State:nk]', '[ds].[sum:Sales:qk]', filters))
+        self.assertIn('TOP-N count=10', result)
+        self.assertIn('direction=DESC', result)
+        self.assertIn('ranking equivalence UNVERIFIED', result)
+
+    def test_top_n_retains_ranking_different_from_displayed_metric(self):
+        filters = """<filter class="categorical" column="[ds].[State]" context="true">
+          <groupfilter function="order" expression="SUM([Sales])">
+            <groupfilter function="top" count="10" direction="ASC">
+              <groupfilter function="member" member="West"/>
+            </groupfilter>
+          </groupfilter></filter>"""
+        # Profit is displayed, but Sales chooses the states. A category
+        # breakdown also makes ten result rows different from ten states.
+        result = parse(6, worksheet('[ds].[none:State:nk] / [ds].[none:Category:nk]',
+                                    '[ds].[sum:Profit:qk]', filters))
+        for evidence in ('SUM([Sales])', 'direction=ASC', 'count=10',
+                         '[context]', 'member="West"', 'ranking equivalence UNVERIFIED'):
+            self.assertIn(evidence, result)
+        self.assertNotIn('map to series_limit/row_limit', result)
+
+    def test_top_n_missing_direction_stays_unknown(self):
+        result = parse(6, worksheet(filters='''<filter class="categorical" column="[ds].[State]">
+          <groupfilter function="top" count="10"/></filter>'''))
+        self.assertIn('direction=?', result)
+        self.assertNotIn('direction=DESC', result)
+
+    def test_required_fields_extraction_for_dataset_matching(self):
+        # Dataset matching needs the real source columns, not the opaque
+        # Calculation_* ids, so calc formulas must be walked for references.
+        xml = """<workbook><worksheets><worksheet name="Sales by Category"><table><view>
+          <datasource-dependencies datasource="ds">
+            <column datatype="string" name="[Sub-Category]" role="dimension"/>
+            <column caption="YTD Sales" name="[Calculation_99]" role="measure">
+              <calculation class="tableau" formula="IF [CYTD] THEN [Sales] END"/>
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[ds].[State]"/>
+          </view>
+          <cols>[ds].[none:Sub-Category:nk]</cols>
+          <rows>[ds].[sum:Calculation_99:qk]</rows>
+        </table></worksheet></worksheets></workbook>"""
+        result = parse(8, xml)
+        for field in ('Sub-Category', 'State', 'Sales', 'CYTD'):
+            self.assertIn(field, result)
+        self.assertNotIn('Calculation_99', result)
+        self.assertNotIn('\n  ds\n', result)
+
     def test_existing_automatic_shapes(self):
         cases = [
             ('[ds].[tmn:Order Date:qk]', '[ds].[sum:Sales:qk]', 'xy / line'),
             ('[ds].[none:Category:nk]', '[ds].[sum:Sales:qk]', 'xy / bar'),
             ('', '[ds].[sum:Sales:qk]', 'big_number'),
             ('[ds].[none:Category:nk]', '', 'table'),
-            ('[ds].[Longitude (generated)]', '[ds].[Latitude (generated)]', 'map -- UNSUPPORTED, skip'),
+            ('[ds].[Longitude (generated)]', '[ds].[Latitude (generated)]', 'map -> convert to xy/bar on the geo dimension'),
         ]
         for cols, rows, expected in cases:
             with self.subTest(expected=expected):

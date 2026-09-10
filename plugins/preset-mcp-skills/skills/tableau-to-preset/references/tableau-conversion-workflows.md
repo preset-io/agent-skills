@@ -433,14 +433,17 @@ Only skip a map worksheet outright when no `semantic-role` dimension can be foun
 
 ### Converting KPI tiles
 
-A Tableau KPI sheet is usually a large current-period number with a small sparkline beneath it. The shelves show a measure plus a date, so the Phase 5 parser infers `xy / line` — structurally right, visually wrong. Build these as `big_number` with `show_trendline: true` and `temporal_column` set.
+A measure plus a date is not enough to identify a KPI: an ordinary monthly-sales line chart has the same shelves. Preserve the Phase 5 chart-type inference unless the worksheet's mark labels/formatting establish a prominent headline value, or the user confirms that presentation in the mapping review. A worksheet name alone is not sufficient evidence. If the presentation remains ambiguous, keep the inferred chart type and state the uncertainty.
 
-Set `aggregation` explicitly. It controls how the headline number is derived from the trendline points, and the frontend default is `LAST_VALUE` — so a period-to-date total silently renders as *the most recent period only*.
+For a confirmed KPI, use `big_number`. Set `show_trendline: true` and `temporal_column` only when reproducing a source sparkline; a standalone headline uses `show_trendline: false` without `aggregation`. Preserve the source metric and time filters in either case.
 
-| Tableau measure | `aggregation` |
+For a KPI with a trendline, set `aggregation` explicitly. It controls how the headline number is derived from the trendline points, and the frontend default is `LAST_VALUE` — so a period-to-date total silently renders as *the most recent period only*.
+
+| Source headline meaning (with trendline) | `aggregation` |
 |---|---|
-| Additive total (sales, quantity, profit) | `sum` |
-| Ratio, average, or distinct count (sales per customer) | `raw` |
+| Latest period's value | `LAST_VALUE` |
+| Additive total across the selected period (sales, quantity, profit) | `sum` |
+| Ratio, average, or distinct count across the selected period (sales per customer) | `raw` |
 
 `raw` computes a single aggregate across the whole period. Never use `sum` for a ratio — summing weekly ratios is meaningless.
 
@@ -650,7 +653,7 @@ Record the chart ID returned by each `generate_chart` call before moving to the 
 
 ## Phase 9: `generate_dashboard` & Layout
 
-`generate_dashboard` auto-arranges when you pass only `chart_ids`, but it also accepts an explicit **`position_json`** — Superset's layout tree. Use it. The Phase 2 worksheet zones convert straight into it, so the dashboard reproduces the Tableau arrangement instead of landing in an arbitrary packed grid.
+`generate_dashboard` auto-arranges when you pass only `chart_ids`, but it also accepts an explicit **`position_json`** — Superset's layout tree. Build it from the Phase 2 worksheet zones and container hierarchy, preserving the arrangement where the grid permits and reporting structural approximations.
 
 `update_dashboard` accepts the same `position_json`, so an already-created dashboard can be re-laid-out without rebuilding it.
 
@@ -665,7 +668,23 @@ width_cols   = round(w / 100000 * 12)          # clamp to 1..12
 height_units = round(h / 100000 * canvas_h_px / 8)
 ```
 
-Group zones sharing a `y` into one `ROW`; order rows by `y` and charts within a row by `x`. Widths in a row should sum to 12.
+The Phase 2 one-liner prints leaf coordinates, not container relationships. Re-read the chosen dashboard's top-level `<zones>` tree to retain its nested layout containers (still excluding `<devicelayouts>`). Map horizontal groups to `ROW` and vertical stacks to `COLUMN`, retaining nesting. Use coordinates to order siblings within those groups; grouping all leaves solely by equal `y` loses vertical stacks beside taller charts.
+
+For example, a tall chart A on the left and charts B/C stacked on the right need this structure:
+
+```text
+GRID_ID
+└── ROW-main
+    ├── COLUMN-left (width 6)
+    │   └── CHART-A
+    └── COLUMN-right (width 6)
+        ├── CHART-B
+        └── CHART-C
+```
+
+B and C remain in the right column; C must not become a new full-width row below A. Column widths use the same dashboard grid units as chart widths: children fit their containing column, and sibling widths must fit the parent rather than each nested row being expanded to 12. Reconcile rounding within each parent. Group by `y` alone only for a simple, non-overlapping row layout such as the example below.
+
+If floating/overlapping zones or an unavailable container structure cannot be represented faithfully, build the closest non-overlapping layout and name the changed placement in the handoff. Do not describe that as only pixel rounding. If canvas height is missing or there are no dashboard zones (a worksheet-only workbook), choose reasonable chart sizes and report that the layout is newly arranged rather than reproduced.
 
 ```
 generate_dashboard(request={
@@ -691,7 +710,7 @@ generate_dashboard(request={
 
 Every chart must be reachable from `ROOT_ID`, and each component's `parents` must list its full ancestor chain. Author the whole tree in one call — `position_json` fully replaces the existing layout, so incremental edits are not safe.
 
-Verify with `get_dashboard_layout(identifier)`, which returns the per-chart `width`/`height` actually stored. Report the dashboard URL, and set `cross_filters_enabled: true` via `update_dashboard` when the workbook had dashboard action filters — it is the closest built-in equivalent.
+Verify with `get_dashboard_layout(identifier)`, which returns the per-chart `width`/`height` actually stored. Those dimensions alone do not prove the arrangement: also check the authored tree's parent/child placement against the source groups, and inspect the rendered dashboard when available. Report any unverified visual fidelity with the dashboard URL, and set `cross_filters_enabled: true` via `update_dashboard` when the workbook had dashboard action filters — it is the closest built-in equivalent.
 
 ---
 
@@ -712,7 +731,7 @@ Every row below is something Preset cannot reproduce exactly. The **What you bui
 | Dashboard action / cross-filters | Nothing on the chart itself | Recreate as Superset native filters on the dashboard |
 | Multi-datasource blends | Nothing until the sources are pre-joined | Each chart targets one dataset; the blend needs a joined virtual dataset first |
 | Number formats, color palettes | Nothing — chart is built unstyled | Apply in Preset chart settings after creation |
-| Dashboard chart positioning | An explicit `position_json` built from the Phase 2 zones (Phase 9) | Layout is reproduced on a 12-column grid, so Tableau's free-form pixel offsets are approximated, not matched exactly |
+| Dashboard chart positioning | An explicit `position_json` built from the Phase 2 zones and nested containers (Phase 9) | Grid rounding approximates pixel offsets; separately name any structural changes from floating/overlapping zones or unavailable container information |
 | `.hyper` / `.tde` extracts | **Nothing** — no MCP import path | The Preset dataset must be a live database connection; ask which existing dataset to target |
 | Mark with no resolvable dimension or measure | **Nothing** — genuinely empty | Say which worksheet and why |
 

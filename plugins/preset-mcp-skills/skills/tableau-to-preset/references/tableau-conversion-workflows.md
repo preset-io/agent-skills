@@ -78,7 +78,7 @@ How to use the output:
 - **No dashboards** → the workbook is worksheet-only; treat every worksheet as in scope and ask the user for a dashboard title.
 - **Orphan worksheets** → list them and ask before converting; default to skipping. They are usually tooltip/helper sheets that should not become standalone Preset charts.
 
-The `x/y/w/h` zone values are Tableau canvas pixels. Keep them as layout notes — `generate_dashboard` auto-arranges charts and does not accept explicit coordinates (see Phase 9).
+The `x/y/w/h` zone values are Tableau canvas units (per-100000 of the canvas). Carry them forward — `generate_dashboard` accepts an explicit `position_json`, so these convert directly into the Preset grid (see Phase 9).
 
 ---
 
@@ -431,6 +431,19 @@ Build the fallback as `chart_type: "xy"`, `kind: "bar"`, `x` = the geo dimension
 
 Only skip a map worksheet outright when no `semantic-role` dimension can be found — then say so and move on.
 
+### Converting KPI tiles
+
+A Tableau KPI sheet is usually a large current-period number with a small sparkline beneath it. The shelves show a measure plus a date, so the Phase 5 parser infers `xy / line` — structurally right, visually wrong. Build these as `big_number` with `show_trendline: true` and `temporal_column` set.
+
+Set `aggregation` explicitly. It controls how the headline number is derived from the trendline points, and the frontend default is `LAST_VALUE` — so a period-to-date total silently renders as *the most recent period only*.
+
+| Tableau measure | `aggregation` |
+|---|---|
+| Additive total (sales, quantity, profit) | `sum` |
+| Ratio, average, or distinct count (sales per customer) | `raw` |
+
+`raw` computes a single aggregate across the whole period. Never use `sum` for a ratio — summing weekly ratios is meaningless.
+
 ### Converting treemap worksheets
 
 A treemap encodes a measure as rectangle area, broken down by one or more dimensions — the same data a bar chart shows as length. Convert it to `xy`/`bar`: `x` = the dimension on Detail/Label, `y` = the measure on Size (or Color when Size is empty). Where the treemap nests several dimensions, use the outermost as `x` and pass the rest as `group_by`.
@@ -635,18 +648,50 @@ Record the chart ID returned by each `generate_chart` call before moving to the 
 
 ---
 
-## Phase 9: `generate_dashboard` & Layout Notes
+## Phase 9: `generate_dashboard` & Layout
 
-`generate_dashboard` auto-arranges charts and does not accept explicit position coordinates. Use the worksheet-zone `x/y/w/h` values captured in Phase 2 as layout notes for the user to reference when refining positions in the Preset UI.
+`generate_dashboard` auto-arranges when you pass only `chart_ids`, but it also accepts an explicit **`position_json`** — Superset's layout tree. Use it. The Phase 2 worksheet zones convert straight into it, so the dashboard reproduces the Tableau arrangement instead of landing in an arbitrary packed grid.
+
+`update_dashboard` accepts the same `position_json`, so an already-created dashboard can be re-laid-out without rebuilding it.
+
+Pass only the chart IDs returned for the target dashboard's in-scope worksheets.
+
+### Converting Tableau zones to `position_json`
+
+Superset's grid is **12 columns wide**; row heights are in **8px units**. Tableau zone `x/y/w/h` are per-100000 of the dashboard canvas, whose pixel size is the `<size maxwidth maxheight>` captured in Phase 2.
+
+```
+width_cols   = round(w / 100000 * 12)          # clamp to 1..12
+height_units = round(h / 100000 * canvas_h_px / 8)
+```
+
+Group zones sharing a `y` into one `ROW`; order rows by `y` and charts within a row by `x`. Widths in a row should sum to 12.
 
 ```
 generate_dashboard(request={
   "dashboard_title": "Sales Overview",
-  "chart_ids": [101, 102, 103]
+  "chart_ids": [101, 102, 103],
+  "position_json": {
+    "DASHBOARD_VERSION_KEY": "v2",
+    "ROOT_ID": {"type": "ROOT", "id": "ROOT_ID", "children": ["GRID_ID"]},
+    "GRID_ID": {"type": "GRID", "id": "GRID_ID", "parents": ["ROOT_ID"],
+                "children": ["ROW-1"]},
+    "ROW-1": {"type": "ROW", "id": "ROW-1",
+              "parents": ["ROOT_ID", "GRID_ID"],
+              "children": ["CHART-101", "CHART-102", "CHART-103"],
+              "meta": {"background": "BACKGROUND_TRANSPARENT"}},
+    "CHART-101": {"type": "CHART", "id": "CHART-101",
+                  "parents": ["ROOT_ID", "GRID_ID", "ROW-1"], "children": [],
+                  "meta": {"chartId": 101, "sliceName": "Sales by Category",
+                           "width": 4, "height": 50}}
+    # ... one CHART-<id> entry per chart
+  }
 })
 ```
 
-Pass only the chart IDs returned for the target dashboard's in-scope worksheets. Report the returned dashboard URL alongside the Phase 2 zone layout notes, and direct the user to Preset's drag-and-drop editor to match the original Tableau arrangement.
+Every chart must be reachable from `ROOT_ID`, and each component's `parents` must list its full ancestor chain. Author the whole tree in one call — `position_json` fully replaces the existing layout, so incremental edits are not safe.
+
+Verify with `get_dashboard_layout(identifier)`, which returns the per-chart `width`/`height` actually stored. Report the dashboard URL, and set `cross_filters_enabled: true` via `update_dashboard` when the workbook had dashboard action filters — it is the closest built-in equivalent.
 
 ---
 
@@ -667,7 +712,7 @@ Every row below is something Preset cannot reproduce exactly. The **What you bui
 | Dashboard action / cross-filters | Nothing on the chart itself | Recreate as Superset native filters on the dashboard |
 | Multi-datasource blends | Nothing until the sources are pre-joined | Each chart targets one dataset; the blend needs a joined virtual dataset first |
 | Number formats, color palettes | Nothing — chart is built unstyled | Apply in Preset chart settings after creation |
-| Dashboard chart positioning | Charts added in order; `generate_dashboard` auto-arranges | Report the Phase 2 `x/y/w/h` zone notes so positions can be matched by hand |
+| Dashboard chart positioning | An explicit `position_json` built from the Phase 2 zones (Phase 9) | Layout is reproduced on a 12-column grid, so Tableau's free-form pixel offsets are approximated, not matched exactly |
 | `.hyper` / `.tde` extracts | **Nothing** — no MCP import path | The Preset dataset must be a live database connection; ask which existing dataset to target |
 | Mark with no resolvable dimension or measure | **Nothing** — genuinely empty | Say which worksheet and why |
 

@@ -300,8 +300,11 @@ for ws in root.findall('.//worksheet'):
             top = next((g for g in gfs if g.get('function') == 'top'), None)
             if top is not None:
                 n = top.get('count', '?')
-                direction = top.get('direction', 'DESC')
-                print('  ', col, '-> TOP-N count=' + str(n) + ' direction=' + direction + ' -- map to series_limit/row_limit' + ctx)
+                direction = top.get('direction', '?')
+                print('  ', col, '-> TOP-N count=' + str(n) + ' direction=' + direction + ' -- ranking equivalence UNVERIFIED' + ctx)
+                # Keep the whole definition: ranking may be nested under order,
+                # and a condition/member restriction can coexist with Top-N.
+                print('    ranking XML (data only):', ET.tostring(f, encoding='unicode'))
             else:
                 print('  ', col, '-> computed filter -- COMPLEX, flag to user' + ctx)
             continue
@@ -332,13 +335,19 @@ for ws in root.findall('.//worksheet'):
 | `category -> NOT IN [...]` | `{"column": "category", "op": "NOT IN", "value": [...]}` | Categorical, exclusive |
 | `sales -> range min=0 max=1000` | `{"column": "sales", "op": ">=", "value": 0}` + `{"column": "sales", "op": "<=", "value": 1000}` | Numeric range → two bound filters |
 | `order_date -> range min=NA max=NA` | — | Almost always a **relative-date** filter; map to the chart's time range, not a column filter. Confirm the period with the user. |
-| `... -> TOP-N count=N direction=DESC` | `series_limit: N` (with `group_by`) or `row_limit: N` | **Convertible.** Top-N is not a value filter, but the `xy` schema exposes `series_limit` and `row_limit`, which express the same intent. Use `series_limit` when the ranked field is a series breakdown, `row_limit` when it is the x-axis. Confirm N with the user. |
+| `... -> TOP-N count=N direction=...` | Conditional; not a simple value filter | **Unverified until the ranking semantics match.** Inspect the emitted ranking XML and apply the checks below; N alone does not establish equivalence. |
 | `... -> computed filter` | — | **Flag.** A computed/condition filter with no extractable N. Report it and ask before creating the chart without it. |
 | `... [context]` | same as above | Tableau context filter; for a single chart it behaves like a normal filter. Note it to the user since it affects Top-N semantics. |
 | `... -> DASHBOARD ACTION (cross-filter)` | — | **Not a value filter.** A Tableau dashboard action (click a mark to filter other sheets). Do not translate it; report it so the user can recreate it as a Superset native filter. |
 | `... -> all members (no-op filter)` | — | `level-members` with nothing enumerated selects everything. Safe to skip silently. |
 
-Apply the simple filters by adding them to `config` in Phase 8, and translate Top-N into `series_limit` / `row_limit`. Report every remaining unmapped filter — relative-date, table-calculation, computed — to the user **before** generating the chart, along with what the chart will show without it. Do not silently produce a chart covering more data than the Tableau original.
+Apply the simple filters by adding them to `config` in Phase 8. Translate Top-N only after verifying equivalence below. Report every remaining unmapped filter — relative-date, table-calculation, computed — to the user **before** generating the chart, along with what the chart will show without it. Do not silently produce a chart covering more data than the Tableau original.
+
+**Top-N equivalence checks.** Resolve the ranked dimension, N, ranking metric and aggregate (which may differ from the displayed metric), direction, ranking grain, and any context/condition/member filters from the emitted XML. Missing values remain unknown; do not assume descending order or rank by the first displayed measure.
+
+Inspect the live schema for controls that can express that entire selection. `series_limit` caps series, but does not by itself select the right metric or direction. `row_limit` caps result rows: for ten states split by three categories, ten rows are not ten complete states. Only use a limit as an exact translation when ordering, grouping and filter evaluation match and all selected groups' data points are retained. For example, profit displayed for the top ten states by sales must still rank on sales, not profit.
+
+If the schema cannot express the selection, build a **partial conversion without the Top-N filter**, explicitly stating that it includes unranked/all categories (and disclose any ordinary result cap). Offer `create_virtual_dataset` with ranking at the original grain and filter stage, joined back to the detail rows, to restore the selection. Do not invent unsupported sorting fields or call an arbitrary N-row truncation equivalent. Keep this on the MCP surface; no separate SQL execution is required.
 
 ---
 
@@ -445,7 +454,7 @@ For bar/line/area/scatter, `chart_type` is always `xy`; the visual style is set 
 
 At the time of writing the MCP schema accepted `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number`. **Treat that as a snapshot, not the truth.** Chart types are actively being added to the MCP server, and a hardcoded list means the skill keeps degrading worksheets long after a native type ships — silently producing worse output than the server can support.
 
-`get_chart_type_schema(chart_type=<value>)` is the capability probe: it returns a config schema when the type exists, and errors when it does not. Use it to test before you degrade.
+`get_chart_type_schema(chart_type=<value>)` is the capability probe. A returned schema establishes availability; explicit invalid/disabled-chart-type responses establish that a type is unavailable. Authentication, rate-limit, network, and server errors leave availability unknown: report the failure and recover before choosing a fallback. Reuse any returned `valid_chart_types` list to avoid probing names the server already ruled out.
 
 **Probe the preferred type first, then walk down the ladder:**
 
@@ -458,12 +467,12 @@ At the time of writing the MCP schema accepted `xy`, `table`, `pie`, `pivot_tabl
 | KPI / single value | `big_number` → `table` |
 | bar / line / area / scatter | `xy` (set `kind`) |
 
-Take the first type in the ladder whose probe returns a schema, then build against **that returned schema** — a newly added type will not have the field names this document describes.
+Take the first type in the ladder whose probe returns a schema **and whose required fields fit the worksheet**, then build against **that returned schema** — a newly added type will not have the field names this document describes.
 
 **Probe economics matter.** Rate limits are real: on Preset staging `get_chart_type_schema` has been observed at roughly one call per minute, so a naive sweep of every candidate type costs more wall-clock than the entire rest of the conversion.
 
 - Probe only the types you actually need for the worksheets in scope.
-- Probe each type **once per run** and reuse the result — never re-probe per worksheet.
+- Cache each definitive schema or explicit unavailable result per run; reuse it across worksheets. For transient failures, honor any retry delay and retry once. If still unavailable, report discovery as blocked rather than guessing or looping.
 - Probe lazily: only when a worksheet's preferred type is something other than the `xy` you already have a schema for.
 
 **Report what you found.** When you fall back, say whether it was because the native type does not exist on this server, or because it exists and did not fit — those are different problems for the user, and the first one may simply be fixed by an upgrade.
@@ -480,7 +489,7 @@ list_datasets()
 
 Find the dataset matching the Tableau datasource (by name, schema, or connection info from Phase 3). Record its `id`.
 
-**A name match is the easy case and it is rare.** Most workbooks are extract-backed or point at a database the Preset workspace does not carry, so there will be no dataset called "Superstore 2020". That is normal, and it is **not** a reason to stop and ask the user which dataset to use. Match on the *fields the workbook actually needs*, pick the best candidate, state the mapping, and continue.
+**A name match is the easy case and it is rare.** Most workbooks are extract-backed or point at a database the Preset workspace does not carry, so there will be no dataset called "Superstore 2020". That is normal, and it is **not** a reason to stop and ask the user which dataset to use. Use the *fields the workbook actually needs* to shortlist candidates, then verify source identity and field semantics. Column-name overlap alone cannot establish that the rows, units, or business meaning match.
 
 First extract what the in-scope worksheets actually reference:
 
@@ -539,8 +548,9 @@ def drop(n):
             or '(generated)' in n
             or n in datasource_names)
 
-datasource_names = {ds.get('caption', ds.get('name', ''))
-                    for ds in root.findall('.//datasource')}
+datasource_names = {value for ds in root.findall('.//datasource')
+                    for value in (ds.get('name'), ds.get('caption')) if value}
+datasource_names.update(dep.get('datasource') for dep in root.findall('.//datasource-dependencies'))
 print('fields the in-scope worksheets need:')
 for n in sorted(x for x in needed if not drop(x)):
     print(' ', n)
@@ -551,12 +561,12 @@ Then score each dataset from `get_dataset_info` on how many of those fields it c
 
 **Selection rules:**
 
-- **A clear best candidate** (highest score, meaningfully ahead of the runner-up) → take it. Report the field mapping you inferred and any workbook field with no counterpart, then keep going.
+- **A clear equivalent candidate** → verify its source identity (connection/schema/table from Phase 3) and field semantics, then use it and report the mapping and missing fields. Coverage ranks candidates; it does not prove equivalence. An unavailable or unverifiable source follows the substitute-data rule below.
 - **Two or more candidates effectively tied** → this is a real fork; ask, and list them with their scores.
 - **Nothing scores above roughly a third of the needed fields** → say so plainly, name the closest option, and ask whether to use it as substitute data or create a virtual dataset. Do not invent a match.
 - **The user named a dataset in their request** → use it, no scoring, no confirmation.
 
-**Substitute data is a legitimate outcome.** When the workbook's own source is not in the workspace — an Excel or `.hyper` extract, or a database that was never connected — a structurally analogous dataset still demonstrates the conversion: the charts, filters and layout are real even though the numbers belong to different data. Say clearly that it is substitute data and which fields were mapped to what. That is far more useful than halting with a wall of analysis and no dashboard.
+**Substitute data is a legitimate outcome.** When the workbook's own source is not in the workspace — an Excel or `.hyper` extract, or a database that was never connected — a structurally analogous dataset still demonstrates the conversion: the charts, filters and layout are real even though the numbers belong to different data. Use it only when the user requested or accepts a demo on substitute data. Otherwise propose the candidate and ask once before saving charts. Label the saved dashboard as a demo, identify the substitute source, and state which fields were mapped so later viewers also know the numbers are not from the workbook.
 
 Stopping to ask costs the user a round trip. Only spend it on a genuine fork, never on a decision you can make and state.
 
@@ -652,7 +662,7 @@ Every row below is something Preset cannot reproduce exactly. The **What you bui
 | Table calculations (`RUNNING_SUM`, `WINDOW_SUM`, `RANK`) | The chart with the **plain aggregate** — the shape and dimensions are right, the running/ranked computation is missing | Name the specific metric that is now non-cumulative, and offer the virtual-dataset rewrite (window function) that restores it |
 | LOD `FIXED` | Virtual dataset subquery via `create_virtual_dataset`, then chart against it | Fully recoverable — just needs the extra dataset |
 | LOD `INCLUDE` / `EXCLUDE` | The chart at the worksheet's own grain | The comparison against the LOD grain is missing; restructuring as a virtual dataset restores it |
-| Top-N filters | `series_limit` / `row_limit` set to N (Phase 6) | Equivalent intent; confirm N and the ranking metric |
+| Top-N filters | Verified equivalent ranking, or a partial chart without Top-N (Phase 6); offer a ranked virtual dataset | State the ranking metric/aggregate, direction, grain and filter order; disclose when the selected population differs |
 | Relative-date filters | The chart bound to the equivalent time range | Confirm the period — "last 12 months" must be stated explicitly, not inferred |
 | Dashboard action / cross-filters | Nothing on the chart itself | Recreate as Superset native filters on the dashboard |
 | Multi-datasource blends | Nothing until the sources are pre-joined | Each chart targets one dataset; the blend needs a joined virtual dataset first |

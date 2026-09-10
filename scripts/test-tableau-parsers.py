@@ -70,8 +70,7 @@ class TableauParsers(unittest.TestCase):
         self.assertIn('YTD Profit', result)
 
     def test_top_n_filter_exposes_count_and_direction(self):
-        # Top-N is convertible: series_limit/row_limit express the same intent,
-        # so the parser must surface N rather than just flagging the filter.
+        # N and direction are evidence, not proof of an equivalent selection.
         filters = ("""<filter class='categorical' column='[ds].[State]'>"""
                    """<groupfilter function='order' column='[ds].[State]'>"""
                    """<groupfilter function='top' count='10' direction='DESC'/>"""
@@ -79,7 +78,29 @@ class TableauParsers(unittest.TestCase):
         result = parse(6, worksheet('[ds].[none:State:nk]', '[ds].[sum:Sales:qk]', filters))
         self.assertIn('TOP-N count=10', result)
         self.assertIn('direction=DESC', result)
-        self.assertIn('series_limit/row_limit', result)
+        self.assertIn('ranking equivalence UNVERIFIED', result)
+
+    def test_top_n_retains_ranking_different_from_displayed_metric(self):
+        filters = """<filter class="categorical" column="[ds].[State]" context="true">
+          <groupfilter function="order" expression="SUM([Sales])">
+            <groupfilter function="top" count="10" direction="ASC">
+              <groupfilter function="member" member="West"/>
+            </groupfilter>
+          </groupfilter></filter>"""
+        # Profit is displayed, but Sales chooses the states. A category
+        # breakdown also makes ten result rows different from ten states.
+        result = parse(6, worksheet('[ds].[none:State:nk] / [ds].[none:Category:nk]',
+                                    '[ds].[sum:Profit:qk]', filters))
+        for evidence in ('SUM([Sales])', 'direction=ASC', 'count=10',
+                         '[context]', 'member="West"', 'ranking equivalence UNVERIFIED'):
+            self.assertIn(evidence, result)
+        self.assertNotIn('map to series_limit/row_limit', result)
+
+    def test_top_n_missing_direction_stays_unknown(self):
+        result = parse(6, worksheet(filters='''<filter class="categorical" column="[ds].[State]">
+          <groupfilter function="top" count="10"/></filter>'''))
+        self.assertIn('direction=?', result)
+        self.assertNotIn('direction=DESC', result)
 
     def test_required_fields_extraction_for_dataset_matching(self):
         # Dataset matching needs the real source columns, not the opaque
@@ -100,6 +121,7 @@ class TableauParsers(unittest.TestCase):
         for field in ('Sub-Category', 'State', 'Sales', 'CYTD'):
             self.assertIn(field, result)
         self.assertNotIn('Calculation_99', result)
+        self.assertNotIn('\n  ds\n', result)
 
     def test_existing_automatic_shapes(self):
         cases = [

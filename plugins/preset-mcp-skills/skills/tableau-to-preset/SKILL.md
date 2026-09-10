@@ -21,6 +21,7 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 - Map each in-scope worksheet to one `generate_chart` call; record the returned chart ID before moving on.
 - Extract each worksheet's filters and carry the translatable ones into the chart config; flag filters you cannot translate instead of dropping them.
 - Call `generate_dashboard` only after all charts are saved, using only the IDs returned by `generate_chart`.
+- Reproduce the Tableau arrangement by passing `position_json` to `generate_dashboard` (or `update_dashboard` for an existing dashboard); do not leave the layout auto-arranged and hand the user manual coordinates.
 - Use the attached Superset MCP server for every Preset call. When several Superset MCP servers are attached, prefer the one the user names and otherwise ask once, up front, rather than mid-conversion.
 - Do not use direct API, curl, Python requests, or SQL execution at any stage.
 - Degrade, don't drop: when Preset cannot reproduce something exactly, build the closest equivalent and state what changed. Skipping is the last resort, never the default.
@@ -36,6 +37,7 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 - No dataset matching the Tableau datasource by name → expected, not a blocker. Use field coverage to shortlist candidates, then verify source identity and field semantics before selecting one. Continue with a clear equivalent; ask when candidates are tied or only substitute data is available, unless the user already authorized a demo on substitute data.
 - Workbook is extract-backed (`.hyper`/`.tde`) or its database is not in the workspace → propose the best-scoring dataset as substitute data. Use it only if the user requested or accepts a demo on substitute data; label the saved dashboard as a demo and identify the substitute source.
 - Mark class `Automatic` (Tableau's default, very common) → infer the effective mark from the shelf structure; label it as inferred in the mapping table and have the user confirm before creating the chart.
+- Confirmed KPI tile → build `big_number` (Phase 7). A measure plus a date also describes an ordinary line chart: preserve the shelf-inferred chart type unless worksheet labels/formatting or user confirmation establish a headline KPI. Match its headline period and aggregation explicitly; add a trendline only when the source has one.
 - Before degrading any worksheet, probe for a native chart type with `get_chart_type_schema(chart_type=<value>)` — require a schema or an explicit invalid/disabled-type result; other errors leave availability unknown (Phase 7). Chart types are actively being added; never assume a type is missing because this skill does not list it.
 - Map / filled map worksheet → do **not** skip. Probe for a geographic type first; otherwise find the geographic dimension (the column carrying a `semantic-role` attribute) and convert to `xy`/`bar` on it, telling the user the geography is not reproduced.
 - Treemap (`square`) → probe `treemap`; otherwise `xy`/`bar`, dimension × size measure.
@@ -52,14 +54,14 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 ## Workflow Order
 
 1. **Extract** — unzip `.twbx` if needed; confirm the `.twb` file path.
-2. **Map dashboards & set scope** — run the dashboard one-liner; list each dashboard and its worksheet zones. If there are several dashboards, ask which to convert. The chosen dashboard's worksheet zones are the conversion scope and the layout notes (x/y/w/h in Tableau pixels). List any worksheets not on a dashboard as supporting/hidden and ask before including them. No dashboards → scope is all worksheets; ask for a dashboard title.
+2. **Map dashboards & set scope** — run the dashboard one-liner; list each dashboard and its worksheet zones. If there are several dashboards, ask which to convert. The chosen dashboard's worksheet zones are the conversion scope and the layout notes (x/y/w/h in per-100000 canvas units); retain the top-level zone tree's container nesting for Phase 9. List any worksheets not on a dashboard as supporting/hidden and ask before including them. No dashboards → scope is all worksheets; ask for a dashboard title.
 3. **Parse datasources** — run the datasource one-liner; record connection class, server, database, schema, and table.
 4. **Resolve dataset** — `list_datasets`, then `get_dataset_info` on the match; confirm column and metric names.
 5. **Audit calculated fields** — run the calculated-fields one-liner for the in-scope worksheets; translate or flag each one.
 6. **Parse worksheets** — run the worksheet one-liner for the in-scope worksheets; build the chart-type mapping table for the user to review.
 7. **Audit worksheet filters** — run the filter one-liner; map simple filters (categorical IN/NOT IN, numeric range) to MCP filters and flag Top-N, relative-date, context-computed, and table-calculation filters for the user.
 8. **Save charts** — call `generate_chart` per in-scope worksheet, including the mapped filters in the config; collect returned chart IDs.
-9. **Assemble dashboard** — call `generate_dashboard` with the collected chart IDs and the dashboard title; report the returned dashboard URL and the Step 2 layout notes so the user can refine positions in Preset.
+9. **Assemble dashboard** — call `generate_dashboard` with the collected chart IDs, the dashboard title, and a `position_json` built from the Step 2 worksheet zones; verify with `get_dashboard_layout` and report the returned dashboard URL.
 
 ## Retrieve
 

@@ -439,7 +439,34 @@ State which you chose and why. Never drop the worksheet: a schedule sheet that v
 
 
 
-The live MCP schema accepts `chart_type` values: `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number`. For bar/line/area/scatter, `chart_type` is always `xy`; the visual style is set via `kind` in the config. Always call `get_chart_type_schema(chart_type=<value>)` to retrieve the exact required and optional config fields before calling `generate_chart`.
+For bar/line/area/scatter, `chart_type` is always `xy`; the visual style is set via `kind` in the config. Always call `get_chart_type_schema(chart_type=<value>)` to retrieve the exact required and optional config fields before calling `generate_chart`.
+
+### Discover chart types at runtime — do not trust this document's list
+
+At the time of writing the MCP schema accepted `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number`. **Treat that as a snapshot, not the truth.** Chart types are actively being added to the MCP server, and a hardcoded list means the skill keeps degrading worksheets long after a native type ships — silently producing worse output than the server can support.
+
+`get_chart_type_schema(chart_type=<value>)` is the capability probe: it returns a config schema when the type exists, and errors when it does not. Use it to test before you degrade.
+
+**Probe the preferred type first, then walk down the ladder:**
+
+| Tableau mark | Preference ladder (best first) |
+|---|---|
+| `map` / `filled map` | a geographic type if one exists (e.g. `deck_choropleth`, `deck_scatter`, `country_map`, `world_map`) → `xy`/`bar` on the geo dimension |
+| `square` (treemap) | `treemap` → `xy`/`bar` |
+| `gantt` | `gantt` → `table` → `xy`/`bar` of duration |
+| `pie` | `pie` → `xy`/`bar` |
+| KPI / single value | `big_number` → `table` |
+| bar / line / area / scatter | `xy` (set `kind`) |
+
+Take the first type in the ladder whose probe returns a schema, then build against **that returned schema** — a newly added type will not have the field names this document describes.
+
+**Probe economics matter.** Rate limits are real: on Preset staging `get_chart_type_schema` has been observed at roughly one call per minute, so a naive sweep of every candidate type costs more wall-clock than the entire rest of the conversion.
+
+- Probe only the types you actually need for the worksheets in scope.
+- Probe each type **once per run** and reuse the result — never re-probe per worksheet.
+- Probe lazily: only when a worksheet's preferred type is something other than the `xy` you already have a schema for.
+
+**Report what you found.** When you fall back, say whether it was because the native type does not exist on this server, or because it exists and did not fit — those are different problems for the user, and the first one may simply be fixed by an upgrade.
 
 ---
 
@@ -539,9 +566,9 @@ Every row below is something Preset cannot reproduce exactly. The **What you bui
 
 | Tableau feature | What you build | What to tell the user |
 |---|---|---|
-| Map / filled map | `xy`/`bar` on the `semantic-role` geographic dimension (Phase 7) | Geography is not rendered; a real map is a manual `deck_scatter` / `deck_choropleth` build |
-| Treemap (`square`) | `xy`/`bar`, dimension × size measure | Values shown as bar length instead of rectangle area |
-| Gantt | `table` (dimension, start, duration), or `xy`/`bar` of duration | Start offsets are not drawn; say which form you chose |
+| Map / filled map | A geographic chart type when the server offers one; otherwise `xy`/`bar` on the `semantic-role` geographic dimension (Phase 7) | If degraded: geography is not rendered, and say whether the server lacks a geo type or it did not fit |
+| Treemap (`square`) | A native `treemap` when available; otherwise `xy`/`bar`, dimension × size measure | If degraded: values shown as bar length instead of rectangle area |
+| Gantt | A native `gantt` when available; otherwise `table` (dimension, start, duration) or `xy`/`bar` of duration | If degraded: start offsets are not drawn; say which form you chose |
 | Table calculations (`RUNNING_SUM`, `WINDOW_SUM`, `RANK`) | The chart with the **plain aggregate** — the shape and dimensions are right, the running/ranked computation is missing | Name the specific metric that is now non-cumulative, and offer the virtual-dataset rewrite (window function) that restores it |
 | LOD `FIXED` | Virtual dataset subquery via `create_virtual_dataset`, then chart against it | Fully recoverable — just needs the extra dataset |
 | LOD `INCLUDE` / `EXCLUDE` | The chart at the worksheet's own grain | The comparison against the LOD grain is missing; restructuring as a virtual dataset restores it |

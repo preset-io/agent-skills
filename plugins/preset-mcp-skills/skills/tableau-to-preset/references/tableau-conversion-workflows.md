@@ -580,17 +580,33 @@ Then score each dataset from `get_dataset_info` on how many of those fields it c
 - **A clear equivalent candidate** → verify its source identity (connection/schema/table from Phase 3) and field semantics, then use it and report the mapping and missing fields. Coverage ranks candidates; it does not prove equivalence. An unavailable or unverifiable source follows the substitute-data rule below.
 - **Two or more candidates effectively tied** → this is a real fork; ask, and list them with their scores.
 - **Nothing scores above roughly a third of the needed fields** → say so plainly, name the closest option, and ask whether to use it as substitute data or create a virtual dataset. Do not invent a match.
-- **The user named a dataset in their request** → use it, no scoring, no confirmation.
+- **The user named a dataset in their request** → use it without scoring other candidates. Still inspect its columns and metrics in Step 2; skip mapping confirmation only when every field is exact (Step 3b).
 
 **Substitute data is a legitimate outcome.** When the workbook's own source is not in the workspace — an Excel or `.hyper` extract, or a database that was never connected — a structurally analogous dataset still demonstrates the conversion: the charts, filters and layout are real even though the numbers belong to different data. Use it only when the user requested or accepts a demo on substitute data. Otherwise propose the candidate and ask once before saving charts. Label the saved dashboard as a demo, identify the substitute source, and state which fields were mapped so later viewers also know the numbers are not from the workbook.
 
 Stopping to ask costs the user a round trip. Only spend it on a genuine fork, never on a decision you can make and state.
 
-### Step 1b: Show the field mapping before building anything
+### Step 2: Inspect columns and saved metrics
+
+```
+get_dataset_info(request={"identifier": <id>})
+```
+
+Use the returned column names and saved metric names. Do not invent columns.
+
+### Step 3: Get the chart config schema
+
+```
+get_chart_type_schema(chart_type="xy")   # use "xy" for bar/line/area/scatter; "pie", "table", "pivot_table", "big_number" for others
+```
+
+This returns the exact required and optional config fields — including the filter field — for the MCP `generate_chart` call. Follow the live schema; do not guess field names.
+
+### Step 3b: Show the field mapping before building anything
 
 Dataset binding is the one decision in this workflow that is both expensive to get wrong and invisible when wrong. A wrong chart type is one `update_chart` away and obvious on screen. A wrong dataset is wrong on *every* chart at once, and the dashboard still renders perfectly — the numbers are simply not what the workbook meant. Field-name overlap is what ranked the candidate; it does not establish that the columns mean the same thing.
 
-So before the first `generate_chart`, print the resolved mapping and get one confirmation:
+Complete the calculated-field, worksheet, and filter audits (Phases 4–6), inspect the selected dataset (Step 2), and verify the chart schemas (Step 3) first. Resolve every in-scope field, including calculated-field dependencies and fields used only in filters, against that metadata. Then, immediately before the first `generate_chart`, print the final mapping and get one confirmation unless the user named the dataset and every field is exact:
 
 ```text
 Tableau "Superstore 2020"  ->  Preset "Vehicle Sales" (id 3)
@@ -614,26 +630,10 @@ Classify every needed field into exactly one of:
 
 Rules:
 
-- This is the **only** confirmation gate in the conversion. Everything downstream stays decide-and-report.
+- Use one mapping confirmation for the completed conversion plan; include any pending chart-inference or filter decisions in that review. Scope questions and error recovery still follow their own rules. Once approved, build and report without repeating approval for the same mapping. If the dataset, field mapping, or proxy SQL changes, show the revised mapping and obtain confirmation before using it.
 - Never invent a proxy expression silently. A proxy is a modelling decision the user owns, and it must appear on this table with its SQL before any chart uses it.
 - Skip the gate only when the user named the dataset *and* every field is `exact`. A named dataset still gets the table printed when anything is substitute, proxy, or dropped — naming a dataset authorises the binding, not the guesswork underneath it.
 - On a substitute-data demo the gate is more important, not less: the numbers are known to be foreign, so the mapping is the only record of what they now mean.
-
-### Step 2: Inspect columns and saved metrics
-
-```
-get_dataset_info(request={"identifier": <id>})
-```
-
-Use the returned column names and saved metric names. Do not invent columns.
-
-### Step 3: Get the chart config schema
-
-```
-get_chart_type_schema(chart_type="xy")   # use "xy" for bar/line/area/scatter; "pie", "table", "pivot_table", "big_number" for others
-```
-
-This returns the exact required and optional config fields — including the filter field — for the MCP `generate_chart` call. Follow the live schema; do not guess field names.
 
 ### Step 4: Call `generate_chart`
 

@@ -20,6 +20,7 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 - Map each in-scope worksheet to one `generate_chart` call; record the returned chart ID before moving on.
 - Extract each worksheet's filters and carry the translatable ones into the chart config; flag filters you cannot translate instead of dropping them.
 - Call `generate_dashboard` only after all charts are saved, using only the IDs returned by `generate_chart`.
+- Use the attached Superset MCP server for every Preset call. In Preset staging that server is `preset-mcp-stg-amin`; when several Superset MCP servers are attached, prefer the one the user names and otherwise ask once, up front, rather than mid-conversion.
 - Do not use direct API, curl, Python requests, or SQL execution at any stage.
 - Flag unsupported worksheets, calculated fields, or filters to the user before skipping; do not silently drop them.
 
@@ -31,7 +32,8 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 - Worksheet not referenced by any dashboard (hidden/supporting sheet) → list it and ask before converting; default to skipping.
 - No matching Preset dataset → surface the Tableau connection details (class, server, dbname, schema) to the user; ask whether to point at an existing dataset or create a virtual one via `create_virtual_dataset`.
 - Mark class `Automatic` (Tableau's default, very common) → infer the effective mark from the shelf structure; label it as inferred in the mapping table and have the user confirm before creating the chart.
-- Unsupported mark type (`map`, `filled map`, treemap, gantt) → tell the user, skip the worksheet, continue with the rest.
+- Map / filled map worksheet → do **not** skip. Find the geographic dimension (the column carrying a `semantic-role` attribute) and convert to `xy`/`bar` on that dimension; tell the user the geography is not reproduced. Skip only when no `semantic-role` dimension exists.
+- Unsupported mark type (treemap, gantt) → tell the user, skip the worksheet, continue with the rest.
 - Worksheet filter that is Top-N, relative-date, context-computed, or based on a table calculation → it cannot map to a simple MCP filter; flag it and ask before creating the chart without it.
 - Worksheet filter that is a dashboard action (cross-filter) or an unenumerated `level-members` filter → not a value filter; never translate it to an `IN []` filter. Report action filters as Superset native filters to recreate; skip no-op ones.
 - Datasource `connection class='federated'` → a wrapper with no connection details; unwrap to the inner `<named-connection>` before matching a Preset dataset. A file connector (`excel-direct`, `textscan`, `hyper`) means the workbook is extract-backed — ask the user which existing Preset dataset to target.

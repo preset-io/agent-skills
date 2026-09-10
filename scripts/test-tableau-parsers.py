@@ -53,13 +53,29 @@ class TableauParsers(unittest.TestCase):
                 self.assertNotIn('big_number', result)
                 self.assertIn('INFERRED, confirm with user', result)
 
+    def test_map_worksheet_resolves_geo_dimension_and_measure(self):
+        # A map must convert, not vanish: the geographic dimension carries a
+        # semantic-role attribute and the measure is the summed column-instance.
+        xml = """<workbook><worksheets><worksheet name="Profit BY STATE"><table><view>
+          <mapsources><mapsource name="Tableau"/></mapsources>
+          <datasource-dependencies datasource="ds">
+            <column datatype="string" name="[State]" role="dimension" semantic-role="[State].[Name]" type="nominal"/>
+            <column caption="YTD Profit" datatype="real" name="[Calc_1]" role="measure" type="quantitative"/>
+            <column-instance column="[Calc_1]" derivation="Sum" name="[sum:Calc_1:qk]" pivot="key" type="quantitative"/>
+          </datasource-dependencies>
+        </view></table></worksheet></worksheets></workbook>"""
+        result = parse(7, xml)
+        self.assertIn('is map: True', result)
+        self.assertIn("geo dimensions: ['State']", result)
+        self.assertIn('YTD Profit', result)
+
     def test_existing_automatic_shapes(self):
         cases = [
             ('[ds].[tmn:Order Date:qk]', '[ds].[sum:Sales:qk]', 'xy / line'),
             ('[ds].[none:Category:nk]', '[ds].[sum:Sales:qk]', 'xy / bar'),
             ('', '[ds].[sum:Sales:qk]', 'big_number'),
             ('[ds].[none:Category:nk]', '', 'table'),
-            ('[ds].[Longitude (generated)]', '[ds].[Latitude (generated)]', 'map -- UNSUPPORTED, skip'),
+            ('[ds].[Longitude (generated)]', '[ds].[Latitude (generated)]', 'map -> convert to xy/bar on the geo dimension'),
         ]
         for cols, rows, expected in cases:
             with self.subTest(expected=expected):

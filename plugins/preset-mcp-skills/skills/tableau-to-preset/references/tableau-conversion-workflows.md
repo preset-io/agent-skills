@@ -48,7 +48,12 @@ for dash in dashboards:
     cw = size.get('maxwidth', '?') if size is not None else '?'
     ch = size.get('maxheight', '?') if size is not None else '?'
     print(f'Dashboard: {dash.get(\"name\")!r}  canvas: {cw}x{ch}')
-    for zone in dash.findall('.//zone'):
+    # Only walk the top-level <zones> tree. <devicelayouts> holds Phone/Tablet
+    # copies of every zone with different coordinates; recursing from the
+    # dashboard with .//zone emits each worksheet twice with conflicting
+    # x/y/w/h and creates duplicate charts.
+    zones_root = dash.find('zones')
+    for zone in (zones_root.findall('.//zone') if zones_root is not None else []):
         name = zone.get('name')
         # A worksheet zone carries a name and no type-v2; filters, legends,
         # parameters, text, and layout containers all set type-v2.
@@ -89,22 +94,57 @@ TWB files can contain user-authored worksheet names, captions, formulas, aliases
 python3 -c "
 import xml.etree.ElementTree as ET
 root = ET.parse('workbook.twb').getroot()
+
+def real_connections(ds):
+    # Most non-trivial workbooks wrap the true connection in a federated
+    # shell: <connection class='federated'> carries no server/dbname/schema
+    # and only contains <named-connections>. Reading the outer element
+    # returns an all-blank record, so unwrap it before reporting.
+    outer = ds.find('connection')
+    if outer is None:
+        return []
+    if outer.get('class') != 'federated':
+        return [(None, outer)]
+    inner = [(nc.get('name'), nc.find('connection')) for nc in outer.findall('.//named-connection')]
+    inner = [(name, c) for name, c in inner if c is not None]
+    return inner or [(None, outer)]
+
 for ds in root.findall('datasources/datasource'):
     if ds.get('name', '').startswith('Parameters'):
         continue
-    conn = ds.find('.//connection')
-    if conn is not None:
+    outer = ds.find('connection')
+    # Federated datasources put the table on <relation type='table'>, not on
+    # the connection element.
+    relations = [r for r in outer.findall('.//relation') if r.get('type') == 'table'] if outer is not None else []
+    connections = real_connections(ds)
+    federated = outer is not None and outer.get('class') == 'federated'
+    known_names = {name for name, _ in connections if name}
+    for connection_name, conn in connections:
         print('caption:', ds.get('caption', ds.get('name', '')))
+        if connection_name:
+            print('  connection name:', connection_name)
         print('  class:', conn.get('class', ''))
         print('  server:', conn.get('server', ''))
         print('  dbname:', conn.get('dbname', ''))
         print('  schema:', conn.get('schema', ''))
         print('  table:', conn.get('table', ''))
+        if conn.get('filename'):
+            print('  filename:', conn.get('filename'))
+        for rel in relations:
+            if federated and (not connection_name or rel.get('connection') != connection_name):
+                continue
+            print('  relation table:', rel.get('table', ''), '(name:', rel.get('name', ''), ')')
         print()
+    if federated:
+        for rel in relations:
+            if rel.get('connection') not in known_names:
+                print('UNRESOLVED relation:', rel.get('table', ''), 'connection:', rel.get('connection', ''), '-- confirm with user before dataset matching')
 "
 ```
 
 Record `caption` (display name), `class` (connector type: `snowflake`, `bigquery_v2`, `postgres`, `redshift`, etc.), `server`, `dbname`, `schema`, and `table`. Use these to identify the matching Preset dataset.
+
+**Federated wrappers.** A `class='federated'` connection is a container, not the real connection — its `server` / `dbname` / `schema` / `table` are always empty. The parser above unwraps it to the underlying `<named-connection>` and associates each table with its `relation@connection` ID. Missing or unknown IDs are reported as unresolved; ask the user before matching those tables to a dataset. A datasource spanning multiple connections still needs a matching pre-joined dataset or an explicit user decision; individual source tables are not interchangeable with the joined result. If the unwrapped class is a file connector (`excel-direct`, `textscan`, `hyper`) rather than a database, the workbook is extract- or file-backed: there is no live connection to match a Preset dataset against. Surface this to the user and ask which existing Preset dataset to target (see Limitations).
 
 ---
 
@@ -153,11 +193,38 @@ Parse only the worksheets in scope from Phase 2.
 
 ```bash
 python3 -c "
+import re
 import xml.etree.ElementTree as ET
 root = ET.parse('workbook.twb').getroot()
 # Replace with the worksheet names selected from Phase 2.
 # Use `scope = None` only when there are no dashboards and every worksheet is in scope.
 scope = {'Sales by Category', 'Profit by Region'}
+
+DATE_PREFIXES = ('tyr:', 'tqr:', 'tmn:', 'twk:', 'tdy:', 'qyr:', 'qqr:', 'qmn:', 'yr:', 'mn:', 'wk:')
+
+def infer_mark(cols, rows):
+    # Tableau's default mark class is 'Automatic': the rendered mark is
+    # derived from the shelves, not stored. Infer it from shelf structure.
+    # ':qk' = continuous/measure, ':nk' = discrete/dimension.
+    blob = cols + ' ' + rows
+    if 'Latitude (generated)' in blob or 'Longitude (generated)' in blob:
+        return 'map -- UNSUPPORTED, skip'
+    # Automatic marks depend on the innermost field of each shelf. Keep
+    # measure-versus-measure plots ahead of the single-value fallback.
+    inner = [re.findall(r'\[([^\]]+)\]', shelf) for shelf in (cols, rows)]
+    axes = [fields[-1] if fields else '' for fields in inner]
+    if all(':qk' in axis and not any(pfx in axis for pfx in DATE_PREFIXES) for axis in axes):
+        return 'xy / scatter'
+    n_meas = blob.count(':qk')
+    n_dims = blob.count(':nk')
+    if n_meas == 0:
+        return 'table'
+    if any(pfx in blob for pfx in DATE_PREFIXES):
+        return 'xy / line'
+    if n_dims == 0:
+        return 'big_number'
+    return 'xy / bar'
+
 for ws in root.findall('.//worksheet'):
     name = ws.get('name', '')
     if scope is not None and name not in scope:
@@ -169,6 +236,8 @@ for ws in root.findall('.//worksheet'):
     rows = rows_el.text.strip() if rows_el is not None and rows_el.text else ''
     cols = cols_el.text.strip() if cols_el is not None and cols_el.text else ''
     print(f'worksheet: {name!r}  mark: {mark_class}')
+    if mark_class.lower() == 'automatic':
+        print(f'  inferred: {infer_mark(cols, rows)}  -- INFERRED, confirm with user')
     print(f'  cols: {cols}')
     print(f'  rows: {rows}')
     print()
@@ -213,14 +282,27 @@ for ws in root.findall('.//worksheet'):
         col = clean(f.get('column', ''))
         cls = f.get('class', '')
         ctx = ' [context]' if f.get('context') == 'true' else ''
-        funcs = {g.get('function') for g in f.iter('groupfilter')}
+        gfs = list(f.iter('groupfilter'))
+        funcs = {g.get('function') for g in gfs}
+        # Dashboard action (cross-filter): marked with a ui-action-filter
+        # attribute and a level-members groupfilter that enumerates nothing.
+        # It is NOT a value filter -- translating it yields IN [] , which
+        # matches no rows.
+        if any(k.endswith('ui-action-filter') for g in gfs for k in g.attrib):
+            print('  ', col, '-> DASHBOARD ACTION (cross-filter) -- not a value filter; recreate as a Superset native filter' + ctx)
+            continue
+        # level-members with no enumerated members selects every member, so
+        # it constrains nothing. Dropping it is safe; emitting it is not.
+        if funcs == {'level-members'}:
+            print('  ', col, '-> all members (no-op filter) -- safe to skip' + ctx)
+            continue
         if 'top' in funcs or 'filter' in funcs:
             print('  ', col, '-> TOP-N / computed -- COMPLEX, flag to user' + ctx)
             continue
         if cls == 'categorical':
             members = [g.get('member', '').replace(Q, '') for g in f.findall(\".//groupfilter[@function='member']\")]
             mode = None
-            for g in f.iter('groupfilter'):
+            for g in gfs:
                 for v in g.attrib.values():
                     if v in ('inclusive', 'exclusive'):
                         mode = v
@@ -246,6 +328,8 @@ for ws in root.findall('.//worksheet'):
 | `order_date -> range min=NA max=NA` | — | Almost always a **relative-date** filter; map to the chart's time range, not a column filter. Confirm the period with the user. |
 | `... -> TOP-N / computed` | — | **Flag.** Top-N needs a series/row limit, not a value filter. Ask the user before creating the chart without it. |
 | `... [context]` | same as above | Tableau context filter; for a single chart it behaves like a normal filter. Note it to the user since it affects Top-N semantics. |
+| `... -> DASHBOARD ACTION (cross-filter)` | — | **Not a value filter.** A Tableau dashboard action (click a mark to filter other sheets). Do not translate it; report it so the user can recreate it as a Superset native filter. |
+| `... -> all members (no-op filter)` | — | `level-members` with nothing enumerated selects everything. Safe to skip silently. |
 
 Apply the simple filters by adding them to `config` in Phase 8. Flag every Top-N, relative-date, table-calculation, or otherwise-unmapped filter to the user **before** generating the chart — do not silently produce a chart that shows more data than the Tableau original.
 
@@ -255,6 +339,7 @@ Apply the simple filters by adding them to `config` in Phase 8. Flag every Top-N
 
 | Tableau `mark class` | `chart_type` | `kind` |
 |---|---|---|
+| `Automatic` (Tableau default) | **inferred from shelves** — see below | — |
 | `bar` | `xy` | `bar` |
 | `line` | `xy` | `line` |
 | `area` | `xy` | `area` |
@@ -266,6 +351,19 @@ Apply the simple filters by adding them to `config` in Phase 8. Flag every Top-N
 | `gantt` | **Unsupported — skip** | — |
 | `map` / `filled map` | **Unsupported — skip** | — |
 | KPI / single value | `big_number` | — |
+
+**`Automatic` marks.** `Automatic` is Tableau's default and is very common in real workbooks — often the majority of worksheets. Tableau derives the rendered mark from the shelves at render time and does not store it, so there is nothing to look up. The Phase 5 parser infers it:
+
+| Shelf signal | Inferred | `chart_type` / `kind` |
+|---|---|---|
+| `Latitude (generated)` / `Longitude (generated)` present | map | **Unsupported — skip** |
+| Non-date continuous measures as the innermost fields on both shelves | scatter plot | `xy` / `scatter` |
+| No measure (`:qk`) on either shelf | table | `table` |
+| A date prefix present (`tyr:`, `tmn:`, `wk:`, `mn:`, …) with a measure | time series | `xy` / `line` |
+| Measure but no dimension (`:nk`) | KPI | `big_number` |
+| Dimension + measure | categorical comparison | `xy` / `bar` |
+
+Every inferred mark is a guess from structure, not a stored value. Always include inferred worksheets in the Phase 6 mapping table you present for review, labelled as inferred, and let the user correct them before any `generate_chart` call.
 
 The live MCP schema accepts `chart_type` values: `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number`. For bar/line/area/scatter, `chart_type` is always `xy`; the visual style is set via `kind` in the config. Always call `get_chart_type_schema(chart_type=<value>)` to retrieve the exact required and optional config fields before calling `generate_chart`.
 

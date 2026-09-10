@@ -69,6 +69,18 @@ class TableauParsers(unittest.TestCase):
         self.assertIn("geo dimensions: ['State']", result)
         self.assertIn('YTD Profit', result)
 
+    def test_top_n_filter_exposes_count_and_direction(self):
+        # Top-N is convertible: series_limit/row_limit express the same intent,
+        # so the parser must surface N rather than just flagging the filter.
+        filters = ("""<filter class='categorical' column='[ds].[State]'>"""
+                   """<groupfilter function='order' column='[ds].[State]'>"""
+                   """<groupfilter function='top' count='10' direction='DESC'/>"""
+                   """</groupfilter></filter>""")
+        result = parse(6, worksheet('[ds].[none:State:nk]', '[ds].[sum:Sales:qk]', filters))
+        self.assertIn('TOP-N count=10', result)
+        self.assertIn('direction=DESC', result)
+        self.assertIn('series_limit/row_limit', result)
+
     def test_existing_automatic_shapes(self):
         cases = [
             ('[ds].[tmn:Order Date:qk]', '[ds].[sum:Sales:qk]', 'xy / line'),

@@ -297,7 +297,13 @@ for ws in root.findall('.//worksheet'):
             print('  ', col, '-> all members (no-op filter) -- safe to skip' + ctx)
             continue
         if 'top' in funcs or 'filter' in funcs:
-            print('  ', col, '-> TOP-N / computed -- COMPLEX, flag to user' + ctx)
+            top = next((g for g in gfs if g.get('function') == 'top'), None)
+            if top is not None:
+                n = top.get('count', '?')
+                direction = top.get('direction', 'DESC')
+                print('  ', col, '-> TOP-N count=' + str(n) + ' direction=' + direction + ' -- map to series_limit/row_limit' + ctx)
+            else:
+                print('  ', col, '-> computed filter -- COMPLEX, flag to user' + ctx)
             continue
         if cls == 'categorical':
             members = [g.get('member', '').replace(Q, '') for g in f.findall(\".//groupfilter[@function='member']\")]
@@ -326,12 +332,30 @@ for ws in root.findall('.//worksheet'):
 | `category -> NOT IN [...]` | `{"column": "category", "op": "NOT IN", "value": [...]}` | Categorical, exclusive |
 | `sales -> range min=0 max=1000` | `{"column": "sales", "op": ">=", "value": 0}` + `{"column": "sales", "op": "<=", "value": 1000}` | Numeric range → two bound filters |
 | `order_date -> range min=NA max=NA` | — | Almost always a **relative-date** filter; map to the chart's time range, not a column filter. Confirm the period with the user. |
-| `... -> TOP-N / computed` | — | **Flag.** Top-N needs a series/row limit, not a value filter. Ask the user before creating the chart without it. |
+| `... -> TOP-N count=N direction=DESC` | `series_limit: N` (with `group_by`) or `row_limit: N` | **Convertible.** Top-N is not a value filter, but the `xy` schema exposes `series_limit` and `row_limit`, which express the same intent. Use `series_limit` when the ranked field is a series breakdown, `row_limit` when it is the x-axis. Confirm N with the user. |
+| `... -> computed filter` | — | **Flag.** A computed/condition filter with no extractable N. Report it and ask before creating the chart without it. |
 | `... [context]` | same as above | Tableau context filter; for a single chart it behaves like a normal filter. Note it to the user since it affects Top-N semantics. |
 | `... -> DASHBOARD ACTION (cross-filter)` | — | **Not a value filter.** A Tableau dashboard action (click a mark to filter other sheets). Do not translate it; report it so the user can recreate it as a Superset native filter. |
 | `... -> all members (no-op filter)` | — | `level-members` with nothing enumerated selects everything. Safe to skip silently. |
 
-Apply the simple filters by adding them to `config` in Phase 8. Flag every Top-N, relative-date, table-calculation, or otherwise-unmapped filter to the user **before** generating the chart — do not silently produce a chart that shows more data than the Tableau original.
+Apply the simple filters by adding them to `config` in Phase 8, and translate Top-N into `series_limit` / `row_limit`. Report every remaining unmapped filter — relative-date, table-calculation, computed — to the user **before** generating the chart, along with what the chart will show without it. Do not silently produce a chart covering more data than the Tableau original.
+
+---
+
+## Degrade, Don't Drop
+
+The default for anything Preset cannot reproduce exactly is **convert it as closely as possible and tell the user what changed** — not skip it.
+
+A skipped worksheet is invisible. The user sees a dashboard that looks finished, and discovers the hole weeks later when someone asks where a chart went. A downgraded worksheet is visible, reviewable, and fixable: the data is there, the title matches the original, and the note says exactly what was lost.
+
+Rank the options in this order:
+
+1. **Exact conversion** — the mark and every filter map cleanly.
+2. **Structural conversion** — the numbers are right, the visual form differs (a map becomes a bar chart, a treemap becomes a bar chart). Say what changed.
+3. **Partial conversion** — the shape is right but a computation is missing (a running total renders as a plain series). Say precisely which number is now wrong, and offer the virtual-dataset route that would fix it.
+4. **Skip** — only when there is genuinely nothing to build, e.g. no resolvable dimension or measure. Say why.
+
+Never silently choose 4. Whatever the outcome, report it per worksheet in the mapping table so the user reviews the whole set before any chart is created.
 
 ---
 
@@ -347,8 +371,8 @@ Apply the simple filters by adding them to `config` in Phase 8. Flag every Top-N
 | `pie` | `pie` | — |
 | `text` (crosstab) | `table` | — |
 | `text` (with row/col pivots) | `pivot_table` | — |
-| `square` (treemap) | **Unsupported — skip** | — |
-| `gantt` | **Unsupported — skip** | — |
+| `square` (treemap) | `xy` (fallback) | `bar` |
+| `gantt` | `xy` (fallback) | `bar` |
 | `map` / `filled map` | `xy` (fallback) | `bar` |
 | KPI / single value | `big_number` | — |
 
@@ -397,6 +421,23 @@ for ws in root.findall('.//worksheet'):
 Build the fallback as `chart_type: "xy"`, `kind: "bar"`, `x` = the geo dimension, `y` = the measure. Name the chart after the original worksheet and tell the user plainly: *converted from a Tableau map; geographic rendering is not reproduced, the data is shown as a bar chart by <dimension>.* If the workspace needs a real map later, that is a manual `deck_scatter` / `deck_choropleth` build in Preset.
 
 Only skip a map worksheet outright when no `semantic-role` dimension can be found — then say so and move on.
+
+### Converting treemap worksheets
+
+A treemap encodes a measure as rectangle area, broken down by one or more dimensions — the same data a bar chart shows as length. Convert it to `xy`/`bar`: `x` = the dimension on Detail/Label, `y` = the measure on Size (or Color when Size is empty). Where the treemap nests several dimensions, use the outermost as `x` and pass the rest as `group_by`.
+
+Tell the user: *converted from a treemap; values are shown as bar length instead of rectangle area.* Ordering is usually the point of a treemap, so consider `series_limit` to keep the top contributors legible.
+
+### Converting gantt worksheets
+
+A gantt encodes a duration per row: a dimension, a start date, and a length. There is no MCP gantt type, and no bar chart reproduces the time offset. Two honest options, in order:
+
+1. **`table`** — dimension, start date, and duration as columns. Loses the visual, keeps every number, and stays readable. Prefer this when the sheet is used for lookup.
+2. **`xy`/`bar`** — duration by dimension. Keeps the comparison of lengths, drops when each item starts.
+
+State which you chose and why. Never drop the worksheet: a schedule sheet that vanishes is far more surprising to a user than one that arrives as a table.
+
+
 
 The live MCP schema accepts `chart_type` values: `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number`. For bar/line/area/scatter, `chart_type` is always `xy`; the visual style is set via `kind` in the config. Always call `get_chart_type_schema(chart_type=<value>)` to retrieve the exact required and optional config fields before calling `generate_chart`.
 
@@ -492,17 +533,25 @@ Pass only the chart IDs returned for the target dashboard's in-scope worksheets.
 
 ---
 
-## Limitations
+## Degraded Conversions & Limits
 
-| Limitation | Detail |
-|---|---|
-| `.hyper` / `.tde` data extracts | No MCP tool to import Tableau extract data; the Preset dataset must be a live database connection |
-| LOD INCLUDE / EXCLUDE | Not expressible as a single column; must be restructured as a virtual dataset or separate SQL |
-| Table calculations (`RUNNING_SUM`, `RANK`, `WINDOW_SUM`, etc.) | Computed server-side in Tableau; must be rewritten as window functions in a virtual dataset SQL |
-| Top-N / computed worksheet filters | Not a simple value filter; needs a series/row limit configured manually — flag to the user |
-| Relative-date filters | Map to the chart's time range rather than a column filter; confirm the period with the user |
-| Map / filled map charts | No geographic `generate_chart` equivalent. Convert to an `xy`/`bar` chart on the geographic dimension (Phase 7) and tell the user the geography is not reproduced; a real map is a manual `deck_scatter` / `deck_choropleth` build. |
-| Dashboard chart positioning | `generate_dashboard` auto-arranges; exact zone positions from the TWB must be applied manually in the Preset UI |
-| Multi-datasource worksheet blends | Each `generate_chart` targets one Preset dataset; Tableau blends must be pre-joined in a virtual dataset |
-| Dashboard parameter / filter actions | Superset native filters are not set automatically; configure manually after dashboard creation |
-| Tableau Server-side formatting (number formats, color palettes) | Not carried over; apply in Preset chart settings after creation |
+Every row below is something Preset cannot reproduce exactly. The **What you build** column is what to produce anyway — only the last two rows have no chart to build at all.
+
+| Tableau feature | What you build | What to tell the user |
+|---|---|---|
+| Map / filled map | `xy`/`bar` on the `semantic-role` geographic dimension (Phase 7) | Geography is not rendered; a real map is a manual `deck_scatter` / `deck_choropleth` build |
+| Treemap (`square`) | `xy`/`bar`, dimension × size measure | Values shown as bar length instead of rectangle area |
+| Gantt | `table` (dimension, start, duration), or `xy`/`bar` of duration | Start offsets are not drawn; say which form you chose |
+| Table calculations (`RUNNING_SUM`, `WINDOW_SUM`, `RANK`) | The chart with the **plain aggregate** — the shape and dimensions are right, the running/ranked computation is missing | Name the specific metric that is now non-cumulative, and offer the virtual-dataset rewrite (window function) that restores it |
+| LOD `FIXED` | Virtual dataset subquery via `create_virtual_dataset`, then chart against it | Fully recoverable — just needs the extra dataset |
+| LOD `INCLUDE` / `EXCLUDE` | The chart at the worksheet's own grain | The comparison against the LOD grain is missing; restructuring as a virtual dataset restores it |
+| Top-N filters | `series_limit` / `row_limit` set to N (Phase 6) | Equivalent intent; confirm N and the ranking metric |
+| Relative-date filters | The chart bound to the equivalent time range | Confirm the period — "last 12 months" must be stated explicitly, not inferred |
+| Dashboard action / cross-filters | Nothing on the chart itself | Recreate as Superset native filters on the dashboard |
+| Multi-datasource blends | Nothing until the sources are pre-joined | Each chart targets one dataset; the blend needs a joined virtual dataset first |
+| Number formats, color palettes | Nothing — chart is built unstyled | Apply in Preset chart settings after creation |
+| Dashboard chart positioning | Charts added in order; `generate_dashboard` auto-arranges | Report the Phase 2 `x/y/w/h` zone notes so positions can be matched by hand |
+| `.hyper` / `.tde` extracts | **Nothing** — no MCP import path | The Preset dataset must be a live database connection; ask which existing dataset to target |
+| Mark with no resolvable dimension or measure | **Nothing** — genuinely empty | Say which worksheet and why |
+
+**Partial conversions are not failures, but they are not successes either.** When a chart is missing a computation, name the metric and the consequence — "this line shows weekly sales, not the running YTD total the Tableau sheet showed" — so the user can decide whether it needs the virtual-dataset fix before anyone trusts the number.

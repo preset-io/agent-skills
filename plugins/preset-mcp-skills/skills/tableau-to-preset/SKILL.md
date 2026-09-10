@@ -22,7 +22,8 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 - Call `generate_dashboard` only after all charts are saved, using only the IDs returned by `generate_chart`.
 - Use the attached Superset MCP server for every Preset call. In Preset staging that server is `preset-mcp-stg-amin`; when several Superset MCP servers are attached, prefer the one the user names and otherwise ask once, up front, rather than mid-conversion.
 - Do not use direct API, curl, Python requests, or SQL execution at any stage.
-- Flag unsupported worksheets, calculated fields, or filters to the user before skipping; do not silently drop them.
+- Degrade, don't drop: when Preset cannot reproduce something exactly, build the closest equivalent and state what changed. Skipping is the last resort, never the default.
+- For a partial conversion, name the specific metric that is wrong and the consequence, so the user can judge whether the number is trustworthy.
 
 ## Decision Rules
 
@@ -32,9 +33,12 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 - Worksheet not referenced by any dashboard (hidden/supporting sheet) → list it and ask before converting; default to skipping.
 - No matching Preset dataset → surface the Tableau connection details (class, server, dbname, schema) to the user; ask whether to point at an existing dataset or create a virtual one via `create_virtual_dataset`.
 - Mark class `Automatic` (Tableau's default, very common) → infer the effective mark from the shelf structure; label it as inferred in the mapping table and have the user confirm before creating the chart.
-- Map / filled map worksheet → do **not** skip. Find the geographic dimension (the column carrying a `semantic-role` attribute) and convert to `xy`/`bar` on that dimension; tell the user the geography is not reproduced. Skip only when no `semantic-role` dimension exists.
-- Unsupported mark type (treemap, gantt) → tell the user, skip the worksheet, continue with the rest.
-- Worksheet filter that is Top-N, relative-date, context-computed, or based on a table calculation → it cannot map to a simple MCP filter; flag it and ask before creating the chart without it.
+- Map / filled map worksheet → do **not** skip. Find the geographic dimension (the column carrying a `semantic-role` attribute) and convert to `xy`/`bar` on that dimension; tell the user the geography is not reproduced.
+- Treemap (`square`) → convert to `xy`/`bar`, dimension × size measure.
+- Gantt → convert to a `table` of dimension, start, and duration, or `xy`/`bar` of duration; say which you chose.
+- Skip a worksheet only when no dimension or measure can be resolved at all — then say which worksheet and why.
+- Top-N worksheet filter → translate to `series_limit` (ranked series) or `row_limit` (ranked x-axis) using the `count` on the `top` groupfilter; confirm N with the user.
+- Worksheet filter that is relative-date, context-computed, or based on a table calculation → it cannot map to a simple MCP filter; build the chart and state precisely what it now shows without that filter.
 - Worksheet filter that is a dashboard action (cross-filter) or an unenumerated `level-members` filter → not a value filter; never translate it to an `IN []` filter. Report action filters as Superset native filters to recreate; skip no-op ones.
 - Datasource `connection class='federated'` → a wrapper with no connection details; unwrap to the inner `<named-connection>` before matching a Preset dataset. A file connector (`excel-direct`, `textscan`, `hyper`) means the workbook is extract-backed — ask the user which existing Preset dataset to target.
 - LOD INCLUDE / EXCLUDE or table calculation in a calculated field → flag as unsupported; ask the user how to handle before continuing.

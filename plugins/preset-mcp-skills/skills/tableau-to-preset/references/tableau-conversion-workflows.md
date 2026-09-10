@@ -78,7 +78,7 @@ How to use the output:
 - **No dashboards** → the workbook is worksheet-only; treat every worksheet as in scope and ask the user for a dashboard title.
 - **Orphan worksheets** → list them and ask before converting; default to skipping. They are usually tooltip/helper sheets that should not become standalone Preset charts.
 
-The `x/y/w/h` zone values are Tableau canvas pixels. Keep them as layout notes — `generate_dashboard` auto-arranges charts and does not accept explicit coordinates (see Phase 9).
+The `x/y/w/h` zone values are Tableau canvas units (per-100000 of the canvas). Carry them forward — `generate_dashboard` accepts an explicit `position_json`, so these convert directly into the Preset grid (see Phase 9).
 
 ---
 
@@ -196,7 +196,7 @@ def infer_mark(cols, rows):
     # ':qk' = continuous/measure, ':nk' = discrete/dimension.
     blob = cols + ' ' + rows
     if 'Latitude (generated)' in blob or 'Longitude (generated)' in blob:
-        return 'map -- UNSUPPORTED, skip'
+        return 'map -> convert to xy/bar on the geo dimension (see Phase 7)'
     n_meas = blob.count(':qk')
     n_dims = blob.count(':nk')
     if n_meas == 0:
@@ -331,20 +331,66 @@ Apply the simple filters by adding them to `config` in Phase 8. Flag every Top-N
 | `text` (with row/col pivots) | `pivot_table` | — |
 | `square` (treemap) | **Unsupported — skip** | — |
 | `gantt` | **Unsupported — skip** | — |
-| `map` / `filled map` | **Unsupported — skip** | — |
+| `map` / `filled map` | `xy` (fallback) | `bar` |
 | KPI / single value | `big_number` | — |
 
 **`Automatic` marks.** `Automatic` is Tableau's default and is very common in real workbooks — often the majority of worksheets. Tableau derives the rendered mark from the shelves at render time and does not store it, so there is nothing to look up. The Phase 5 parser infers it:
 
 | Shelf signal | Inferred | `chart_type` / `kind` |
 |---|---|---|
-| `Latitude (generated)` / `Longitude (generated)` present | map | **Unsupported — skip** |
+| `Latitude (generated)` / `Longitude (generated)` present | map | `xy` / `bar` fallback — see below |
 | No measure (`:qk`) on either shelf | table | `table` |
 | A date prefix present (`tyr:`, `tmn:`, `wk:`, `mn:`, …) with a measure | time series | `xy` / `line` |
 | Measure but no dimension (`:nk`) | KPI | `big_number` |
 | Dimension + measure | categorical comparison | `xy` / `bar` |
 
 Every inferred mark is a guess from structure, not a stored value. Always include inferred worksheets in the Phase 6 mapping table you present for review, labelled as inferred, and let the user correct them before any `generate_chart` call.
+
+### Converting map worksheets
+
+MCP `generate_chart` has no geographic chart type, but a Tableau map is still a measure broken down by a geographic dimension — and that converts cleanly to a bar chart. **Convert it; do not skip it.** Losing the geography is a far smaller loss than losing the worksheet, and a migration that silently drops sheets is worse than one that downgrades them and says so.
+
+Find the geographic dimension: Tableau tags geo fields with a `semantic-role` attribute (e.g. `semantic-role="[State].[Name]"`), and map worksheets carry a `<mapsources>` element. The `Latitude (generated)` / `Longitude (generated)` fields on the shelves are derived — the real dimension is the `semantic-role` column, and the measure is the summed `column-instance`.
+
+```bash
+python3 -c "
+import xml.etree.ElementTree as ET
+root = ET.parse('workbook.twb').getroot()
+target = 'Profit BY STATE'   # replace with the map worksheet name
+for ws in root.findall('.//worksheet'):
+    if ws.get('name') != target:
+        continue
+    print('is map:', ws.find('.//mapsources') is not None)
+    geo = [c.get('name', '').strip('[]') for c in ws.findall('.//column')
+           if c.get('semantic-role')]
+    print('geo dimensions:', geo)
+    measures = [ci.get('column', '').strip('[]')
+                for ci in ws.findall('.//column-instance')
+                if ci.get('type') == 'quantitative']
+    print('measures:', measures)
+    # Resolve calculated-field ids to their captions for a readable name.
+    for c in ws.findall('.//column'):
+        if c.get('name', '').strip('[]') in measures and c.get('caption'):
+            print('  ', c.get('name', '').strip('[]'), '->', c.get('caption'))
+"
+```
+
+Build the fallback as `chart_type: "xy"`, `kind: "bar"`, `x` = the geo dimension, `y` = the measure. Name the chart after the original worksheet and tell the user plainly: *converted from a Tableau map; geographic rendering is not reproduced, the data is shown as a bar chart by <dimension>.* If the workspace needs a real map later, that is a manual `deck_scatter` / `deck_choropleth` build in Preset.
+
+Only skip a map worksheet outright when no `semantic-role` dimension can be found — then say so and move on.
+
+### KPI tiles with sparklines
+
+A Tableau KPI sheet is usually a large current-period number with a small trend line beneath it — the shelves show a measure plus a date, so the Phase 5 parser infers `xy / line`. That inference is structurally right but visually wrong: build these as `big_number` with `show_trendline: true` and `temporal_column` set, which is what the tile actually looks like.
+
+Set `aggregation` explicitly. It controls how the headline number is derived from the trendline points, and the frontend default is `LAST_VALUE` — a period-to-date total then renders as *the most recent week* rather than the total.
+
+| Tableau measure | `aggregation` |
+|---|---|
+| Additive total (sum of sales, quantity, profit) | `sum` |
+| Ratio, average, or distinct count (sales per customer) | `raw` |
+
+`raw` computes one aggregate across the whole period; summing weekly ratios is meaningless, so never use `sum` for a ratio.
 
 The live MCP schema accepts `chart_type` values: `xy`, `table`, `pie`, `pivot_table`, `mixed_timeseries`, `handlebars`, `big_number`. For bar/line/area/scatter, `chart_type` is always `xy`; the visual style is set via `kind` in the config. Always call `get_chart_type_schema(chart_type=<value>)` to retrieve the exact required and optional config fields before calling `generate_chart`.
 
@@ -425,18 +471,50 @@ Record the chart ID returned by each `generate_chart` call before moving to the 
 
 ---
 
-## Phase 9: `generate_dashboard` & Layout Notes
+## Phase 9: `generate_dashboard` & Layout
 
-`generate_dashboard` auto-arranges charts and does not accept explicit position coordinates. Use the worksheet-zone `x/y/w/h` values captured in Phase 2 as layout notes for the user to reference when refining positions in the Preset UI.
+`generate_dashboard` auto-arranges when you pass only `chart_ids`, but it also accepts an explicit **`position_json`** — Superset's layout tree. Use it. The Phase 2 worksheet zones convert straight into it, so the Preset dashboard can reproduce the Tableau arrangement instead of landing in an arbitrary packed grid.
+
+`update_dashboard` accepts the same `position_json`, so an already-created dashboard can be re-laid-out without rebuilding it.
+
+Pass only the chart IDs returned for the target dashboard's in-scope worksheets.
+
+### Converting Tableau zones to `position_json`
+
+Superset's grid is **12 columns wide**; row heights are in **8px units**. Tableau zone `x/y/w/h` are per-100000 of the dashboard canvas, whose pixel size is the `<size maxwidth maxheight>` captured in Phase 2.
+
+```
+width_cols    = round(w / 100000 * 12)          # clamp to 1..12
+height_units  = round(h / 100000 * canvas_h_px / 8)
+```
+
+Group zones with the same `y` into one `ROW`; order rows by `y` and the charts inside each row by `x`. Widths within a row should sum to 12.
 
 ```
 generate_dashboard(request={
   "dashboard_title": "Sales Overview",
-  "chart_ids": [101, 102, 103]
+  "chart_ids": [101, 102, 103],
+  "position_json": {
+    "DASHBOARD_VERSION_KEY": "v2",
+    "ROOT_ID": {"type": "ROOT", "id": "ROOT_ID", "children": ["GRID_ID"]},
+    "GRID_ID": {"type": "GRID", "id": "GRID_ID", "parents": ["ROOT_ID"],
+                "children": ["ROW-1"]},
+    "ROW-1": {"type": "ROW", "id": "ROW-1",
+              "parents": ["ROOT_ID", "GRID_ID"],
+              "children": ["CHART-101", "CHART-102", "CHART-103"],
+              "meta": {"background": "BACKGROUND_TRANSPARENT"}},
+    "CHART-101": {"type": "CHART", "id": "CHART-101",
+                  "parents": ["ROOT_ID", "GRID_ID", "ROW-1"], "children": [],
+                  "meta": {"chartId": 101, "sliceName": "Sales by Category",
+                           "width": 4, "height": 50}}
+    # ... one CHART-<id> entry per chart
+  }
 })
 ```
 
-Pass only the chart IDs returned for the target dashboard's in-scope worksheets. Report the returned dashboard URL alongside the Phase 2 zone layout notes, and direct the user to Preset's drag-and-drop editor to match the original Tableau arrangement.
+Every chart must be reachable from `ROOT_ID`, and each component's `parents` must list its full ancestor chain. Author the whole tree at once — do not attempt incremental edits to an existing `position_json`.
+
+Verify with `get_dashboard_layout(identifier)`, which returns the per-chart `width`/`height` actually stored. Report the dashboard URL and note that cross-filtering (`cross_filters_enabled`) is the closest equivalent to Tableau's dashboard action filters.
 
 ---
 
@@ -449,8 +527,8 @@ Pass only the chart IDs returned for the target dashboard's in-scope worksheets.
 | Table calculations (`RUNNING_SUM`, `RANK`, `WINDOW_SUM`, etc.) | Computed server-side in Tableau; must be rewritten as window functions in a virtual dataset SQL |
 | Top-N / computed worksheet filters | Not a simple value filter; needs a series/row limit configured manually — flag to the user |
 | Relative-date filters | Map to the chart's time range rather than a column filter; confirm the period with the user |
-| Map / filled map charts | No direct `generate_chart` equivalent; skip or ask the user to create `deck_scatter` / `deck_choropleth` manually |
-| Dashboard chart positioning | `generate_dashboard` auto-arranges; exact zone positions from the TWB must be applied manually in the Preset UI |
+| Map / filled map charts | No geographic `generate_chart` equivalent. Convert to an `xy`/`bar` chart on the geographic dimension (Phase 7) and tell the user the geography is not reproduced; a real map is a manual `deck_scatter` / `deck_choropleth` build. |
+| Dashboard chart positioning | Reproducible: pass `position_json` to `generate_dashboard` / `update_dashboard` (Phase 9). Fidelity is limited to the 12-column grid, so Tableau's free-form pixel offsets are approximated, not matched exactly. |
 | Multi-datasource worksheet blends | Each `generate_chart` targets one Preset dataset; Tableau blends must be pre-joined in a virtual dataset |
-| Dashboard parameter / filter actions | Superset native filters are not set automatically; configure manually after dashboard creation |
+| Dashboard parameter / filter actions | Superset native filters are not set automatically; configure manually after dashboard creation. For Tableau *action* filters (click a mark to filter other sheets), set `cross_filters_enabled: true` via `update_dashboard` — the closest built-in equivalent. |
 | Tableau Server-side formatting (number formats, color palettes) | Not carried over; apply in Preset chart settings after creation |

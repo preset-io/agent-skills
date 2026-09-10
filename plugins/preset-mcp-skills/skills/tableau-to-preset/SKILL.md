@@ -30,9 +30,11 @@ Use for converting a Tableau workbook file to a Preset dashboard through MCP too
 
 - `.twbx` input → extract only the `.twb` member to a unique temp directory (use `tempfile.mkdtemp`); the snippet prints the full `.twb` path — use that directly for all parsing steps.
 - Multiple dashboards in the workbook → list them and ask the user which to convert; scope every later step to that dashboard's worksheet zones.
+- Decide and report rather than stop and ask. A round trip is worth spending on a genuine fork (which dashboard, two tied datasets), never on a call you can make yourself and state plainly. When the user has named a dataset, use it without confirming.
 - No dashboards defined → the workbook is worksheet-only; convert every worksheet and ask the user for a dashboard title.
 - Worksheet not referenced by any dashboard (hidden/supporting sheet) → list it and ask before converting; default to skipping.
-- No matching Preset dataset → surface the Tableau connection details (class, server, dbname, schema) to the user; ask whether to point at an existing dataset or create a virtual one via `create_virtual_dataset`.
+- No dataset matching the Tableau datasource by name → expected, not a blocker. Score the available datasets on how many of the fields the in-scope worksheets need they can supply, take the clear winner, state the field mapping, and continue. Ask only when two candidates are effectively tied, or when nothing covers roughly a third of the needed fields.
+- Workbook is extract-backed (`.hyper`/`.tde`) or its database is not in the workspace → use the best-scoring dataset as substitute data and say so explicitly. A converted dashboard on analogous data demonstrates the migration; a wall of analysis with no dashboard does not.
 - Mark class `Automatic` (Tableau's default, very common) → infer the effective mark from the shelf structure; label it as inferred in the mapping table and have the user confirm before creating the chart.
 - Before degrading any worksheet, probe for a native chart type with `get_chart_type_schema(chart_type=<value>)` — it returns a schema when the type exists and errors when it does not. Chart types are actively being added; never assume a type is missing because this skill does not list it.
 - Map / filled map worksheet → do **not** skip. Probe for a geographic type first; otherwise find the geographic dimension (the column carrying a `semantic-role` attribute) and convert to `xy`/`bar` on it, telling the user the geography is not reproduced.

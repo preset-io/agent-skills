@@ -81,6 +81,26 @@ class TableauParsers(unittest.TestCase):
         self.assertIn('direction=DESC', result)
         self.assertIn('series_limit/row_limit', result)
 
+    def test_required_fields_extraction_for_dataset_matching(self):
+        # Dataset matching needs the real source columns, not the opaque
+        # Calculation_* ids, so calc formulas must be walked for references.
+        xml = """<workbook><worksheets><worksheet name="Sales by Category"><table><view>
+          <datasource-dependencies datasource="ds">
+            <column datatype="string" name="[Sub-Category]" role="dimension"/>
+            <column caption="YTD Sales" name="[Calculation_99]" role="measure">
+              <calculation class="tableau" formula="IF [CYTD] THEN [Sales] END"/>
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[ds].[State]"/>
+          </view>
+          <cols>[ds].[none:Sub-Category:nk]</cols>
+          <rows>[ds].[sum:Calculation_99:qk]</rows>
+        </table></worksheet></worksheets></workbook>"""
+        result = parse(8, xml)
+        for field in ('Sub-Category', 'State', 'Sales', 'CYTD'):
+            self.assertIn(field, result)
+        self.assertNotIn('Calculation_99', result)
+
     def test_existing_automatic_shapes(self):
         cases = [
             ('[ds].[tmn:Order Date:qk]', '[ds].[sum:Sales:qk]', 'xy / line'),

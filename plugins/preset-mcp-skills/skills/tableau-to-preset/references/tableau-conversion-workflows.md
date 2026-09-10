@@ -472,13 +472,93 @@ Take the first type in the ladder whose probe returns a schema, then build again
 
 ## Phase 8: `generate_chart` Workflow
 
-### Step 1: Resolve dataset ID
+### Step 1: Resolve dataset ID — match, don't interrogate
 
 ```
 list_datasets()
 ```
 
 Find the dataset matching the Tableau datasource (by name, schema, or connection info from Phase 3). Record its `id`.
+
+**A name match is the easy case and it is rare.** Most workbooks are extract-backed or point at a database the Preset workspace does not carry, so there will be no dataset called "Superstore 2020". That is normal, and it is **not** a reason to stop and ask the user which dataset to use. Match on the *fields the workbook actually needs*, pick the best candidate, state the mapping, and continue.
+
+First extract what the in-scope worksheets actually reference:
+
+```bash
+python3 -c "
+import re
+import xml.etree.ElementTree as ET
+root = ET.parse('workbook.twb').getroot()
+# Replace with the worksheet names selected from Phase 2, or None for all.
+scope = None
+
+# Shelf tokens interleave role/aggregate/type markers with the field name
+# ('win:sum:Sales:qk:6'). Strip the markers instead of guessing by position --
+# picking parts[-2] returns the type code 'qk' on five-part window tokens.
+MARKERS = {
+    'none', 'usr', 'win', 'sum', 'avg', 'min', 'max', 'cnt', 'ctd', 'med',
+    'attr', 'qk', 'nk', 'ok', 'yr', 'qr', 'mn', 'wk', 'dy', 'tyr', 'tqr',
+    'tmn', 'twk', 'tdy', 'qyr', 'qqr', 'qmn',
+}
+
+def clean(tok):
+    seg = tok.split('].[')[-1].rstrip(']').lstrip('[')
+    parts = [p for p in seg.split(':') if p]
+    real = [p for p in parts if p.lower() not in MARKERS and not p.isdigit()]
+    return max(real, key=len) if real else seg
+
+needed = set()
+for ws in root.findall('.//worksheet'):
+    name = ws.get('name', '')
+    if scope is not None and name not in scope:
+        continue
+    for shelf in ('rows', 'cols'):
+        el = ws.find('.//' + shelf)
+        if el is not None and el.text:
+            for tok in re.findall(r'\[[^\]]+\]', el.text):
+                needed.add(clean(tok))
+    for f in ws.findall('.//filter'):
+        needed.add(clean(f.get('column', '')))
+    # Real source columns behind calculated fields matter more than the calc ids.
+    for col in ws.findall('.//column'):
+        calc = col.find('calculation')
+        if calc is not None:
+            for ref in re.findall(r'\[([^\]]+)\]', calc.get('formula', '') or ''):
+                needed.add(ref)
+        elif col.get('name'):
+            needed.add(col.get('name').strip('[]'))
+
+def drop(n):
+    # Keep only fields a Preset dataset could plausibly supply: drop Tableau's
+    # internal calc ids, duplicated calc fields, generated geo fields, the
+    # datasource caption, and dashboard-action pseudo-columns.
+    return (not n
+            or n.startswith('Calculation_')
+            or n.startswith('Action (')
+            or '(copy)_' in n
+            or '(generated)' in n
+            or n in datasource_names)
+
+datasource_names = {ds.get('caption', ds.get('name', ''))
+                    for ds in root.findall('.//datasource')}
+print('fields the in-scope worksheets need:')
+for n in sorted(x for x in needed if not drop(x)):
+    print(' ', n)
+"
+```
+
+Then score each dataset from `get_dataset_info` on how many of those fields it can supply, normalising for case and separators (`Sub-Category` ≈ `sub_category`, `Order Date` ≈ `order_date`).
+
+**Selection rules:**
+
+- **A clear best candidate** (highest score, meaningfully ahead of the runner-up) → take it. Report the field mapping you inferred and any workbook field with no counterpart, then keep going.
+- **Two or more candidates effectively tied** → this is a real fork; ask, and list them with their scores.
+- **Nothing scores above roughly a third of the needed fields** → say so plainly, name the closest option, and ask whether to use it as substitute data or create a virtual dataset. Do not invent a match.
+- **The user named a dataset in their request** → use it, no scoring, no confirmation.
+
+**Substitute data is a legitimate outcome.** When the workbook's own source is not in the workspace — an Excel or `.hyper` extract, or a database that was never connected — a structurally analogous dataset still demonstrates the conversion: the charts, filters and layout are real even though the numbers belong to different data. Say clearly that it is substitute data and which fields were mapped to what. That is far more useful than halting with a wall of analysis and no dashboard.
+
+Stopping to ask costs the user a round trip. Only spend it on a genuine fork, never on a decision you can make and state.
 
 ### Step 2: Inspect columns and saved metrics
 

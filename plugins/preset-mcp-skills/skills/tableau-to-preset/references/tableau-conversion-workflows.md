@@ -586,6 +586,39 @@ Then score each dataset from `get_dataset_info` on how many of those fields it c
 
 Stopping to ask costs the user a round trip. Only spend it on a genuine fork, never on a decision you can make and state.
 
+### Step 1b: Show the field mapping before building anything
+
+Dataset binding is the one decision in this workflow that is both expensive to get wrong and invisible when wrong. A wrong chart type is one `update_chart` away and obvious on screen. A wrong dataset is wrong on *every* chart at once, and the dashboard still renders perfectly — the numbers are simply not what the workbook meant. Field-name overlap is what ranked the candidate; it does not establish that the columns mean the same thing.
+
+So before the first `generate_chart`, print the resolved mapping and get one confirmation:
+
+```text
+Tableau "Superstore 2020"  ->  Preset "Vehicle Sales" (id 3)
+  Sales          -> sales             exact
+  Quantity       -> quantity_ordered  exact
+  State          -> state             exact
+  Sub-Category   -> product_line      SUBSTITUTE (different concept)
+  Customer ID    -> customer_name     SUBSTITUTE
+  Profit         -> MISSING           PROXY (msrp - price_each) * quantity_ordered
+Coverage: 3 exact, 2 substitute, 1 proxy. Proceed?
+```
+
+Classify every needed field into exactly one of:
+
+| Class | Meaning |
+|---|---|
+| exact | Same column, same business meaning |
+| substitute | A column stands in, but the concept differs — say how |
+| proxy | No column exists; an expression was constructed — show the SQL |
+| dropped | Nothing available; charts using it will be degraded or skipped |
+
+Rules:
+
+- This is the **only** confirmation gate in the conversion. Everything downstream stays decide-and-report.
+- Never invent a proxy expression silently. A proxy is a modelling decision the user owns, and it must appear on this table with its SQL before any chart uses it.
+- Skip the gate only when the user named the dataset *and* every field is `exact`. A named dataset still gets the table printed when anything is substitute, proxy, or dropped — naming a dataset authorises the binding, not the guesswork underneath it.
+- On a substitute-data demo the gate is more important, not less: the numbers are known to be foreign, so the mapping is the only record of what they now mean.
+
 ### Step 2: Inspect columns and saved metrics
 
 ```

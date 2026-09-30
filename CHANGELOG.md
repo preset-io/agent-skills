@@ -10,12 +10,14 @@ Releases are tagged `vX.Y.Z`. Install a specific version by pinning the tag in y
 
 ### Changed
 
+- **preset-cli-skills** - corrected the Codex listing metadata so the package passes OpenAI plugin directory validation: `interface.category` is now the supported `Developer Tools` value (`Coding` is not a recognised category), `shortDescription` fits the 30-character subtitle limit, starter prompts are trimmed to the maximum of three, `capabilities` lists real capability labels, and the verified Preset website, support, privacy, and terms URLs are declared. Listing copy no longer points at sibling packages, which keeps it clear of the directory's fair-play rule for model-readable fields.
 - **preset-api-skills** - made gates intent-proportional per the canonical gate policy (`docs/gate-policy.md`): metadata reads and explicitly requested customer-data reads (chart data, samples, distinct values, screenshots, own query history) run directly with parameterized row limits and summarized output; SQL requested by the user and confidently classified as a single-statement SELECT executes without a confirmation stop; result retrieval of approved queries runs directly. Confirmation gates remain for mutations, imports, exports, RBAC, guest tokens, credential-bearing reads, audit downloads, permalinks, cache invalidation, and unclassified SQL. Prerequisite skill chains ("use preset-api, preset-workspaces, preset-superset first") replaced with inline context.
 - **preset-cli-skills** - safety policy loads only before mutations, untrusted-source SQL, unfamiliar workspaces, or broad outputs; added headless/CI guidance (bounded row-returning exports, destination-explicit full exports, interactive-operator rule for destructive ops).
 - Added `scripts/check-gate-policy.mjs` drift check (wired into the smoke test) so package policy files cannot silently diverge from the canonical gate policy.
 
 ### Added
 
+- Added `scripts/build-openai-plugin-zip.mjs` (wired into the smoke test) to preflight a skills-only plugin against OpenAI's documented directory limits and build the submission ZIP, plus `plugins/preset-cli-skills/assets/README.md` recording the listing icon requirements.
 - Added a root `CLAUDE.md` that redirects direct Claude Code repository users to the installable API and MCP packages.
 - Added Codex and Claude marketplace metadata for the installable API package.
 - Added installable **preset-mcp-skills** package with 8 focused Superset MCP workflow skills, client manifests, package docs, tool inventory, and inventory drift check.

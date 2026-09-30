@@ -19,7 +19,11 @@ command -v node >/dev/null || fail "node is required"
 node scripts/validate-agent-skills.mjs
 node scripts/sync-version.mjs --check
 node scripts/check-gate-policy.mjs
-node scripts/build-openai-plugin-zip.mjs --check
+node scripts/build-openai-plugin-zip.mjs
+if command -v unzip >/dev/null; then
+  unzip -tq dist/preset-cli-skills-*-openai.zip >/dev/null || fail "OpenAI plugin ZIP failed integrity check"
+  [ "$(unzip -Z1 dist/preset-cli-skills-*-openai.zip | cut -d/ -f1 | sort -u)" = "preset-cli-skills" ] || fail "OpenAI plugin ZIP must have a single preset-cli-skills/ top-level directory"
+fi
 
 require_file() {
   test -f "$1" || fail "missing file $1"

@@ -17,6 +17,7 @@
 //   node scripts/build-openai-plugin-zip.mjs                  # check + build
 //   node scripts/build-openai-plugin-zip.mjs --check           # preflight only
 //   node scripts/build-openai-plugin-zip.mjs --plugin <name>   # default preset-cli-skills
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -100,6 +101,13 @@ if (!fs.existsSync(pluginDir)) {
   process.exit(1);
 }
 
+// Only git-tracked files are packaged, so local scratch files and secrets never reach the upload.
+const trackedFiles = execFileSync("git", ["ls-files", "-z", "--", path.relative(ROOT, pluginDir)], { cwd: ROOT, encoding: "utf8" })
+  .split("\0")
+  .filter((rel) => rel && fs.statSync(path.join(ROOT, rel), { throwIfNoEntry: false })?.isFile())
+  .sort();
+const isTracked = (abs) => trackedFiles.includes(path.relative(ROOT, abs));
+
 // The portal accepts .codex-plugin/plugin.json directly and converts
 // .claude-plugin/plugin.json into one, adding its own defaults for anything
 // the interface block leaves out. Reading the codex manifest here checks the
@@ -116,6 +124,9 @@ if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(manifest.name ?? "")) {
   fail("name must start with an ASCII letter or digit and use only letters, digits, _ and -.");
 }
 limit("version", manifest.version, 64);
+if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(manifest.version ?? "")) {
+  fail("version must be a semantic version such as 1.2.3.");
+}
 limit("description", manifest.description, 1024);
 limit("author.name", manifest.author?.name, 120);
 
@@ -195,6 +206,7 @@ if (!ui || typeof ui !== "object" || Array.isArray(ui)) {
     if (!/\.(png|jpe?g|webp|svg)$/i.test(String(value))) fail(`interface.${field} must be a PNG, JPEG, WebP or SVG file.`);
     const iconPath = path.join(pluginDir, String(value));
     if (!fs.existsSync(iconPath)) fail(`interface.${field} points at ${value}, which does not exist.`);
+    else if (!isTracked(iconPath)) fail(`interface.${field} points at ${value}, which is not tracked by git and would be left out of the archive.`);
     else if (fs.statSync(iconPath).size > 5 * 1024 * 1024) fail(`interface.${field} exceeds the 5 MiB image limit.`);
   }
 }
@@ -213,12 +225,21 @@ if (!fs.existsSync(skillsDir)) {
       fail(`skills/${entry.name} has no SKILL.md.`);
       continue;
     }
+    if (!isTracked(skillFile)) {
+      fail(`skills/${entry.name}/SKILL.md is not tracked by git and would be left out of the archive.`);
+      continue;
+    }
     const body = fs.readFileSync(skillFile, "utf8");
     if (!body.startsWith("---")) {
       fail(`skills/${entry.name}/SKILL.md must open with YAML frontmatter.`);
       continue;
     }
-    const frontmatter = body.slice(3, body.indexOf("\n---", 3));
+    const close = body.indexOf("\n---", 3);
+    if (close === -1) {
+      fail(`skills/${entry.name}/SKILL.md frontmatter is never closed with ---.`);
+      continue;
+    }
+    const frontmatter = body.slice(3, close);
     for (const key of ["name", "description"]) {
       if (!new RegExp(`^${key}:`, "m").test(frontmatter)) {
         fail(`skills/${entry.name}/SKILL.md frontmatter is missing "${key}".`);
@@ -255,23 +276,14 @@ if (checkOnly) process.exit(0);
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const zipPath = path.join(OUT_DIR, `${pluginName}-${manifest.version}-openai.zip`);
 fs.rmSync(zipPath, { force: true });
-const entries = collectFiles(pluginDir, pluginName);
+const entries = trackedFiles.map((rel) => ({
+  name: `${pluginName}/${path.relative(path.relative(ROOT, pluginDir), rel).split(path.sep).join("/")}`,
+  data: fs.readFileSync(path.join(ROOT, rel)),
+}));
 fs.writeFileSync(zipPath, buildZip(entries));
 const sizeKib = (fs.statSync(zipPath).size / 1024).toFixed(1);
 console.log(`Wrote ${path.relative(ROOT, zipPath)} (${entries.length} files, ${sizeKib} KiB).`);
 console.log("Upload it at https://platform.openai.com/plugins -> Create plugin -> Skills only.");
-
-function collectFiles(dir, prefix) {
-  const out = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-    if (entry.name === ".DS_Store" || entry.name === "__MACOSX") continue;
-    const abs = path.join(dir, entry.name);
-    const rel = `${prefix}/${entry.name}`;
-    if (entry.isDirectory()) out.push(...collectFiles(abs, rel));
-    else if (entry.isFile()) out.push({ name: rel, data: fs.readFileSync(abs) });
-  }
-  return out;
-}
 
 function buildZip(files) {
   const locals = [];

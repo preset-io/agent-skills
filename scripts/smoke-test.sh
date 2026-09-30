@@ -20,9 +20,11 @@ node scripts/validate-agent-skills.mjs
 node scripts/sync-version.mjs --check
 node scripts/check-gate-policy.mjs
 node scripts/build-openai-plugin-zip.mjs
+openai_zip="dist/preset-cli-skills-$(jq -r .version "$CLI_ROOT/.codex-plugin/plugin.json")-openai.zip"
+test -f "$openai_zip" || fail "missing $openai_zip"
 if command -v unzip >/dev/null; then
-  unzip -tq dist/preset-cli-skills-*-openai.zip >/dev/null || fail "OpenAI plugin ZIP failed integrity check"
-  [ "$(unzip -Z1 dist/preset-cli-skills-*-openai.zip | cut -d/ -f1 | sort -u)" = "preset-cli-skills" ] || fail "OpenAI plugin ZIP must have a single preset-cli-skills/ top-level directory"
+  unzip -tq "$openai_zip" >/dev/null || fail "OpenAI plugin ZIP failed integrity check"
+  [ "$(unzip -Z1 "$openai_zip" | cut -d/ -f1 | sort -u)" = "preset-cli-skills" ] || fail "OpenAI plugin ZIP must have a single preset-cli-skills/ top-level directory"
 fi
 
 require_file() {

@@ -1,6 +1,6 @@
 # Preset CLI Skills
 
-This package contains installable Preset CLI skills for OpenAI Codex, Gemini CLI, and direct repository readers.
+This package contains installable Preset CLI skills for OpenAI Codex and direct repository readers.
 
 Use these skills only for explicit Preset CLI work driven through the `sup` CLI (PyPI package `superset-sup`). If the user is working through Preset/Superset MCP tools, use the separate `preset-mcp-skills` package instead. If the user wants direct HTTP, SDK, or `requests`/`curl` code paths, use the separate `preset-api-skills` package instead. Do not switch surfaces unless the user explicitly approves the switch.
 

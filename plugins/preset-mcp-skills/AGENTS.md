@@ -1,6 +1,6 @@
 # Preset MCP Skills
 
-This package contains installable Preset/Superset MCP skills for OpenAI Codex, Gemini CLI, and direct repository readers.
+This package contains installable Preset/Superset MCP skills for OpenAI Codex and direct repository readers.
 
 Use these skills only for Superset MCP tool workflows. Do not use this package for direct Preset Management API, Superset REST API, Snowflake Cortex API, curl, Python requests, exports, or database calls.
 

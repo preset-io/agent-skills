@@ -1,6 +1,6 @@
 # Preset Agent Skills
 
-This package contains installable Preset API skills for OpenAI Codex, Gemini CLI, and direct repository readers.
+This package contains installable Preset API skills for OpenAI Codex and direct repository readers.
 
 Use these skills only for explicit direct Preset Management API, Superset workspace API, and Snowflake Cortex API workflows. Do not use this package for Preset/Superset MCP tool workflows, and do not switch from MCP tools to direct API calls unless the user explicitly approves changing surfaces.
 

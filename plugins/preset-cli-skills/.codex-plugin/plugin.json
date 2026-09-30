@@ -22,22 +22,28 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Preset CLI Skills",
-    "shortDescription": "CLI-only Preset skills (`sup`). Use preset-api-skills for HTTP/SDK code or preset-mcp-skills for MCP-only work.",
-    "longDescription": "Markdown skills for agents driving the Preset `sup` CLI (PyPI package `superset-sup`) for shell one-liners, batch exports, ad-hoc SQL, and CI/CD automation. Includes a non-destructive foundation skill and a separate Phase-5-style mutation skill that gates `push`, `--force`, `--overwrite`, and cross-workspace `sync` behind dry-run/preview and confirmation templates. Use only when the user explicitly asks for `sup`, the Preset CLI, shell automation, or CI scripting. MCP-only tool workflows are intentionally handled by the separate preset-mcp-skills package, and direct HTTP/SDK code paths are intentionally handled by the separate preset-api-skills package; route to whichever surface the user actually asked for.",
+    "shortDescription": "Preset workflows via sup CLI",
+    "longDescription": "Preset CLI Skills teaches coding agents a repeatable way to drive Preset and Apache Superset from the `sup` command line tool (PyPI package `superset-sup`). Use it for shell one-liners, batch asset exports, ad-hoc SQL, and CI/CD automation against a Preset workspace.\n\nThe package contains two skills. `preset-cli` covers the non-destructive foundation: installing and authenticating the CLI, selecting a workspace, choosing an output format, running read-only queries, and exporting charts, dashboards, and datasets as YAML. `preset-cli-mutations` covers state-changing work, including pushing asset YAML, destructive flags such as `--force` and `--overwrite`, and cross-workspace `sync`. It requires a dry run or preview plus an explicit confirmation before any write, and it keeps credentials out of command output.\n\nIntended for data engineers, analytics engineers, and platform teams who already manage Preset or Apache Superset assets as code.\n\nLimitations: the skills assume the `sup` CLI is installed and authenticated in the execution environment, and they act only on workspaces the signed-in user can already reach. They do not bundle credentials, and they do not create or administer Preset accounts.",
     "developerName": "Preset",
-    "category": "Coding",
+    "category": "Developer Tools",
     "capabilities": [
-      "Interactive"
+      "Install and authenticate the sup CLI",
+      "Select and inspect Preset workspaces",
+      "Export charts, dashboards, and datasets as YAML",
+      "Run ad-hoc SQL against a workspace",
+      "Push asset YAML to a workspace",
+      "Sync assets between workspaces"
     ],
     "websiteURL": "https://preset.io/",
+    "supportURL": "https://preset.io/contact/",
+    "privacyPolicyURL": "https://preset.io/privacy-policy/",
+    "termsOfServiceURL": "https://preset.io/terms-of-service/",
     "defaultPrompt": [
-      "Install the Preset sup CLI",
-      "Authenticate the sup CLI",
-      "Run an ad-hoc SQL query through sup",
-      "Export charts and dashboards as YAML with sup",
-      "Push chart YAML to a Preset workspace",
-      "Sync assets between Preset workspaces"
+      "Install and authenticate the Preset sup CLI",
+      "Export my Preset dashboards and charts as YAML",
+      "Run a SQL query against my Preset workspace"
     ],
-    "brandColor": "#00A5B5"
+    "brandColor": "#00A5B5",
+    "brandColorDark": "#00A5B5"
   }
 }

@@ -19,6 +19,13 @@ command -v node >/dev/null || fail "node is required"
 node scripts/validate-agent-skills.mjs
 node scripts/sync-version.mjs --check
 node scripts/check-gate-policy.mjs
+node scripts/build-openai-plugin-zip.mjs
+openai_zip="dist/preset-cli-skills-$(jq -r .version "$CLI_ROOT/.codex-plugin/plugin.json")-openai.zip"
+test -f "$openai_zip" || fail "missing $openai_zip"
+if command -v unzip >/dev/null; then
+  unzip -tq "$openai_zip" >/dev/null || fail "OpenAI plugin ZIP failed integrity check"
+  [ "$(unzip -Z1 "$openai_zip" | cut -d/ -f1 | sort -u)" = "preset-cli-skills" ] || fail "OpenAI plugin ZIP must have a single preset-cli-skills/ top-level directory"
+fi
 
 require_file() {
   test -f "$1" || fail "missing file $1"
@@ -535,9 +542,14 @@ required_cli_skills=(
 
 require_jq '.name == "preset-cli-skills"' "$CLI_ROOT/.codex-plugin/plugin.json"
 require_jq '.description | contains("Use only for CLI workflows")' "$CLI_ROOT/.codex-plugin/plugin.json"
-require_jq '.interface.shortDescription | contains("CLI-only")' "$CLI_ROOT/.codex-plugin/plugin.json"
-require_jq '.interface.longDescription | contains("preset-api-skills")' "$CLI_ROOT/.codex-plugin/plugin.json"
-require_jq '.interface.longDescription | contains("preset-mcp-skills")' "$CLI_ROOT/.codex-plugin/plugin.json"
+# The OpenAI directory caps the listing subtitle at 30 characters and treats
+# model-readable listing fields that steer selection between plugins as a
+# fair-play problem, so the sibling-package routing lives in .description (above)
+# and the skill descriptions rather than in the public listing copy.
+require_jq '.interface.shortDescription == "Preset workflows via sup CLI"' "$CLI_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.category == "Developer Tools"' "$CLI_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.longDescription | contains("`sup` command line tool")' "$CLI_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.developerName == "Preset"' "$CLI_ROOT/.codex-plugin/plugin.json"
 require_jq '.skills == "./skills/"' "$CLI_ROOT/.codex-plugin/plugin.json"
 require_jq '.name == "preset-cli-skills"' "$CLI_ROOT/.claude-plugin/plugin.json"
 require_jq '.description | contains("Use only for CLI workflows")' "$CLI_ROOT/.claude-plugin/plugin.json"

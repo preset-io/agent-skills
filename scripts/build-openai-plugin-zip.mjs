@@ -120,6 +120,10 @@ if (!fs.existsSync(codexManifestPath)) {
   console.error(`Missing ${path.relative(ROOT, codexManifestPath)}`);
   process.exit(1);
 }
+if (!isTracked(codexManifestPath)) {
+  console.error(`${path.relative(ROOT, codexManifestPath)} is not tracked by git and would be left out of the archive.`);
+  process.exit(1);
+}
 const manifest = JSON.parse(fs.readFileSync(codexManifestPath, "utf8"));
 
 limit("name", manifest.name, 64);
@@ -342,18 +346,24 @@ function checkIcon(label, value) {
   if (!fs.existsSync(iconPath)) return fail(`${label} points at ${value}, which does not exist.`);
   if (!isTracked(iconPath)) return fail(`${label} points at ${value}, which is not tracked by git and would be left out of the archive.`);
   if (fs.statSync(iconPath).size > 5 * 1024 * 1024) return fail(`${label} exceeds the 5 MiB image limit.`);
+  const format = { ".png": "png", ".jpg": "jpeg", ".jpeg": "jpeg", ".webp": "webp", ".svg": "svg" }[path.extname(value).toLowerCase()];
+  if (!format) return fail(`${label} must end in .png, .jpg, .jpeg, .webp or .svg.`);
   const size = imageSize(fs.readFileSync(iconPath));
   if (!size) return fail(`${label} must be a PNG, JPEG, WebP or SVG image with readable dimensions.`);
-  const { width, height, raster } = size;
+  if (size.error) return fail(`${label}: ${size.error}`);
+  if (size.format !== format) return fail(`${label} has a ${path.extname(value)} extension but contains ${size.format.toUpperCase()} data.`);
+  const { width, height } = size;
+  const raster = format !== "svg";
+  if (!(width > 0 && height > 0)) return fail(`${label} dimensions must be positive.`);
   if (width !== height) fail(`${label} is ${width}x${height}; icons must be square.`);
   if (Math.min(width, height) < 48) fail(`${label} is ${width}x${height}; icons must be at least 48x48.`);
   if (raster && Math.max(width, height) > 4096) fail(`${label} is ${width}x${height}; raster icons must be at most 4096px per side.`);
 }
 
-// Reads pixel dimensions from PNG, JPEG and WebP headers, or the SVG width/height or viewBox.
+// Detects the image format and reads dimensions from PNG, JPEG and WebP headers, or the SVG width/height or viewBox.
 function imageSize(buf) {
   if (buf.length >= 24 && buf.readUInt32BE(0) === 0x89504e47 && buf.toString("latin1", 12, 16) === "IHDR") {
-    return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20), raster: true };
+    return { format: "png", width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
   }
   if (buf.length >= 4 && buf[0] === 0xff && buf[1] === 0xd8) {
     let i = 2;
@@ -361,7 +371,7 @@ function imageSize(buf) {
       const marker = buf[i + 1];
       if (marker === 0xff) { i += 1; continue; }
       if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
-        return { width: buf.readUInt16BE(i + 7), height: buf.readUInt16BE(i + 5), raster: true };
+        return { format: "jpeg", width: buf.readUInt16BE(i + 7), height: buf.readUInt16BE(i + 5) };
       }
       i += 2 + buf.readUInt16BE(i + 2);
     }
@@ -369,24 +379,27 @@ function imageSize(buf) {
   }
   if (buf.length >= 30 && buf.toString("latin1", 0, 4) === "RIFF" && buf.toString("latin1", 8, 12) === "WEBP") {
     const chunk = buf.toString("latin1", 12, 16);
-    if (chunk === "VP8 ") return { width: buf.readUInt16LE(26) & 0x3fff, height: buf.readUInt16LE(28) & 0x3fff, raster: true };
+    if (chunk === "VP8 ") return { format: "webp", width: buf.readUInt16LE(26) & 0x3fff, height: buf.readUInt16LE(28) & 0x3fff };
     if (chunk === "VP8L") {
       const bits = buf.readUInt32LE(21);
-      return { width: (bits & 0x3fff) + 1, height: ((bits >>> 14) & 0x3fff) + 1, raster: true };
+      return { format: "webp", width: (bits & 0x3fff) + 1, height: ((bits >>> 14) & 0x3fff) + 1 };
     }
-    if (chunk === "VP8X") return { width: buf.readUIntLE(24, 3) + 1, height: buf.readUIntLE(27, 3) + 1, raster: true };
+    if (chunk === "VP8X") return { format: "webp", width: buf.readUIntLE(24, 3) + 1, height: buf.readUIntLE(27, 3) + 1 };
     return null;
   }
-  const tag = buf.toString("utf8").match(/<svg\b[^>]*>/i)?.[0];
-  if (!tag) return null;
+  const text = buf.toString("utf8").replace(/^\uFEFF?(\s*(<\?xml[\s\S]*?\?>|<!--[\s\S]*?-->|<!DOCTYPE[^>]*>))*\s*/i, "");
+  const tag = text.match(/^<svg\b[^>]*>/i)?.[0];
+  if (!tag) return /<svg\b/i.test(text) ? { error: "SVG root element must be <svg>." } : null;
   const attr = (name) => tag.match(new RegExp(`\\s${name}\\s*=\\s*["']([^"']*)["']`, "i"))?.[1];
-  const numeric = (v) => (v !== undefined && /^\s*[\d.]+(px)?\s*$/.test(v) ? parseFloat(v) : undefined);
-  const width = numeric(attr("width"));
-  const height = numeric(attr("height"));
-  if (width !== undefined && height !== undefined) return { width, height, raster: false };
+  const number = (v) => (/^\s*\d+(\.\d+)?\s*$/.test(v) ? Number(v) : NaN);
+  const [w, h] = [attr("width"), attr("height")];
+  if ((w !== undefined && Number.isNaN(number(w))) || (h !== undefined && Number.isNaN(number(h)))) {
+    return { error: "SVG width and height must be numeric and omit units and percentages." };
+  }
+  if (w !== undefined && h !== undefined) return { format: "svg", width: number(w), height: number(h) };
   const box = attr("viewBox")?.trim().split(/[\s,]+/).map(Number);
-  if (box?.length === 4 && box.every(Number.isFinite)) return { width: box[2], height: box[3], raster: false };
-  return null;
+  if (box?.length === 4 && box.every(Number.isFinite)) return { format: "svg", width: box[2], height: box[3] };
+  return { error: "SVG must define a numeric viewBox or numeric width and height." };
 }
 
 function crc32(buffer) {

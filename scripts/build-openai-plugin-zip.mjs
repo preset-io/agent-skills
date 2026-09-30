@@ -176,7 +176,7 @@ if (!ui || typeof ui !== "object" || Array.isArray(ui)) {
     const value = ui[field];
     if (value === undefined) continue; // optional for skills-only submissions
     limit(`interface.${field}`, value, max);
-    if (!String(value).startsWith("https://")) fail(`interface.${field} must be an HTTPS URL.`);
+    if (!isHttpsUrl(value)) fail(`interface.${field} must be an HTTPS URL with a hostname and no credentials or whitespace.`);
   }
 
   for (const field of ["brandColor", "brandColorDark"]) {
@@ -338,6 +338,16 @@ function buildZip(files) {
   return Buffer.concat([...locals, centralBuffer, end]);
 }
 
+function isHttpsUrl(value) {
+  if (typeof value !== "string" || /\s/.test(value)) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname !== "" && url.username === "" && url.password === "";
+  } catch {
+    return false;
+  }
+}
+
 function checkIcon(label, value) {
   if (typeof value !== "string" || !value.startsWith("./")) {
     fail(`${label} must be a ./-prefixed path relative to the plugin root.`);
@@ -352,6 +362,7 @@ function checkIcon(label, value) {
   const size = imageSize(fs.readFileSync(iconPath));
   if (!size) return fail(`${label} must be a PNG, JPEG, WebP or SVG image with readable dimensions.`);
   if (size.error) return fail(`${label}: ${size.error}`);
+  if (size.truncated) return fail(`${label} appears truncated; re-export the image.`);
   if (size.format !== format) return fail(`${label} has a ${path.extname(value)} extension but contains ${size.format.toUpperCase()} data.`);
   const { width, height } = size;
   const raster = format !== "svg";
@@ -364,7 +375,8 @@ function checkIcon(label, value) {
 // Detects the image format and reads dimensions from PNG, JPEG and WebP headers, or the SVG width/height or viewBox.
 function imageSize(buf) {
   if (buf.length >= 24 && buf.readUInt32BE(0) === 0x89504e47 && buf.toString("latin1", 12, 16) === "IHDR") {
-    return { format: "png", width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+    const truncated = buf.length < 45 || buf.toString("latin1", buf.length - 8, buf.length - 4) !== "IEND";
+    return { format: "png", width: buf.readUInt32BE(16), height: buf.readUInt32BE(20), truncated };
   }
   if (buf.length >= 4 && buf[0] === 0xff && buf[1] === 0xd8) {
     let i = 2;
@@ -372,20 +384,26 @@ function imageSize(buf) {
       const marker = buf[i + 1];
       if (marker === 0xff) { i += 1; continue; }
       if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
-        return { format: "jpeg", width: buf.readUInt16BE(i + 7), height: buf.readUInt16BE(i + 5) };
+        const truncated = buf.lastIndexOf(Buffer.from([0xff, 0xd9])) <= i;
+        return { format: "jpeg", width: buf.readUInt16BE(i + 7), height: buf.readUInt16BE(i + 5), truncated };
       }
       i += 2 + buf.readUInt16BE(i + 2);
     }
     return null;
   }
-  if (buf.length >= 30 && buf.toString("latin1", 0, 4) === "RIFF" && buf.toString("latin1", 8, 12) === "WEBP") {
+  if (buf.length >= 16 && buf.toString("latin1", 0, 4) === "RIFF" && buf.toString("latin1", 8, 12) === "WEBP") {
+    const truncated = buf.readUInt32LE(4) + 8 > buf.length;
     const chunk = buf.toString("latin1", 12, 16);
-    if (chunk === "VP8 ") return { format: "webp", width: buf.readUInt16LE(26) & 0x3fff, height: buf.readUInt16LE(28) & 0x3fff };
-    if (chunk === "VP8L") {
-      const bits = buf.readUInt32LE(21);
-      return { format: "webp", width: (bits & 0x3fff) + 1, height: ((bits >>> 14) & 0x3fff) + 1 };
+    if (chunk === "VP8 " && buf.length >= 30) {
+      return { format: "webp", width: buf.readUInt16LE(26) & 0x3fff, height: buf.readUInt16LE(28) & 0x3fff, truncated };
     }
-    if (chunk === "VP8X") return { format: "webp", width: buf.readUIntLE(24, 3) + 1, height: buf.readUIntLE(27, 3) + 1 };
+    if (chunk === "VP8L" && buf.length >= 25) {
+      const bits = buf.readUInt32LE(21);
+      return { format: "webp", width: (bits & 0x3fff) + 1, height: ((bits >>> 14) & 0x3fff) + 1, truncated };
+    }
+    if (chunk === "VP8X" && buf.length >= 30) {
+      return { format: "webp", width: buf.readUIntLE(24, 3) + 1, height: buf.readUIntLE(27, 3) + 1, truncated };
+    }
     return null;
   }
   const text = buf.toString("utf8").replace(/^\uFEFF?(\s*(<\?xml[\s\S]*?\?>|<!--[\s\S]*?-->|<!DOCTYPE[^>]*>))*\s*/i, "");

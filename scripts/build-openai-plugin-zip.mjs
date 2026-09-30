@@ -349,8 +349,8 @@ function isHttpsUrl(value) {
 }
 
 function checkIcon(label, value) {
-  if (typeof value !== "string" || !value.startsWith("./")) {
-    fail(`${label} must be a ./-prefixed path relative to the plugin root.`);
+  if (typeof value !== "string" || !value.startsWith("./") || value.split(/[\\/]/).includes("..")) {
+    fail(`${label} must be a ./-prefixed path relative to the plugin root with no .. segments.`);
     return;
   }
   const iconPath = path.join(pluginDir, value);
@@ -372,10 +372,10 @@ function checkIcon(label, value) {
   if (raster && Math.max(width, height) > 4096) fail(`${label} is ${width}x${height}; raster icons must be at most 4096px per side.`);
 }
 
-// Detects the image format and reads dimensions from PNG, JPEG and WebP headers, or the SVG width/height or viewBox.
+// Detects the format, dimensions and obvious truncation; full decoding is left to the portal's own validation.
 function imageSize(buf) {
   if (buf.length >= 24 && buf.readUInt32BE(0) === 0x89504e47 && buf.toString("latin1", 12, 16) === "IHDR") {
-    const truncated = buf.length < 45 || buf.toString("latin1", buf.length - 8, buf.length - 4) !== "IEND";
+    const truncated = buf.indexOf("IDAT", 33, "latin1") === -1 || buf.toString("latin1", buf.length - 8, buf.length - 4) !== "IEND";
     return { format: "png", width: buf.readUInt32BE(16), height: buf.readUInt32BE(20), truncated };
   }
   if (buf.length >= 4 && buf[0] === 0xff && buf[1] === 0xd8) {
@@ -392,7 +392,7 @@ function imageSize(buf) {
     return null;
   }
   if (buf.length >= 16 && buf.toString("latin1", 0, 4) === "RIFF" && buf.toString("latin1", 8, 12) === "WEBP") {
-    const truncated = buf.readUInt32LE(4) + 8 > buf.length;
+    const truncated = buf.readUInt32LE(4) + 8 > buf.length || buf.readUInt32LE(16) === 0 || 20 + buf.readUInt32LE(16) > buf.length;
     const chunk = buf.toString("latin1", 12, 16);
     if (chunk === "VP8 " && buf.length >= 30) {
       return { format: "webp", width: buf.readUInt16LE(26) & 0x3fff, height: buf.readUInt16LE(28) & 0x3fff, truncated };
@@ -409,6 +409,7 @@ function imageSize(buf) {
   const text = buf.toString("utf8").replace(/^\uFEFF?(\s*(<\?xml[\s\S]*?\?>|<!--[\s\S]*?-->|<!DOCTYPE[^>]*>))*\s*/i, "");
   const tag = text.match(/^<svg\b[^>]*>/i)?.[0];
   if (!tag) return /<svg\b/i.test(text) ? { error: "SVG root element must be <svg>." } : null;
+  if (!/\/>\s*$/.test(tag) && !/<\/svg\s*>(\s|<!--[\s\S]*?-->)*$/i.test(text)) return { error: "SVG root element is not closed." };
   const attr = (name) => tag.match(new RegExp(`\\s${name}\\s*=\\s*["']([^"']*)["']`, "i"))?.[1];
   const number = (v) => (/^\s*\d+(\.\d+)?\s*$/.test(v) ? Number(v) : NaN);
   const [w, h] = [attr("width"), attr("height")];

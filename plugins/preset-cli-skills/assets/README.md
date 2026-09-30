@@ -30,7 +30,9 @@ in `.codex-plugin/plugin.json`:
 
 `node scripts/build-openai-plugin-zip.mjs --check` warns while these fields are
 unset and fails if any icon field, including a dark variant, points at a file
-that is missing, untracked, not square, or outside the size limits above.
+that is missing, untracked, not square, or outside the size limits above. It
+reads image headers and catches obvious truncation; the portal still decodes the
+image itself on upload.
 
 Alternatively the primary icon can be uploaded directly in the submission
 dashboard, which satisfies the "App icon required" warning without adding a file

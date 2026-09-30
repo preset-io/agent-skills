@@ -224,6 +224,9 @@ if (!ui || typeof ui !== "object" || Array.isArray(ui)) {
 // A skills-only archive needs at least one skill at skills/<name>/SKILL.md
 // (archive_plugin_files_missing).
 const skillsDir = path.join(pluginDir, "skills");
+if (manifest.skills !== undefined && (typeof manifest.skills !== "string" || !manifest.skills.startsWith("./") || manifest.skills.split(/[\\/]/).includes("..") || path.resolve(pluginDir, manifest.skills) !== skillsDir)) {
+  fail(`skills must point at ./skills/ (got ${JSON.stringify(manifest.skills)}).`);
+}
 let skillCount = 0;
 if (!fs.existsSync(skillsDir)) {
   fail("No skills/ directory. A skills-only upload needs at least one skill.");
@@ -241,25 +244,15 @@ if (!fs.existsSync(skillsDir)) {
       fail(`skills/${entry.name}/SKILL.md is not tracked by git and would be left out of the archive.`);
       continue;
     }
-    const body = fs.readFileSync(skillFile, "utf8");
-    if (!body.startsWith("---")) {
-      fail(`skills/${entry.name}/SKILL.md must open with YAML frontmatter.`);
-      continue;
-    }
-    const close = body.indexOf("\n---", 3);
-    if (close === -1) {
-      fail(`skills/${entry.name}/SKILL.md frontmatter is never closed with ---.`);
-      continue;
-    }
-    const frontmatter = body.slice(3, close);
-    for (const key of ["name", "description"]) {
-      if (!new RegExp(`^${key}:`, "m").test(frontmatter)) {
-        fail(`skills/${entry.name}/SKILL.md frontmatter is missing "${key}".`);
-      }
-    }
     skillCount += 1;
   }
   if (skillCount === 0) fail("skills/ contains no skill directories.");
+  // Frontmatter, name and description rules are owned by the shared skill validator.
+  try {
+    execFileSync(process.execPath, [path.join(ROOT, "scripts", "validate-agent-skills.mjs"), path.relative(ROOT, skillsDir)], { cwd: ROOT, stdio: "pipe" });
+  } catch (error) {
+    fail(`Skill validation failed:\n${String(error.stderr || error.message).trim()}`);
+  }
 }
 
 for (const rel of EXCLUDED_FILES) {

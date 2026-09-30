@@ -19,6 +19,7 @@
 //   node scripts/build-openai-plugin-zip.mjs --plugin <name>   # default preset-cli-skills
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import zlib from "node:zlib";
@@ -247,11 +248,24 @@ if (!fs.existsSync(skillsDir)) {
     skillCount += 1;
   }
   if (skillCount === 0) fail("skills/ contains no skill directories.");
-  // Frontmatter, name and description rules are owned by the shared skill validator.
+  // The shared skill validator runs on a copy of the tracked files, so it sees exactly what the archive will contain.
+  const stageDir = fs.mkdtempSync(path.join(os.tmpdir(), "openai-plugin-skills-"));
+  const skillsRel = path.relative(ROOT, skillsDir) + path.sep;
   try {
-    execFileSync(process.execPath, [path.join(ROOT, "scripts", "validate-agent-skills.mjs"), path.relative(ROOT, skillsDir)], { cwd: ROOT, stdio: "pipe" });
+    for (const rel of trackedFiles.filter((f) => f.startsWith(skillsRel))) {
+      const target = path.join(stageDir, "skills", rel.slice(skillsRel.length));
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(path.join(ROOT, rel), target);
+    }
+    execFileSync(process.execPath, [path.join(ROOT, "scripts", "validate-agent-skills.mjs"), path.join(stageDir, "skills")], { cwd: ROOT, stdio: "pipe" });
   } catch (error) {
-    fail(`Skill validation failed:\n${String(error.stderr || error.message).trim()}`);
+    const staged = path.join(stageDir, "skills");
+    const output = String(error.stderr || error.message).trim()
+      .split(path.relative(ROOT, staged)).join(skillsRel.slice(0, -1))
+      .split(staged).join(skillsRel.slice(0, -1));
+    fail(`Skill validation failed:\n${output}`);
+  } finally {
+    fs.rmSync(stageDir, { recursive: true, force: true });
   }
 }
 

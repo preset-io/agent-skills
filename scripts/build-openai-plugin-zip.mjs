@@ -52,6 +52,9 @@ const EXCLUDED_FILES = [
   ".claude-plugin/marketplace.json",
 ];
 
+// 1980-01-01 00:00, the earliest valid DOS timestamp (a zero date has month 0).
+const DOS_EPOCH = (0x0021 << 16) >>> 0;
+
 const CRC_TABLE = (() => {
   const table = new Int32Array(256);
   for (let i = 0; i < 256; i += 1) {
@@ -66,6 +69,10 @@ const args = process.argv.slice(2);
 const checkOnly = args.includes("--check");
 const pluginArg = args.indexOf("--plugin");
 const pluginName = pluginArg === -1 ? "preset-cli-skills" : args[pluginArg + 1];
+if (!pluginName || pluginName.startsWith("--")) {
+  console.error("Usage: node scripts/build-openai-plugin-zip.mjs [--check] [--plugin <name>]");
+  process.exit(1);
+}
 const pluginDir = path.join(ROOT, "plugins", pluginName);
 
 const errors = [];
@@ -185,6 +192,7 @@ if (!ui || typeof ui !== "object" || Array.isArray(ui)) {
       continue;
     }
     if (!String(value).startsWith("./")) fail(`interface.${field} must be a ./-prefixed path relative to the plugin root.`);
+    if (!/\.(png|jpe?g|webp|svg)$/i.test(String(value))) fail(`interface.${field} must be a PNG, JPEG, WebP or SVG file.`);
     const iconPath = path.join(pluginDir, String(value));
     if (!fs.existsSync(iconPath)) fail(`interface.${field} points at ${value}, which does not exist.`);
     else if (fs.statSync(iconPath).size > 5 * 1024 * 1024) fail(`interface.${field} exceeds the 5 MiB image limit.`);
@@ -279,7 +287,7 @@ function buildZip(files) {
     local.writeUInt16LE(20, 4); // version needed
     local.writeUInt16LE(0x0800, 6); // UTF-8 filename
     local.writeUInt16LE(8, 8); // deflate
-    local.writeUInt32LE(0, 10); // mtime/mdate: fixed for reproducible archives
+    local.writeUInt32LE(DOS_EPOCH, 10); // mtime/mdate: fixed for reproducible archives
     local.writeUInt32LE(crc, 14);
     local.writeUInt32LE(compressed.length, 18);
     local.writeUInt32LE(file.data.length, 22);
@@ -292,7 +300,7 @@ function buildZip(files) {
     entry.writeUInt16LE(20, 6); // version needed
     entry.writeUInt16LE(0x0800, 8);
     entry.writeUInt16LE(8, 10);
-    entry.writeUInt32LE(0, 12);
+    entry.writeUInt32LE(DOS_EPOCH, 12);
     entry.writeUInt32LE(crc, 16);
     entry.writeUInt32LE(compressed.length, 20);
     entry.writeUInt32LE(file.data.length, 24);

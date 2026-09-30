@@ -105,7 +105,8 @@ if (!fs.existsSync(pluginDir)) {
 const trackedFiles = [];
 for (const rel of execFileSync("git", ["ls-files", "-z", "--", path.relative(ROOT, pluginDir)], { cwd: ROOT, encoding: "utf8" }).split("\0")) {
   const stat = rel ? fs.lstatSync(path.join(ROOT, rel), { throwIfNoEntry: false }) : undefined;
-  if (stat?.isSymbolicLink()) fail(`${rel} is a symlink; the archive only accepts regular files.`);
+  if (rel && !stat) fail(`${rel} is tracked by git but missing from the working tree.`);
+  else if (stat?.isSymbolicLink()) fail(`${rel} is a symlink; the archive only accepts regular files.`);
   else if (stat?.isFile()) trackedFiles.push(rel);
 }
 trackedFiles.sort();
@@ -254,8 +255,8 @@ if (!fs.existsSync(skillsDir)) {
 }
 
 for (const rel of EXCLUDED_FILES) {
-  if (fs.existsSync(path.join(pluginDir, rel))) {
-    fail(`${rel} must not be present in a skills-only upload. Submit MCP servers through the With MCP path instead.`);
+  if (isTracked(path.join(pluginDir, rel))) {
+    fail(`${rel} must not be included in a skills-only upload. Submit MCP servers through the With MCP path instead.`);
   }
 }
 if (manifest.mcpServers !== undefined || manifest.apps !== undefined) {

@@ -83,7 +83,7 @@ function fail(message) {
 }
 
 function limit(label, value, max) {
-  if (typeof value !== "string" || value.length === 0) {
+  if (typeof value !== "string" || value.trim().length === 0) {
     fail(`${label} is required and must be a non-empty string.`);
     return;
   }
@@ -146,7 +146,7 @@ if (!ui || typeof ui !== "object" || Array.isArray(ui)) {
     fail(`interface.defaultPrompt has ${prompts.length} entries; at most 3 are allowed.`);
   }
   prompts.forEach((p, i) => limit(`interface.defaultPrompt[${i}]`, p, 128));
-  if (new Set(prompts.map((p) => String(p).trim().toLowerCase())).size !== prompts.length) {
+  if (new Set(prompts.map((p) => String(p).normalize("NFKC").replace(/\s+/g, " ").trim().toLowerCase())).size !== prompts.length) {
     fail("interface.defaultPrompt entries must be unique.");
   }
   for (const p of prompts) {

@@ -101,11 +101,14 @@ if (!fs.existsSync(pluginDir)) {
   process.exit(1);
 }
 
-// Only git-tracked files are packaged, so local scratch files and secrets never reach the upload.
-const trackedFiles = execFileSync("git", ["ls-files", "-z", "--", path.relative(ROOT, pluginDir)], { cwd: ROOT, encoding: "utf8" })
-  .split("\0")
-  .filter((rel) => rel && fs.statSync(path.join(ROOT, rel), { throwIfNoEntry: false })?.isFile())
-  .sort();
+// Only git-tracked regular files are packaged, so local scratch files and secrets never reach the upload.
+const trackedFiles = [];
+for (const rel of execFileSync("git", ["ls-files", "-z", "--", path.relative(ROOT, pluginDir)], { cwd: ROOT, encoding: "utf8" }).split("\0")) {
+  const stat = rel ? fs.lstatSync(path.join(ROOT, rel), { throwIfNoEntry: false }) : undefined;
+  if (stat?.isSymbolicLink()) fail(`${rel} is a symlink; the archive only accepts regular files.`);
+  else if (stat?.isFile()) trackedFiles.push(rel);
+}
+trackedFiles.sort();
 const isTracked = (abs) => trackedFiles.includes(path.relative(ROOT, abs));
 
 // The portal accepts .codex-plugin/plugin.json directly and converts
@@ -191,10 +194,11 @@ if (!ui || typeof ui !== "object" || Array.isArray(ui)) {
 
   // logo is the primary listing icon; composerIcon is shown in the composer.
   // Codex-format package validation asks for both, and the dashboard requires a
-  // primary icon before the draft can be submitted.
-  for (const field of ["logo", "composerIcon"]) {
+  // primary icon before the draft can be submitted. Dark variants are optional.
+  for (const field of ["logo", "composerIcon", "logoDark", "composerIconDark"]) {
     const value = ui[field];
     if (value === undefined) {
+      if (field.endsWith("Dark")) continue;
       warnings.push(
         `interface.${field} is not set. Add a square PNG, JPEG, WebP or SVG of at least 48x48 ` +
         `(at most 5 MiB, raster at most 4096px per side) under plugins/${pluginName}/assets/ and ` +
@@ -202,12 +206,7 @@ if (!ui || typeof ui !== "object" || Array.isArray(ui)) {
       );
       continue;
     }
-    if (!String(value).startsWith("./")) fail(`interface.${field} must be a ./-prefixed path relative to the plugin root.`);
-    if (!/\.(png|jpe?g|webp|svg)$/i.test(String(value))) fail(`interface.${field} must be a PNG, JPEG, WebP or SVG file.`);
-    const iconPath = path.join(pluginDir, String(value));
-    if (!fs.existsSync(iconPath)) fail(`interface.${field} points at ${value}, which does not exist.`);
-    else if (!isTracked(iconPath)) fail(`interface.${field} points at ${value}, which is not tracked by git and would be left out of the archive.`);
-    else if (fs.statSync(iconPath).size > 5 * 1024 * 1024) fail(`interface.${field} exceeds the 5 MiB image limit.`);
+    checkIcon(`interface.${field}`, value);
   }
 }
 
@@ -332,6 +331,62 @@ function buildZip(files) {
   end.writeUInt32LE(centralBuffer.length, 12);
   end.writeUInt32LE(offset, 16);
   return Buffer.concat([...locals, centralBuffer, end]);
+}
+
+function checkIcon(label, value) {
+  if (typeof value !== "string" || !value.startsWith("./")) {
+    fail(`${label} must be a ./-prefixed path relative to the plugin root.`);
+    return;
+  }
+  const iconPath = path.join(pluginDir, value);
+  if (!fs.existsSync(iconPath)) return fail(`${label} points at ${value}, which does not exist.`);
+  if (!isTracked(iconPath)) return fail(`${label} points at ${value}, which is not tracked by git and would be left out of the archive.`);
+  if (fs.statSync(iconPath).size > 5 * 1024 * 1024) return fail(`${label} exceeds the 5 MiB image limit.`);
+  const size = imageSize(fs.readFileSync(iconPath));
+  if (!size) return fail(`${label} must be a PNG, JPEG, WebP or SVG image with readable dimensions.`);
+  const { width, height, raster } = size;
+  if (width !== height) fail(`${label} is ${width}x${height}; icons must be square.`);
+  if (Math.min(width, height) < 48) fail(`${label} is ${width}x${height}; icons must be at least 48x48.`);
+  if (raster && Math.max(width, height) > 4096) fail(`${label} is ${width}x${height}; raster icons must be at most 4096px per side.`);
+}
+
+// Reads pixel dimensions from PNG, JPEG and WebP headers, or the SVG width/height or viewBox.
+function imageSize(buf) {
+  if (buf.length >= 24 && buf.readUInt32BE(0) === 0x89504e47 && buf.toString("latin1", 12, 16) === "IHDR") {
+    return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20), raster: true };
+  }
+  if (buf.length >= 4 && buf[0] === 0xff && buf[1] === 0xd8) {
+    let i = 2;
+    while (i + 9 < buf.length && buf[i] === 0xff) {
+      const marker = buf[i + 1];
+      if (marker === 0xff) { i += 1; continue; }
+      if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
+        return { width: buf.readUInt16BE(i + 7), height: buf.readUInt16BE(i + 5), raster: true };
+      }
+      i += 2 + buf.readUInt16BE(i + 2);
+    }
+    return null;
+  }
+  if (buf.length >= 30 && buf.toString("latin1", 0, 4) === "RIFF" && buf.toString("latin1", 8, 12) === "WEBP") {
+    const chunk = buf.toString("latin1", 12, 16);
+    if (chunk === "VP8 ") return { width: buf.readUInt16LE(26) & 0x3fff, height: buf.readUInt16LE(28) & 0x3fff, raster: true };
+    if (chunk === "VP8L") {
+      const bits = buf.readUInt32LE(21);
+      return { width: (bits & 0x3fff) + 1, height: ((bits >>> 14) & 0x3fff) + 1, raster: true };
+    }
+    if (chunk === "VP8X") return { width: buf.readUIntLE(24, 3) + 1, height: buf.readUIntLE(27, 3) + 1, raster: true };
+    return null;
+  }
+  const tag = buf.toString("utf8").match(/<svg\b[^>]*>/i)?.[0];
+  if (!tag) return null;
+  const attr = (name) => tag.match(new RegExp(`\\s${name}\\s*=\\s*["']([^"']*)["']`, "i"))?.[1];
+  const numeric = (v) => (v !== undefined && /^\s*[\d.]+(px)?\s*$/.test(v) ? parseFloat(v) : undefined);
+  const width = numeric(attr("width"));
+  const height = numeric(attr("height"));
+  if (width !== undefined && height !== undefined) return { width, height, raster: false };
+  const box = attr("viewBox")?.trim().split(/[\s,]+/).map(Number);
+  if (box?.length === 4 && box.every(Number.isFinite)) return { width: box[2], height: box[3], raster: false };
+  return null;
 }
 
 function crc32(buffer) {

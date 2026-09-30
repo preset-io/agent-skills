@@ -29,7 +29,8 @@ in `.codex-plugin/plugin.json`:
 ```
 
 `node scripts/build-openai-plugin-zip.mjs --check` warns while these fields are
-unset and fails if they point at a file that is missing or oversized.
+unset and fails if any icon field, including a dark variant, points at a file
+that is missing, untracked, not square, or outside the size limits above.
 
 Alternatively the primary icon can be uploaded directly in the submission
 dashboard, which satisfies the "App icon required" warning without adding a file

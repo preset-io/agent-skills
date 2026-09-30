@@ -91,8 +91,12 @@ function limit(label, value, max) {
   if (value.length > max) {
     fail(`${label} is ${value.length} characters; the directory limit is ${max}.`);
   }
-  if (label !== "interface.longDescription" && /[\r\n]/.test(value)) {
+  const multiline = label === "interface.longDescription" || label === "description";
+  if (!multiline && /[\r\n]/.test(value)) {
     fail(`${label} must fit on one line.`);
+  }
+  if (/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F-\u009F\u2028\u2029]/.test(value)) {
+    fail(`${label} contains a control character or Unicode line separator.`);
   }
 }
 
@@ -132,7 +136,9 @@ if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(manifest.name ?? "")) {
   fail("name must start with an ASCII letter or digit and use only letters, digits, _ and -.");
 }
 limit("version", manifest.version, 64);
-if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(manifest.version ?? "")) {
+// Official semver.org grammar: no leading zeros in numeric identifiers, no empty identifiers.
+const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+if (!SEMVER.test(manifest.version ?? "")) {
   fail("version must be a semantic version such as 1.2.3.");
 }
 limit("description", manifest.description, 1024);
@@ -224,6 +230,8 @@ if (!fs.existsSync(skillsDir)) {
 } else {
   for (const entry of fs.readdirSync(skillsDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
+    const skillRel = path.relative(ROOT, path.join(skillsDir, entry.name)) + path.sep;
+    if (!trackedFiles.some((rel) => rel.startsWith(skillRel))) continue; // untracked scratch; never packaged
     const skillFile = path.join(skillsDir, entry.name, "SKILL.md");
     if (!fs.existsSync(skillFile)) {
       fail(`skills/${entry.name} has no SKILL.md.`);

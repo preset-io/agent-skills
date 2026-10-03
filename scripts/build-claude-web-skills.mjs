@@ -332,7 +332,10 @@ function defaultSurfaceBoundary(resolvedSourceRoot) {
   if (normalized.includes("/preset-cli-skills/")) {
     return "Use this generated skill only for explicit Preset CLI (`sup`) workflows: shell, scripting, CI/CD, reads, exports, and confirmation-gated CLI mutations. Do not use it for Preset/Superset MCP-only work or as a substitute for direct HTTP/SDK code. If the CLI lacks a needed capability, stop and ask before switching surfaces.";
   }
-  return "Use this generated skill only for explicit direct Preset API, Superset workspace API, or Snowflake Cortex API workflows. Do not use it for Preset/Superset MCP-only work; stay on MCP tooling unless the user explicitly approves switching to direct API calls.";
+  if (normalized.includes("/preset-snowflake-cortex-skills/")) {
+    return "Use this generated skill only for explicit direct Snowflake Cortex Agent REST or SQL workflows. Do not use it for Preset/Superset MCP-only work or for Preset Management API and Superset workspace API work; stay on MCP tooling unless the user explicitly approves switching to direct API calls.";
+  }
+  return "Use this generated skill only for explicit direct Preset API or Superset workspace API workflows. Do not use it for Preset/Superset MCP-only work; stay on MCP tooling unless the user explicitly approves switching to direct API calls.";
 }
 
 function listFiles(dir) {

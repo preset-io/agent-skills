@@ -1,0 +1,19 @@
+{
+  "name": "Preset Snowflake Cortex Skills",
+  "version": "0.5.0",
+  "description": "AI agent skills for explicit direct Snowflake Cortex Agent API workflows only. Do not use for MCP-only work.",
+  "publisher": "preset-io",
+  "repository": "https://github.com/preset-io/agent-skills",
+  "skills": [
+    {
+      "name": "preset-snowflake-cortex",
+      "path": "skills/preset-snowflake-cortex/SKILL.md",
+      "description": "Prepare Snowflake Cortex direct API account, authentication, role, warehouse, and safety context. Do not use for MCP-only work."
+    },
+    {
+      "name": "preset-cortex-agents",
+      "path": "skills/preset-cortex-agents/SKILL.md",
+      "description": "List, describe, create, update, delete, and run Snowflake Cortex Agents through direct API/SQL workflows. Do not use for MCP-only work."
+    }
+  ]
+}

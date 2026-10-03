@@ -6,9 +6,10 @@ Agent guidance for working with [Preset](https://preset.io), Apache Superset, an
 
 The installable packages are:
 
-- [`preset-api-skills`](plugins/preset-api-skills/README.md) — focused skills for direct Preset Management API, Superset workspace API, and Snowflake Cortex API workflows.
+- [`preset-api-skills`](plugins/preset-api-skills/README.md) — focused skills for direct Preset Management API and Superset workspace API workflows.
 - [`preset-mcp-skills`](plugins/preset-mcp-skills/README.md) — focused skills for Superset MCP tool workflows.
 - [`preset-cli-skills`](plugins/preset-cli-skills/README.md) — focused skills for Preset CLI (`sup`) shell, scripting, CI/CD, read/export, SQL, and gated mutation workflows.
+- [`preset-snowflake-cortex-skills`](plugins/preset-snowflake-cortex-skills/README.md) — separate package for direct Snowflake Cortex Agent REST and SQL workflows (account/auth context, agent management, and confirmation-gated agent runs). These two skills used to ship inside `preset-api-skills`.
 
 API package highlights:
 
@@ -18,7 +19,7 @@ API package highlights:
 - **`preset-dashboards`** — inspect dashboards, charts, datasets, and chart data with safety boundaries.
 - **`preset-sql-execution`** — run or route SQL Lab execution, result retrieval, exports, and saved-query mutations with explicit approval.
 
-See the [API package README](plugins/preset-api-skills/README.md) for the full catalog (17 skills covering datasets, SQL Lab, embedding, guest tokens, RLS, database connections, role/permission changes, destructive imports, and Snowflake Cortex Agents).
+See the [API package README](plugins/preset-api-skills/README.md) for the full catalog (15 skills covering datasets, SQL Lab, embedding, guest tokens, RLS, database connections, role/permission changes, and destructive imports).
 
 MCP package highlights:
 
@@ -37,7 +38,14 @@ CLI package highlights:
 
 See the [CLI package README](plugins/preset-cli-skills/README.md) for the full 2-skill catalog.
 
-Install or load each package from its plugin directory, not from the repository root. Use `preset-api-skills` for direct API workflows. Use `preset-mcp-skills` for MCP workflows. Use `preset-cli-skills` for explicit `sup` CLI workflows. Do not use API or CLI skills as a fallback for MCP-only work, and do not use MCP or CLI skills for direct API work.
+Snowflake Cortex package:
+
+- **`preset-snowflake-cortex`** — prepare Snowflake account, authentication, role, warehouse, privilege, and safety context.
+- **`preset-cortex-agents`** — list, describe, create, update, delete, and run Snowflake Cortex Agents with explicit approval.
+
+See the [Snowflake Cortex package README](plugins/preset-snowflake-cortex-skills/README.md) for install steps. It needs a Snowflake account and does not use Preset credentials. Building its OpenAI submission archive does not mean it will pass OpenAI directory review; there is no guarantee it does.
+
+Install or load each package from its plugin directory, not from the repository root. Use `preset-api-skills` for direct API workflows. Use `preset-mcp-skills` for MCP workflows. Use `preset-cli-skills` for explicit `sup` CLI workflows. Use `preset-snowflake-cortex-skills` for Snowflake Cortex Agent workflows. Do not use API or CLI skills as a fallback for MCP-only work, and do not use MCP or CLI skills for direct API work.
 
 ## Supported clients
 
@@ -75,6 +83,7 @@ From any Claude Code session:
 /plugin install preset-api-skills@preset-agent-skills
 /plugin install preset-mcp-skills@preset-agent-skills
 /plugin install preset-cli-skills@preset-agent-skills
+/plugin install preset-snowflake-cortex-skills@preset-agent-skills
 ```
 
 Updates ship when we publish a new version — the version is bumped in the plugin manifests and tagged. Run `/plugin update` (or re-run `/plugin install`) to pull it.
@@ -97,6 +106,9 @@ node scripts/build-claude-web-skills.mjs \
 node scripts/build-claude-web-skills.mjs \
   --source plugins/preset-cli-skills/skills \
   --out dist/claude-web-flat-cli-skills
+node scripts/build-claude-web-skills.mjs \
+  --source plugins/preset-snowflake-cortex-skills/skills \
+  --out dist/claude-web-flat-cortex-skills
 ```
 
 ### OpenAI Codex
@@ -108,6 +120,7 @@ codex plugin marketplace add preset-io/agent-skills --ref master
 codex plugin add preset-api-skills@preset-agent-skills
 codex plugin add preset-mcp-skills@preset-agent-skills
 codex plugin add preset-cli-skills@preset-agent-skills
+codex plugin add preset-snowflake-cortex-skills@preset-agent-skills
 ```
 
 Use a release tag (e.g. `--ref v0.4.0`) instead of `master` for a pinned install. Restart Codex after installing so the new skills are loaded into the next session.
@@ -126,7 +139,7 @@ Cursor imports this repository as a GitHub-backed project rule. Use the `.git` c
 
 ### GitHub Copilot
 
-Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. Copy the package instructions you need into the `.github/` directory of the consuming repository, or reference their content from your own `.github/copilot-instructions.md`: [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) for direct API workflows, [`plugins/preset-mcp-skills/.github/copilot-instructions.md`](plugins/preset-mcp-skills/.github/copilot-instructions.md) for Superset MCP workflows, and [`plugins/preset-cli-skills/.github/copilot-instructions.md`](plugins/preset-cli-skills/.github/copilot-instructions.md) for `sup` CLI workflows. Copilot loads the file whenever it edits code in that repo.
+Copilot only auto-loads instructions from a repository-root `.github/copilot-instructions.md`. Copy the package instructions you need into the `.github/` directory of the consuming repository, or reference their content from your own `.github/copilot-instructions.md`: [`plugins/preset-api-skills/.github/copilot-instructions.md`](plugins/preset-api-skills/.github/copilot-instructions.md) for direct API workflows, [`plugins/preset-mcp-skills/.github/copilot-instructions.md`](plugins/preset-mcp-skills/.github/copilot-instructions.md) for Superset MCP workflows, [`plugins/preset-cli-skills/.github/copilot-instructions.md`](plugins/preset-cli-skills/.github/copilot-instructions.md) for `sup` CLI workflows, and [`plugins/preset-snowflake-cortex-skills/.github/copilot-instructions.md`](plugins/preset-snowflake-cortex-skills/.github/copilot-instructions.md) for Snowflake Cortex Agent workflows. Copilot loads the file whenever it edits code in that repo.
 
 ### Snowflake Cortex Code CLI
 
@@ -144,9 +157,10 @@ git clone https://github.com/preset-io/agent-skills.git
 cortex skill add agent-skills/plugins/preset-api-skills/skills
 cortex skill add agent-skills/plugins/preset-mcp-skills/skills
 cortex skill add agent-skills/plugins/preset-cli-skills/skills
+cortex skill add agent-skills/plugins/preset-snowflake-cortex-skills/skills
 ```
 
-Use the API package for direct Preset/Superset API and Snowflake Cortex Agent workflows, the MCP package for Superset MCP workflows, and the CLI package for `sup` workflows.
+Use the API package for direct Preset/Superset API workflows, the Snowflake Cortex package for Cortex Agent workflows, the MCP package for Superset MCP workflows, and the CLI package for `sup` workflows.
 
 ### Gemini CLI
 
@@ -160,6 +174,8 @@ gemini skills install https://github.com/preset-io/agent-skills.git \
   --path plugins/preset-mcp-skills/skills
 gemini skills install https://github.com/preset-io/agent-skills.git \
   --path plugins/preset-cli-skills/skills
+gemini skills install https://github.com/preset-io/agent-skills.git \
+  --path plugins/preset-snowflake-cortex-skills/skills
 ```
 
 These commands install user-scoped skills under `~/.gemini/skills/`, making
@@ -184,6 +200,7 @@ git clone https://github.com/preset-io/agent-skills.git
 @/path/to/agent-skills/plugins/preset-api-skills/AGENTS.md
 @/path/to/agent-skills/plugins/preset-mcp-skills/AGENTS.md
 @/path/to/agent-skills/plugins/preset-cli-skills/AGENTS.md
+@/path/to/agent-skills/plugins/preset-snowflake-cortex-skills/AGENTS.md
 ```
 
 Run `/memory refresh` in Gemini CLI after updating `GEMINI.md`.
@@ -223,7 +240,9 @@ Run the repository smoke test before publishing changes:
 ./scripts/smoke-test.sh
 ```
 
-It includes `node scripts/validate-agent-skills.mjs`, which checks the source skill folders against the Agent Skills structural rules: required frontmatter, name and description limits, parent-directory name matching, compact `SKILL.md` files, and local Markdown links that stay inside each skill folder.
+It builds the OpenAI submission archives (`dist/<package>-<version>-openai.zip`) for `preset-api-skills`, `preset-cli-skills`, and `preset-snowflake-cortex-skills` with `node scripts/build-openai-plugin-zip.mjs --plugin <package>`, then runs `node --test tests/package-split.test.mjs`, which asserts that the API archive ships no Cortex skills, files, or Cortex listing copy, that the Cortex archive ships both Cortex skills and every file they link to, that every relative link in every package resolves inside that package, and that each skill belongs to exactly one package. Passing the preflight does not guarantee a package passes OpenAI directory review.
+
+The smoke test also runs `node scripts/validate-agent-skills.mjs`, which checks the source skill folders against the Agent Skills structural rules: required frontmatter, name and description limits, parent-directory name matching, compact `SKILL.md` files, and local Markdown links that stay inside each skill folder.
 
 ## Releasing
 

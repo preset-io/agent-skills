@@ -4,7 +4,9 @@ Source of truth for confirmation gating across all skill packages.
 The `preset-api-skills` and `preset-cli-skills` policy files carry the same
 load-bearing tiers with package-specific wording; the `preset-mcp-skills`
 package follows the same blast-radius principle with MCP-specific wording
-(its gates went intent-proportional in a prior change).
+(its gates went intent-proportional in a prior change). The
+`preset-snowflake-cortex-skills` package applies the Tier B Cortex Agent rule
+through its own `preset-snowflake-cortex/references/cortex-safety.md` checklist.
 `scripts/check-gate-policy.mjs` verifies the API and CLI policy sentinels
 and guards the MCP package against regression of its intent-proportional
 language.

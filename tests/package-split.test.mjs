@@ -108,6 +108,15 @@ describe("package selection", () => {
     }
   });
 
+  test("MCP Codex listing carries no Cortex or Snowflake reference and keeps its direct API boundary", () => {
+    const manifest = readJson("plugins/preset-mcp-skills/.codex-plugin/plugin.json");
+    for (const [field, value] of listingFields(manifest)) {
+      assert.doesNotMatch(value, CORTEX_OR_SNOWFLAKE, field);
+    }
+    assert.match(manifest.interface.longDescription, /Do not use for direct Preset Management API, Superset REST API, other direct APIs/);
+    assert.match(manifest.interface.longDescription, /do not switch surfaces/);
+  });
+
   test("both marketplaces publish every package from its own directory", () => {
     const names = Object.keys(PACKAGES);
     const claude = readJson(".claude-plugin/marketplace.json");
@@ -247,6 +256,11 @@ describe("OpenAI archive for preset-cli-skills", () => {
     const files = archives["preset-cli-skills"];
     assert.deepEqual(archiveSkills(files, "preset-cli-skills"), [...PACKAGES["preset-cli-skills"]].sort());
     assert.deepEqual([...files.keys()].filter((e) => CORTEX_TEXT.test(e)), []);
+  });
+
+  test("no archived file mentions Cortex", () => {
+    const hits = [...archives["preset-cli-skills"]].filter(([, data]) => CORTEX_TEXT.test(data.toString("utf8"))).map(([e]) => e);
+    assert.deepEqual(hits, []);
   });
 });
 

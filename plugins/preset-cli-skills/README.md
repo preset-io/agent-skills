@@ -2,13 +2,6 @@
 
 Installable Preset CLI skill package. Drives the `sup` CLI (PyPI package `superset-sup`) for shell one-liners, batch exports, ad-hoc SQL, and CI/CD automation.
 
-This package is one of four surface-scoped Preset agent packages:
-
-- `preset-cli-skills` (this package) - CLI/`sup` workflows.
-- `preset-api-skills` - direct Preset Management API and Superset workspace API workflows.
-- `preset-snowflake-cortex-skills` - direct Snowflake Cortex Agent REST and SQL workflows.
-- `preset-mcp-skills` - Preset/Superset Model Context Protocol tool workflows.
-
 ## Surface Selection
 
 - Use this package only when the user explicitly asks for `sup`, the Preset CLI, shell one-liners, scripting, batch exports, ad-hoc SQL from a terminal, or CI/CD automation that is simpler as a single command than as an HTTP call.

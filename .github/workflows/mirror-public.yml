@@ -73,7 +73,8 @@ jobs:
             for path in \
               plugins/preset-api-skills/skills \
               plugins/preset-mcp-skills/skills \
-              plugins/preset-cli-skills/skills
+              plugins/preset-cli-skills/skills \
+              plugins/preset-snowflake-cortex-skills/skills
             do
               if git cat-file -e "${tag}:${path}" 2>/dev/null; then
                 while IFS= read -r skill; do

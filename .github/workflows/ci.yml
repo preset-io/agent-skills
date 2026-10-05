@@ -46,3 +46,18 @@ jobs:
           node scripts/build-claude-web-skills.mjs \
             --source plugins/preset-cli-skills/skills \
             --out dist/claude-web-flat-cli-skills
+
+      - name: Build Claude web Snowflake Cortex skill ZIPs
+        run: |
+          node scripts/build-claude-web-skills.mjs \
+            --source plugins/preset-snowflake-cortex-skills/skills \
+            --out dist/claude-web-flat-cortex-skills
+
+      - name: Upload built archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-archives
+          path: |
+            dist/*-openai.zip
+            dist/claude-web-flat-*/*.zip
+          if-no-files-found: error

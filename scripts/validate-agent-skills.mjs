@@ -8,6 +8,7 @@ const DEFAULT_SKILLS_ROOTS = [
   "plugins/preset-api-skills/skills",
   "plugins/preset-mcp-skills/skills",
   "plugins/preset-cli-skills/skills",
+  "plugins/preset-snowflake-cortex-skills/skills",
 ];
 const MAX_NAME_LENGTH = 64;
 const MAX_DESCRIPTION_LENGTH = 1024;

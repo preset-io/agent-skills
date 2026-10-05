@@ -8,7 +8,7 @@ Use these skills only for Superset MCP tool workflows. Do not use this package f
 
 - If the user mentions MCP, MCP tools, MCP clients, Superset MCP, or Preset MCP, use this package and stay on MCP tools.
 - If MCP lacks a needed capability, stop and explain the missing MCP capability. Do not switch to direct API.
-- Use `preset-api-skills` only when the user explicitly asks for direct API credentials, REST endpoints, curl/Python requests, Superset workspace API inspection, or Snowflake Cortex API/operator workflows.
+- Use `preset-api-skills` only when the user explicitly asks for direct API credentials, REST endpoints, curl/Python requests, or Superset workspace API inspection. Snowflake Cortex API/operator workflows belong to `preset-snowflake-cortex-skills`.
 - Do not load API skills from an MCP skill unless the user explicitly starts a separate direct API workflow.
 
 ## Skill Routing

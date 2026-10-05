@@ -1,7 +1,7 @@
 {
   "name": "preset-api-skills",
-  "version": "0.4.3",
-  "description": "Preset API skills for explicit direct API workflows only. Do not use for MCP-only work.",
+  "version": "0.5.0",
+  "description": "Preset API skills for explicit direct Preset Management API and Superset workspace API workflows only. Do not use for MCP-only work; MCP-only work must stay on available MCP tooling unless the user explicitly approves switching to direct API calls.",
   "author": {
     "name": "Preset",
     "url": "https://preset.io/"
@@ -21,32 +21,33 @@
     "embedding",
     "guest-tokens",
     "rls",
-    "security",
-    "snowflake",
-    "cortex"
+    "security"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Preset API Skills",
-    "shortDescription": "Direct API-only Preset skills. Do not use for MCP-only work.",
-    "longDescription": "Markdown skills for agents using the public Preset Management API, workspace Superset APIs, and Snowflake Cortex Agent APIs. Use only when the user explicitly asks for direct API access, API credentials, REST endpoints, curl/Python requests, Superset workspace API inspection, or Snowflake Cortex API/operator workflows. Do not use for MCP-only work or as a fallback from MCP tools; MCP-only work must stay on available MCP tooling unless the user explicitly approves switching to direct API.",
+    "shortDescription": "Preset workflows via REST API",
+    "longDescription": "Preset API Skills teaches coding agents to work with Preset and Apache Superset through their public REST APIs: the Preset Management API for teams, workspaces, memberships, invites, roles, and audit logs, and each workspace's Superset API for dashboards, charts, datasets, database connections, SQL Lab, import/export, and embedded analytics.\n\nThe package contains 15 focused skills. `preset-api` covers authentication (exchanging an API token for a short-lived JWT), base URLs, pagination, Rison query parameters, and the shared safety policy; the other skills build on it for workspace discovery, administration, version-aware Superset API use, metadata and data-returning reads, SQL execution, import/export, embedded dashboards, guest tokens, row-level security, and role or permission changes.\n\nReads run directly with row limits and summarized output. Mutations, imports, exports, credential-bearing reads, guest-token creation, and SQL that is not a confidently classified single-statement SELECT require an explicit confirmation that names the exact target, payload, and expected effect, and credentials and tokens are never printed.\n\nIntended for developers, data engineers, and platform teams who automate Preset or Apache Superset with HTTP requests, curl, or Python.\n\nLimitations: the skills assume a Preset API token is available in the execution environment, and they act only on teams and workspaces that token can already reach. They do not bundle credentials, and they do not create Preset accounts or handle billing.",
     "developerName": "Preset",
-    "category": "Coding",
+    "category": "Developer Tools",
     "capabilities": [
-      "Interactive"
+      "Authenticate with the Preset Management API",
+      "Discover Preset teams and workspaces",
+      "Administer team members, invites, and roles",
+      "Inspect dashboards, charts, and datasets",
+      "Run guarded SQL Lab queries",
+      "Configure embedded dashboards and guest tokens"
     ],
     "websiteURL": "https://preset.io/",
+    "supportURL": "https://preset.io/contact/",
+    "privacyPolicyURL": "https://preset.io/privacy-policy/",
+    "termsOfServiceURL": "https://preset.io/terms-of-service/",
     "defaultPrompt": [
       "Authenticate with the Preset API",
-      "Find my Preset workspace hostname",
-      "Check my workspace Superset OpenAPI",
-      "List audit logs for my Preset team",
-      "List dashboards in a Preset workspace",
-      "Inspect SQL Lab query history",
-      "Review a Preset guest-token request",
-      "Review a Preset SQL execution request",
-      "Run a Snowflake Cortex Agent safely"
+      "List the workspaces in my Preset team",
+      "List dashboards in a Preset workspace"
     ],
-    "brandColor": "#00A5B5"
+    "brandColor": "#00A5B5",
+    "brandColorDark": "#00A5B5"
   }
 }

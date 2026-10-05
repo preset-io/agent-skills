@@ -1,6 +1,6 @@
 {
   "name": "preset-mcp-skills",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Preset MCP skills for Superset MCP tool workflows only. Do not use for direct API work.",
   "author": {
     "name": "Preset",
@@ -23,7 +23,7 @@
   "interface": {
     "displayName": "Preset MCP Skills",
     "shortDescription": "MCP-only Superset workflow skills. Do not use for direct API work.",
-    "longDescription": "Markdown skills for agents using Superset MCP tools. Use only when the user asks for MCP, MCP tools, MCP clients, Superset MCP, or Preset MCP workflows. Do not use for direct Preset Management API, Superset REST API, Snowflake Cortex API, curl, Python requests, exports, or database calls. If MCP cannot satisfy the request, stop and explain the missing MCP capability; do not switch surfaces unless the user explicitly starts a direct API workflow.",
+    "longDescription": "Markdown skills for agents using Superset MCP tools. Use only when the user asks for MCP, MCP tools, MCP clients, Superset MCP, or Preset MCP workflows. Do not use for direct Preset Management API, Superset REST API, other direct APIs, curl, Python requests, exports, or database calls. If MCP cannot satisfy the request, stop and explain the missing MCP capability; do not switch surfaces unless the user explicitly starts a direct API workflow.",
     "developerName": "Preset",
     "category": "Coding",
     "capabilities": [

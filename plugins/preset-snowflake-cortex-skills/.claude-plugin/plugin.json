@@ -1,0 +1,22 @@
+{
+  "name": "preset-snowflake-cortex-skills",
+  "displayName": "Preset Snowflake Cortex Skills",
+  "version": "0.5.0",
+  "description": "Snowflake Cortex Agent skills for explicit direct Snowflake Cortex REST and SQL workflows only: account and authentication context, agent management, and confirmation-gated agent runs. Requires a Snowflake account; does not use Preset credentials. Do not use for MCP-only work.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/agent-skills",
+  "repository": "https://github.com/preset-io/agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "snowflake",
+    "cortex",
+    "cortex-agents",
+    "api",
+    "sql",
+    "security"
+  ]
+}

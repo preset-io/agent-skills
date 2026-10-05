@@ -1,0 +1,47 @@
+{
+  "name": "preset-snowflake-cortex-skills",
+  "version": "0.5.0",
+  "description": "Snowflake Cortex Agent skills for explicit direct Snowflake Cortex REST and SQL workflows only: account and authentication context, agent management, and confirmation-gated agent runs. Requires a Snowflake account; does not use Preset credentials. Do not use for MCP-only work.",
+  "author": {
+    "name": "Preset",
+    "url": "https://preset.io/"
+  },
+  "homepage": "https://github.com/preset-io/agent-skills",
+  "repository": "https://github.com/preset-io/agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "preset",
+    "snowflake",
+    "cortex",
+    "cortex-agents",
+    "api",
+    "sql",
+    "security"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Preset Snowflake Cortex Skills",
+    "shortDescription": "Snowflake Cortex Agent skills",
+    "longDescription": "Preset Snowflake Cortex Skills teaches coding agents to operate Snowflake Cortex Agents through Snowflake's documented REST and SQL interfaces.\n\nThe package contains two skills. `preset-snowflake-cortex` prepares the Snowflake side of the work: account URL, authentication method, role, warehouse, database and schema context, Cortex privileges, cross-region inference settings, and the safety and disclosure rules that apply to every Cortex Agent call. `preset-cortex-agents` covers listing and describing agents, creating, updating, and dropping agent objects through REST or SQL DDL, running agents through the REST run endpoints with streaming response handling, and the `SNOWFLAKE.CORTEX.DATA_AGENT_RUN` SQL wrapper.\n\nListing and describing agents run directly. Agent runs and every create, update, replace, or delete require an explicit confirmation that names the account, role, agent, query, tools, budget, and output handling, and Snowflake credentials and tokens are never printed.\n\nIntended for data engineers and platform teams who manage Snowflake Cortex Agents as operators.\n\nLimitations: the skills require a Snowflake account with Cortex Agent privileges and credentials available in the execution environment. They do not use Preset credentials, and Cortex Agent schemas change often, so implementation work should be checked against current Snowflake documentation.",
+    "developerName": "Preset",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Resolve Snowflake account, role, and warehouse context",
+      "Check Cortex Agent privileges and region settings",
+      "List and describe Cortex Agents",
+      "Create, update, and drop Cortex Agents with approval",
+      "Run Cortex Agents with streaming output handling"
+    ],
+    "websiteURL": "https://preset.io/",
+    "supportURL": "https://preset.io/contact/",
+    "privacyPolicyURL": "https://preset.io/privacy-policy/",
+    "termsOfServiceURL": "https://preset.io/terms-of-service/",
+    "defaultPrompt": [
+      "Check my Snowflake Cortex Agent access",
+      "List the Cortex Agents in a Snowflake schema",
+      "Run a Snowflake Cortex Agent safely"
+    ],
+    "brandColor": "#00A5B5",
+    "brandColorDark": "#00A5B5"
+  }
+}

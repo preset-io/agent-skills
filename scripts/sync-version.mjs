@@ -16,7 +16,12 @@ import process from "node:process";
 
 const ROOT = process.cwd();
 const VERSION_FILE = path.join(ROOT, "VERSION");
-const PLUGINS = ["preset-api-skills", "preset-mcp-skills", "preset-cli-skills"];
+const PLUGINS = [
+  "preset-api-skills",
+  "preset-mcp-skills",
+  "preset-cli-skills",
+  "preset-snowflake-cortex-skills",
+];
 const MANIFESTS = [
   ".claude-plugin/plugin.json",
   ".codex-plugin/plugin.json",

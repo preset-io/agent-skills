@@ -7,6 +7,7 @@ cd "$ROOT"
 API_ROOT="plugins/preset-api-skills"
 MCP_ROOT="plugins/preset-mcp-skills"
 CLI_ROOT="plugins/preset-cli-skills"
+CORTEX_ROOT="plugins/preset-snowflake-cortex-skills"
 
 fail() {
   echo "Smoke test failed: $*" >&2
@@ -19,13 +20,15 @@ command -v node >/dev/null || fail "node is required"
 node scripts/validate-agent-skills.mjs
 node scripts/sync-version.mjs --check
 node scripts/check-gate-policy.mjs
-node scripts/build-openai-plugin-zip.mjs
-openai_zip="dist/preset-cli-skills-$(jq -r .version "$CLI_ROOT/.codex-plugin/plugin.json")-openai.zip"
-test -f "$openai_zip" || fail "missing $openai_zip"
-if command -v unzip >/dev/null; then
-  unzip -tq "$openai_zip" >/dev/null || fail "OpenAI plugin ZIP failed integrity check"
-  [ "$(unzip -Z1 "$openai_zip" | cut -d/ -f1 | sort -u)" = "preset-cli-skills" ] || fail "OpenAI plugin ZIP must have a single preset-cli-skills/ top-level directory"
-fi
+for openai_plugin in preset-cli-skills preset-api-skills preset-snowflake-cortex-skills; do
+  node scripts/build-openai-plugin-zip.mjs --plugin "$openai_plugin"
+  openai_zip="dist/$openai_plugin-$(jq -r .version "plugins/$openai_plugin/.codex-plugin/plugin.json")-openai.zip"
+  test -f "$openai_zip" || fail "missing $openai_zip"
+  if command -v unzip >/dev/null; then
+    unzip -tq "$openai_zip" >/dev/null || fail "OpenAI plugin ZIP $openai_zip failed integrity check"
+    [ "$(unzip -Z1 "$openai_zip" | cut -d/ -f1 | sort -u)" = "$openai_plugin" ] || fail "OpenAI plugin ZIP must have a single $openai_plugin/ top-level directory"
+  fi
+done
 
 require_file() {
   test -f "$1" || fail "missing file $1"
@@ -93,6 +96,9 @@ required_api_skills=(
   preset-database-connections
   preset-roles-permissions
   preset-destructive-imports
+)
+
+required_cortex_skills=(
   preset-snowflake-cortex
   preset-cortex-agents
 )
@@ -121,6 +127,7 @@ require_dir plugins
 require_dir "$API_ROOT"
 require_dir "$MCP_ROOT"
 require_dir "$CLI_ROOT"
+require_dir "$CORTEX_ROOT"
 reject_file skills
 reject_file .codex-plugin
 reject_file .claude-plugin/plugin.json
@@ -130,6 +137,8 @@ reject_file .github/copilot-instructions.md
 require_grep "plugins/preset-api-skills" README.md
 require_grep "plugins/preset-mcp-skills" README.md
 require_grep "plugins/preset-cli-skills" README.md
+require_grep "plugins/preset-snowflake-cortex-skills" README.md
+require_grep "no guarantee" README.md
 require_grep ".agents/plugins/marketplace.json" README.md
 require_grep ".claude-plugin/marketplace.json" README.md
 require_grep "not from the repository root" README.md
@@ -150,19 +159,26 @@ require_grep "dist/claude-web-flat-mcp-skills/\\*.zip" .github/workflows/release
 require_grep "--source plugins/preset-cli-skills/skills" .github/workflows/release.yml
 require_grep "--out dist/claude-web-flat-cli-skills" .github/workflows/release.yml
 require_grep "dist/claude-web-flat-cli-skills/\\*.zip" .github/workflows/release.yml
+require_grep "Build Claude web Snowflake Cortex skill ZIPs" .github/workflows/release.yml
+require_grep "Build Claude web Snowflake Cortex skill ZIPs" .github/workflows/ci.yml
+require_grep "--source plugins/preset-snowflake-cortex-skills/skills" .github/workflows/release.yml
+require_grep "dist/claude-web-flat-cortex-skills/\\*.zip" .github/workflows/release.yml
+require_grep "plugins/preset-snowflake-cortex-skills/skills" .github/workflows/mirror-public.yml
+require_grep "Use this generated skill only for explicit direct Snowflake Cortex Agent" scripts/build-claude-web-skills.mjs
 require_grep "root is not itself an installable plugin" CLAUDE.md
 require_grep "plugins/preset-api-skills/AGENTS.md" CLAUDE.md
 require_grep "plugins/preset-mcp-skills/AGENTS.md" CLAUDE.md
 require_grep "plugins/preset-cli-skills/AGENTS.md" CLAUDE.md
+require_grep "plugins/preset-snowflake-cortex-skills/AGENTS.md" CLAUDE.md
 check_markdown_links
 
 require_jq '.name == "preset-agent-skills"' .agents/plugins/marketplace.json
 require_jq '.interface.displayName == "Preset Agent Skills"' .agents/plugins/marketplace.json
 require_jq '
-  [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills", "preset-cli-skills"]
+  [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills", "preset-cli-skills", "preset-snowflake-cortex-skills"]
 ' .agents/plugins/marketplace.json
 require_jq '
-  [.plugins[].source.path] == ["./plugins/preset-api-skills", "./plugins/preset-mcp-skills", "./plugins/preset-cli-skills"]
+  [.plugins[].source.path] == ["./plugins/preset-api-skills", "./plugins/preset-mcp-skills", "./plugins/preset-cli-skills", "./plugins/preset-snowflake-cortex-skills"]
 ' .agents/plugins/marketplace.json
 require_jq 'all(.plugins[]; .policy.installation == "AVAILABLE" and .policy.authentication == "ON_INSTALL")' .agents/plugins/marketplace.json
 
@@ -172,20 +188,24 @@ require_jq '.owner.name == "Preset"' .claude-plugin/marketplace.json
 require_jq '.description | contains("direct API workflows")' .claude-plugin/marketplace.json
 require_jq '.description | contains("MCP tool workflows")' .claude-plugin/marketplace.json
 require_jq '
-  [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills", "preset-cli-skills"]
+  [.plugins[].name] == ["preset-api-skills", "preset-mcp-skills", "preset-cli-skills", "preset-snowflake-cortex-skills"]
 ' .claude-plugin/marketplace.json
 require_jq '
-  [.plugins[].source] == ["./plugins/preset-api-skills", "./plugins/preset-mcp-skills", "./plugins/preset-cli-skills"]
+  [.plugins[].source] == ["./plugins/preset-api-skills", "./plugins/preset-mcp-skills", "./plugins/preset-cli-skills", "./plugins/preset-snowflake-cortex-skills"]
 ' .claude-plugin/marketplace.json
 require_jq 'all(.plugins[]; .category == "development" and .author.name == "Preset")' .claude-plugin/marketplace.json
 require_jq '.plugins[] | select(.name == "preset-api-skills") | .description | contains("Do not use for MCP-only work")' .claude-plugin/marketplace.json
 require_jq '.plugins[] | select(.name == "preset-mcp-skills") | .description | contains("Do not use for direct API work")' .claude-plugin/marketplace.json
 require_jq '.plugins[] | select(.name == "preset-cli-skills") | .description | contains("Use only for CLI workflows")' .claude-plugin/marketplace.json
+require_jq '.plugins[] | select(.name == "preset-snowflake-cortex-skills") | .description | contains("Do not use for MCP-only work")' .claude-plugin/marketplace.json
 
 require_jq '.name == "preset-api-skills"' "$API_ROOT/.codex-plugin/plugin.json"
 require_jq '.description | contains("Do not use for MCP-only work")' "$API_ROOT/.codex-plugin/plugin.json"
-require_jq '.interface.shortDescription | contains("Direct API-only")' "$API_ROOT/.codex-plugin/plugin.json"
-require_jq '.interface.longDescription | contains("MCP-only work must stay on available MCP tooling")' "$API_ROOT/.codex-plugin/plugin.json"
+# Listing copy follows the OpenAI directory limits (see the CLI checks below);
+# the MCP routing rule lives in .description rather than the listing copy.
+require_jq '.description | contains("MCP-only work must stay on available MCP tooling")' "$API_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.shortDescription == "Preset workflows via REST API"' "$API_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.category == "Developer Tools"' "$API_ROOT/.codex-plugin/plugin.json"
 require_jq '.skills == "./skills/"' "$API_ROOT/.codex-plugin/plugin.json"
 require_jq '.name == "preset-api-skills"' "$API_ROOT/.claude-plugin/plugin.json"
 require_jq '.displayName == "Preset API Skills"' "$API_ROOT/.claude-plugin/plugin.json"
@@ -235,7 +255,6 @@ require_jq '
   [.skills[].path] | sort == [
     "skills/preset-admin/SKILL.md",
     "skills/preset-api/SKILL.md",
-    "skills/preset-cortex-agents/SKILL.md",
     "skills/preset-dashboards/SKILL.md",
     "skills/preset-database-connections/SKILL.md",
     "skills/preset-datasets/SKILL.md",
@@ -245,7 +264,6 @@ require_jq '
     "skills/preset-guest-tokens/SKILL.md",
     "skills/preset-import-export/SKILL.md",
     "skills/preset-roles-permissions/SKILL.md",
-    "skills/preset-snowflake-cortex/SKILL.md",
     "skills/preset-sql-execution/SKILL.md",
     "skills/preset-sqllab/SKILL.md",
     "skills/preset-superset/SKILL.md",
@@ -307,15 +325,6 @@ required_api_references=(
   skills/preset-database-connections/references/connection-mutations-and-validation.md
   skills/preset-roles-permissions/references/role-permission-changes.md
   skills/preset-destructive-imports/references/destructive-import-approval.md
-  skills/preset-snowflake-cortex/references/authentication-and-context.md
-  skills/preset-snowflake-cortex/references/account-auth-context.md
-  skills/preset-snowflake-cortex/references/agent-access-and-region.md
-  skills/preset-snowflake-cortex/references/oauth-context.md
-  skills/preset-snowflake-cortex/references/cortex-safety.md
-  skills/preset-cortex-agents/references/agent-runs.md
-  skills/preset-cortex-agents/references/agent-management.md
-  skills/preset-cortex-agents/references/sql-agent-ddl.md
-  skills/preset-cortex-agents/references/sql-wrapper.md
 )
 
 for file in "${required_api_references[@]}"; do
@@ -402,18 +411,6 @@ require_grep "use \`preset-guest-tokens\`" "$API_ROOT/skills/preset-embedding/re
 require_grep "Use \`preset-destructive-imports\`" "$API_ROOT/skills/preset-import-export/references/import-workflows.md"
 require_grep "Use \`preset-database-connections\`" "$API_ROOT/skills/preset-datasets/references/connection-configuration.md"
 require_grep "route to the focused Phase 5 skill" "$API_ROOT/skills/preset-superset/references/workspace-api-safety.md"
-require_grep "SNOWFLAKE.CORTEX_USER" "$API_ROOT/skills/preset-snowflake-cortex/references/authentication-and-context.md"
-require_grep "SNOWFLAKE.CORTEX_AGENT_USER" "$API_ROOT/skills/preset-snowflake-cortex/references/authentication-and-context.md"
-require_grep "Wait for explicit confirmation" "$API_ROOT/skills/preset-snowflake-cortex/references/cortex-safety.md"
-require_grep "/api/v2/databases/{database}/schemas/{schema}/agents/{name}:run" "$API_ROOT/skills/preset-cortex-agents/references/agent-runs.md"
-require_grep "/api/v2/cortex/agent:run" "$API_ROOT/skills/preset-cortex-agents/references/agent-runs.md"
-require_grep "unknown event types" "$API_ROOT/skills/preset-cortex-agents/references/agent-runs.md"
-require_grep "DELETE /api/v2/databases/{database}/schemas/{schema}/agents/{name}" "$API_ROOT/skills/preset-cortex-agents/references/agent-management.md"
-require_grep "CREATE AGENT" "$API_ROOT/skills/preset-cortex-agents/references/sql-agent-ddl.md"
-require_grep "DROP AGENT" "$API_ROOT/skills/preset-cortex-agents/references/sql-agent-ddl.md"
-require_grep "CORTEX_ENABLED_CROSS_REGION" "$API_ROOT/skills/preset-snowflake-cortex/references/authentication-and-context.md"
-require_grep "SNOWFLAKE.CORTEX.DATA_AGENT_RUN" "$API_ROOT/skills/preset-cortex-agents/references/sql-wrapper.md"
-require_grep "not Preset chatbot runtime instructions" "$API_ROOT/skills/preset-snowflake-cortex/SKILL.md"
 require_grep "/api/v2/audit/teams" "$API_ROOT/skills/preset-admin/references/audit-logs.md"
 require_grep "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/" "$API_ROOT/skills/preset-admin/references/audit-logs.md"
 require_grep "https://api.app.preset.io/v2/audit/teams/{team_name}/logs/actions/" "$API_ROOT/skills/preset-admin/references/audit-logs.md"
@@ -462,6 +459,84 @@ fi
 while IFS= read -r path; do
   require_file "$API_ROOT/$path"
 done < <(jq -r '.skills[].path' "$API_ROOT/.cursor-plugin/plugin.json")
+
+require_jq '.name == "preset-snowflake-cortex-skills"' "$CORTEX_ROOT/.codex-plugin/plugin.json"
+require_jq '.description | contains("Do not use for MCP-only work")' "$CORTEX_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.category == "Developer Tools"' "$CORTEX_ROOT/.codex-plugin/plugin.json"
+require_jq '.skills == "./skills/"' "$CORTEX_ROOT/.codex-plugin/plugin.json"
+require_jq '.name == "preset-snowflake-cortex-skills"' "$CORTEX_ROOT/.claude-plugin/plugin.json"
+require_jq '.displayName == "Preset Snowflake Cortex Skills"' "$CORTEX_ROOT/.claude-plugin/plugin.json"
+require_jq '.description | contains("Do not use for MCP-only work")' "$CORTEX_ROOT/.claude-plugin/plugin.json"
+require_jq 'has("skills") | not' "$CORTEX_ROOT/.claude-plugin/plugin.json"
+require_jq '.name == "Preset Snowflake Cortex Skills"' "$CORTEX_ROOT/.cursor-plugin/plugin.json"
+require_jq 'all(.skills[]; .description | contains("Do not use for MCP-only work"))' "$CORTEX_ROOT/.cursor-plugin/plugin.json"
+require_jq '
+  [.skills[].path] | sort == [
+    "skills/preset-cortex-agents/SKILL.md",
+    "skills/preset-snowflake-cortex/SKILL.md"
+  ]
+' "$CORTEX_ROOT/.cursor-plugin/plugin.json"
+require_file "$CORTEX_ROOT/AGENTS.md"
+reject_file "$CORTEX_ROOT/CLAUDE.md"
+require_file "$CORTEX_ROOT/.github/copilot-instructions.md"
+require_file "$CORTEX_ROOT/README.md"
+require_grep "Do not use this package for Preset/Superset MCP tool workflows" "$CORTEX_ROOT/AGENTS.md"
+require_grep "Do not use this package for Preset/Superset MCP tool workflows" "$CORTEX_ROOT/.github/copilot-instructions.md"
+require_grep "Do not use this package for Preset/Superset MCP tool workflows" "$CORTEX_ROOT/README.md"
+require_grep "Claude plugin installs do not load package-level" "$CORTEX_ROOT/AGENTS.md"
+require_grep "There is no guarantee this package passes OpenAI directory review" "$CORTEX_ROOT/README.md"
+
+for skill in "${required_cortex_skills[@]}"; do
+  file="$CORTEX_ROOT/skills/$skill/SKILL.md"
+  require_file "$file"
+  require_grep "^name: $skill$" "$file"
+  require_grep "^description: " "$file"
+  require_grep "Use only for direct API workflows" "$file"
+  require_grep "Do not use for MCP-only work" "$file"
+  require_dir "$CORTEX_ROOT/skills/$skill/references"
+  require_grep "skills/$skill/SKILL.md" "$CORTEX_ROOT/AGENTS.md"
+  require_grep "skills/$skill/SKILL.md" "$CORTEX_ROOT/.github/copilot-instructions.md"
+  require_grep "skills/$skill/SKILL.md" "$CORTEX_ROOT/README.md"
+  reject_file "$API_ROOT/skills/$skill"
+done
+
+required_cortex_references=(
+  skills/preset-snowflake-cortex/references/authentication-and-context.md
+  skills/preset-snowflake-cortex/references/account-auth-context.md
+  skills/preset-snowflake-cortex/references/agent-access-and-region.md
+  skills/preset-snowflake-cortex/references/oauth-context.md
+  skills/preset-snowflake-cortex/references/cortex-safety.md
+  skills/preset-cortex-agents/references/agent-runs.md
+  skills/preset-cortex-agents/references/agent-management.md
+  skills/preset-cortex-agents/references/sql-agent-ddl.md
+  skills/preset-cortex-agents/references/sql-wrapper.md
+)
+
+for file in "${required_cortex_references[@]}"; do
+  require_file "$CORTEX_ROOT/$file"
+done
+
+require_grep "SNOWFLAKE.CORTEX_USER" "$CORTEX_ROOT/skills/preset-snowflake-cortex/references/authentication-and-context.md"
+require_grep "SNOWFLAKE.CORTEX_AGENT_USER" "$CORTEX_ROOT/skills/preset-snowflake-cortex/references/authentication-and-context.md"
+require_grep "Wait for explicit confirmation" "$CORTEX_ROOT/skills/preset-snowflake-cortex/references/cortex-safety.md"
+require_grep "/api/v2/databases/{database}/schemas/{schema}/agents/{name}:run" "$CORTEX_ROOT/skills/preset-cortex-agents/references/agent-runs.md"
+require_grep "/api/v2/cortex/agent:run" "$CORTEX_ROOT/skills/preset-cortex-agents/references/agent-runs.md"
+require_grep "unknown event types" "$CORTEX_ROOT/skills/preset-cortex-agents/references/agent-runs.md"
+require_grep "DELETE /api/v2/databases/{database}/schemas/{schema}/agents/{name}" "$CORTEX_ROOT/skills/preset-cortex-agents/references/agent-management.md"
+require_grep "CREATE AGENT" "$CORTEX_ROOT/skills/preset-cortex-agents/references/sql-agent-ddl.md"
+require_grep "DROP AGENT" "$CORTEX_ROOT/skills/preset-cortex-agents/references/sql-agent-ddl.md"
+require_grep "CORTEX_ENABLED_CROSS_REGION" "$CORTEX_ROOT/skills/preset-snowflake-cortex/references/authentication-and-context.md"
+require_grep "SNOWFLAKE.CORTEX.DATA_AGENT_RUN" "$CORTEX_ROOT/skills/preset-cortex-agents/references/sql-wrapper.md"
+require_grep "not Preset chatbot runtime instructions" "$CORTEX_ROOT/skills/preset-snowflake-cortex/SKILL.md"
+
+while IFS= read -r path; do
+  require_file "$CORTEX_ROOT/$path"
+done < <(jq -r '.skills[].path' "$CORTEX_ROOT/.cursor-plugin/plugin.json")
+
+# The API package must not carry Cortex scope in skills, docs, or manifests.
+if grep -R -i -q "cortex" "$API_ROOT"; then
+  fail "API package still references Cortex: $(grep -R -i -l "cortex" "$API_ROOT" | tr '\n' ' ')"
+fi
 
 require_jq '.name == "preset-mcp-skills"' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.description | contains("Do not use for direct API work")' "$MCP_ROOT/.codex-plugin/plugin.json"
@@ -682,5 +757,6 @@ while IFS= read -r path; do
 done < <(jq -r '.skills[].path' "$CLI_ROOT/.cursor-plugin/plugin.json")
 
 python3 scripts/test-tableau-parsers.py
+node --test tests/package-split.test.mjs
 
 echo "Smoke test passed."

@@ -80,6 +80,23 @@ Set `SUPERSET_MCP_SERVICE_PATH` instead of passing `--mcp-root` when the Superse
 | VS Code (GitHub Copilot) | `.github/copilot-instructions.md` | Template [vscode.mcp.json](connections/vscode.mcp.json) |
 | Claude (claude.ai, Claude Desktop), ChatGPT | skill ZIPs / not applicable | Manual steps only (see [connections](connections/README.md)) |
 
+## Packaging
+
+The endpoint and server names live in one file, [connections/gateway.json](connections/gateway.json). Every connection config file for every target (portable `mcp.json`, Codex `.mcp.json`, Claude's inline `mcpServers`, Cursor `cursor/mcp.json`, the manifest pointers, and the user-level templates) is generated from it:
+
+```bash
+node scripts/sync-mcp-config.mjs          # write
+node scripts/sync-mcp-config.mjs --check  # fail on drift (runs in the smoke test)
+```
+
+The OpenAI archive for this package includes all of those files and is built through the With MCP path (it is refused on the skills-only path):
+
+```bash
+node scripts/build-openai-plugin-zip.mjs --plugin preset-mcp-skills --with-mcp
+```
+
+The preflight checks that each target's file is present with exactly its derived shape, that server entries carry only `type` and `url` (no headers, OAuth settings, client IDs, or credentials), and that no `.app.json` or lifecycle hooks are present. The per-skill Claude web ZIPs hold skills only; a skill ZIP has no place for connector configuration, so Claude (claude.ai, Desktop) uses the manual steps. Building the archive does not submit anything; the With MCP submission needs review metadata this repository does not produce.
+
 ## Verification
 
 - Mocked tests (run in CI by `scripts/smoke-test.sh`, `node --test tests/mcp-gateway.test.mjs`): fixture-based walkthroughs against a mocked gateway (multi-workspace gateway, direct workspace, disabled service, malformed or missing request wrapper), validation of the client connection templates, and a stale-claim check (`scripts/check-mcp-gateway-claims.mjs`) that fails on outdated statements about who defines the gateway's top-level tools. They prove the documented guidance is consistent with the gateway source contract; they do not call a live service.

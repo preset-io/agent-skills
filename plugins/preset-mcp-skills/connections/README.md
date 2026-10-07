@@ -16,6 +16,13 @@ The templates below use the name `preset-gateway` so they never collide with the
 - Production endpoint: `https://mcp.app.preset.io/mcp` (the `remotes[0].url` in `server.json` of `preset-io/mcp-gateway`). The supported path is always `/mcp`.
 - Authentication is interactive OAuth in the browser. The templates contain no API key, token, header, client ID, or client secret, and none should be added. Do not register a confidential OAuth client for this endpoint; clients register themselves (dynamic client registration, or the client's published client metadata document).
 - Staging, sandbox, and other environments are opt-in only. Use one only when its operator gives you that URL, copy a template, replace the URL, and give the server a different name (for example `preset-gateway-staging`). Never reuse a workspace ID from one environment in another.
+
+  Opt-in example for a non-production gateway (placeholder host; use only a URL the environment's operator gave you, and never copy a workspace ID from another environment):
+
+  ```bash
+  claude mcp add --transport http preset-gateway-staging https://<operator-supplied-gateway-host>/mcp
+  ```
+
 - Server name: the templates use `preset-gateway`. Before adding it, check whether the client already has a server by that name or with that URL (`claude mcp list`, `codex mcp list`, the client's MCP settings). If one exists, keep it and stop, or choose a different name. Never overwrite or merge over an existing connection.
 
 | Client | Template | Goes in | Official documentation |

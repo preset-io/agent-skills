@@ -21,6 +21,17 @@ node scripts/validate-agent-skills.mjs
 node scripts/sync-version.mjs --check
 node scripts/check-gate-policy.mjs
 node scripts/check-mcp-gateway-claims.mjs
+node scripts/sync-mcp-config.mjs --check
+# The MCP package bundles its connection config, so it builds through the With MCP path.
+node scripts/build-openai-plugin-zip.mjs --plugin preset-mcp-skills --with-mcp
+mcp_zip="dist/preset-mcp-skills-$(jq -r .version "plugins/preset-mcp-skills/.codex-plugin/plugin.json")-openai.zip"
+test -f "$mcp_zip" || fail "missing $mcp_zip"
+if command -v unzip >/dev/null; then
+  unzip -tq "$mcp_zip" >/dev/null || fail "OpenAI plugin ZIP $mcp_zip failed integrity check"
+  for entry in mcp.json .mcp.json cursor/mcp.json .claude-plugin/plugin.json .codex-plugin/plugin.json .cursor-plugin/plugin.json plugin.json; do
+    unzip -Z1 "$mcp_zip" | grep -qx "preset-mcp-skills/$entry" || fail "OpenAI plugin ZIP $mcp_zip is missing $entry"
+  done
+fi
 node --test tests/mcp-gateway.test.mjs >/dev/null || fail "MCP gateway tests failed (run: node --test tests/mcp-gateway.test.mjs)"
 for openai_plugin in preset-cli-skills preset-api-skills preset-snowflake-cortex-skills; do
   node scripts/build-openai-plugin-zip.mjs --plugin "$openai_plugin"
@@ -543,7 +554,7 @@ fi
 
 require_jq '.name == "preset-mcp-skills"' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.description | contains("Do not use for direct API work")' "$MCP_ROOT/.codex-plugin/plugin.json"
-require_jq '.interface.shortDescription | contains("MCP-only")' "$MCP_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.shortDescription == "Preset MCP gateway workflows"' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.skills == "./skills/"' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.name == "preset-mcp-skills"' "$MCP_ROOT/.claude-plugin/plugin.json"
 require_jq '.displayName == "Preset MCP Skills"' "$MCP_ROOT/.claude-plugin/plugin.json"

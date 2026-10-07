@@ -25,21 +25,26 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Preset MCP Skills",
-    "shortDescription": "MCP-only Superset workflow skills. Do not use for direct API work.",
+    "shortDescription": "Preset MCP gateway workflows",
     "longDescription": "Markdown skills for agents using the Preset MCP gateway and Superset MCP tools. Use only when the user asks for MCP, MCP tools, MCP clients, Superset MCP, or Preset MCP workflows, including connecting a client and choosing a workspace. Do not use for direct Preset Management API, Superset REST API, other direct APIs, curl, Python requests, exports, or database calls. If MCP cannot satisfy the request, stop and explain the missing MCP capability; do not switch surfaces unless the user explicitly starts a direct API workflow.",
     "developerName": "Preset",
-    "category": "Coding",
+    "category": "Developer Tools",
     "capabilities": [
-      "Interactive"
+      "Connect to the Preset MCP gateway",
+      "Select a Preset workspace",
+      "Inspect dashboards, charts, and datasets",
+      "Run SQL and build charts through MCP tools"
     ],
     "websiteURL": "https://preset.io/",
+    "supportURL": "https://preset.io/contact/",
+    "privacyPolicyURL": "https://preset.io/privacy-policy/",
+    "termsOfServiceURL": "https://preset.io/terms-of-service/",
     "defaultPrompt": [
       "Connect to the Preset MCP gateway and list my workspaces",
       "Use Superset MCP tools to list dashboards",
-      "Use Superset MCP to inspect a dataset",
-      "Create an Explore link through MCP",
       "Troubleshoot a Superset MCP tool error"
     ],
-    "brandColor": "#00A5B5"
+    "brandColor": "#00A5B5",
+    "brandColorDark": "#00A5B5"
   }
 }

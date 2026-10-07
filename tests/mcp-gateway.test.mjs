@@ -11,12 +11,14 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { describe, test } from "node:test";
+import { before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
+import { CREDENTIAL_LIKE, checkPackage, generatedFiles, manifestFields, PACKAGE as PKG_REL, readSource } from "../scripts/lib/mcp-config.mjs";
 import { findStaleClaims, scanRepository } from "../scripts/check-mcp-gateway-claims.mjs";
 import { validate } from "./lib/json-schema.mjs";
+import { readZip } from "./lib/zip.mjs";
 import { walk } from "./lib/walkthrough.mjs";
 import { CONTRACT } from "./lib/mock-gateway.mjs";
 
@@ -24,7 +26,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PKG = path.join(ROOT, "plugins", "preset-mcp-skills");
 const SKILL = path.join(PKG, "skills", "preset-mcp-gateway");
 const FIXTURES = path.join(ROOT, "tests", "fixtures", "mcp-gateway");
-const ENDPOINT = "https://mcp.app.preset.io/mcp";
+const PINNED_ENDPOINT = "https://mcp.app.preset.io/mcp";
+const SOURCE = readSource(ROOT);
+const ENDPOINT = SOURCE.endpoint;
 
 const read = (...parts) => fs.readFileSync(path.join(...parts), "utf8");
 const json = (...parts) => JSON.parse(read(...parts));
@@ -393,6 +397,131 @@ describe("plugin-bundled MCP configuration (one exact shape per target)", () => 
 
   test("version is in lockstep for the portable manifest", () => {
     assert.equal(json(PKG, "plugin.json").version, fs.readFileSync(path.join(ROOT, "VERSION"), "utf8").trim());
+  });
+});
+
+describe("single-sourced endpoint and generated config", () => {
+  const readDisk = (rel) => (fs.existsSync(path.join(ROOT, rel)) ? fs.readFileSync(path.join(ROOT, rel), "utf8") : null);
+
+  test("the source file pins the production endpoint and every target is generated from it", () => {
+    assert.equal(SOURCE.endpoint, PINNED_ENDPOINT);
+    assert.deepEqual(checkPackage(readDisk, SOURCE), []);
+    const result = spawnSync("node", ["scripts/sync-mcp-config.mjs", "--check"], { cwd: ROOT, encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(clients.endpoint, ENDPOINT);
+  });
+
+  test("changing the source endpoint changes every generated file, so no copy is hand-maintained", () => {
+    const other = { ...SOURCE, endpoint: "https://example.invalid/mcp" };
+    const before = generatedFiles(SOURCE);
+    const after = generatedFiles(other);
+    assert.deepEqual(Object.keys(before), Object.keys(after));
+    for (const rel of Object.keys(before)) {
+      assert.notEqual(before[rel], after[rel], `${rel} follows the source`);
+      assert.ok(after[rel].includes("example.invalid"));
+      assert.ok(!after[rel].includes(PINNED_ENDPOINT));
+    }
+    for (const fields of Object.values(manifestFields(other))) {
+      assert.ok(typeof fields.mcpServers === "string" || JSON.stringify(fields).includes("example.invalid"));
+    }
+  });
+
+  test("the checker flags a wrong endpoint, a missing target file, an unsolicited setting, and credentials", () => {
+    const overlay = (rel, text) => (file) => (file === rel ? text : readDisk(file));
+    const mcp = `${PKG_REL}/mcp.json`;
+    const wrongHost = readDisk(mcp).replace("mcp.app.preset.io", "mcp.staging.example");
+    assert.ok(checkPackage(overlay(mcp, wrongHost), SOURCE).some((p) => p.includes(mcp)));
+    assert.ok(checkPackage(overlay(`${PKG_REL}/.mcp.json`, null), SOURCE).some((p) => p.includes("missing")));
+    const extra = JSON.stringify({ mcpServers: { preset: { url: ENDPOINT, timeout: 5 } } }, null, 2) + "\n";
+    assert.ok(checkPackage(overlay(`${PKG_REL}/.mcp.json`, extra), SOURCE).some((p) => p.includes("unsolicited setting")));
+    const secret = JSON.stringify({ mcpServers: { preset: { url: ENDPOINT, headers: { Authorization: "Bearer x" } } } }, null, 2) + "\n";
+    const problems = checkPackage(overlay(`${PKG_REL}/.mcp.json`, secret), SOURCE);
+    assert.ok(problems.some((p) => p.includes("credential-like")));
+    assert.ok(checkPackage((file) => (file === `${PKG_REL}/.app.json` ? "{}" : readDisk(file)), SOURCE).some((p) => p.includes("not eligible")));
+  });
+
+  test("every preset.io/mcp URL in package config files is the source endpoint", () => {
+    for (const file of packageFiles()) {
+      if (!/\.(json|toml)$/.test(file) || file.endsWith(`${path.sep}tool-inventory.json`)) continue;
+      for (const url of read(file).match(/https:\/\/[a-z0-9.-]*preset\.io\/mcp\b/gi) ?? []) {
+        assert.equal(url, ENDPOINT, path.relative(PKG, file));
+      }
+    }
+  });
+
+  test("staging and sandbox appear only as opt-in placeholders, never as a real host", () => {
+    const readme = read(PKG, "connections", "README.md");
+    assert.match(readme, /Opt-in example for a non-production gateway/);
+    assert.match(readme, /<operator-supplied-gateway-host>/);
+    assert.match(readme, /preset-gateway-staging/);
+    for (const file of packageFiles()) {
+      if (!/\.(json|toml)$/.test(file)) continue;
+      assert.doesNotMatch(read(file), /staging|sandbox/i, `${path.relative(PKG, file)} (config files carry no non-production host)`);
+    }
+  });
+});
+
+describe("built OpenAI archive carries every target's config", () => {
+  const NAME = "preset-mcp-skills";
+  let files;
+
+  before(() => {
+    execFileSync(process.execPath, ["scripts/build-openai-plugin-zip.mjs", "--plugin", NAME, "--with-mcp"], { cwd: ROOT, stdio: "pipe" });
+    const version = fs.readFileSync(path.join(ROOT, "VERSION"), "utf8").trim();
+    files = readZip(fs.readFileSync(path.join(ROOT, "dist", `${NAME}-${version}-openai.zip`)));
+  });
+
+  const inArchive = (rel) => files.get(`${NAME}/${rel.slice(PKG_REL.length + 1)}`)?.toString("utf8") ?? null;
+
+  test("every target's config file is in the archive with the exact derived shape and endpoint", () => {
+    assert.deepEqual(checkPackage(inArchive, SOURCE), []);
+    for (const rel of ["mcp.json", ".mcp.json", "cursor/mcp.json", "plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json"]) {
+      assert.ok(files.has(`${NAME}/${rel}`), `${rel} is archived`);
+    }
+    assert.deepEqual(JSON.parse(files.get(`${NAME}/mcp.json`)).mcpServers.preset, { type: "streamable-http", url: ENDPOINT });
+    assert.deepEqual(JSON.parse(files.get(`${NAME}/.mcp.json`)), { mcpServers: { preset: { url: ENDPOINT } } });
+    assert.deepEqual(JSON.parse(files.get(`${NAME}/.claude-plugin/plugin.json`)).mcpServers, { preset: { type: "http", url: ENDPOINT } });
+    assert.equal(JSON.parse(files.get(`${NAME}/.codex-plugin/plugin.json`)).mcpServers, "./.mcp.json");
+    assert.equal(JSON.parse(files.get(`${NAME}/.cursor-plugin/plugin.json`)).mcpServers, "./cursor/mcp.json");
+    assert.deepEqual(JSON.parse(files.get(`${NAME}/cursor/mcp.json`)), { mcpServers: { preset: { url: ENDPOINT } } });
+  });
+
+  test("archived portable files validate against the Agent Plugins schemas", () => {
+    const plugin = json(ROOT, "tests", "fixtures", "agent-plugins", "plugin.schema.json");
+    const mcp = json(ROOT, "tests", "fixtures", "agent-plugins", "mcp.schema.json");
+    assert.deepEqual(validate(plugin, JSON.parse(files.get(`${NAME}/plugin.json`))), []);
+    assert.deepEqual(validate(mcp, JSON.parse(files.get(`${NAME}/mcp.json`))), []);
+  });
+
+  test("the archive has no credential-like config, no app mapping, no hooks, and no other host", () => {
+    for (const [entry, data] of files) {
+      assert.ok(!/(^|\/)\.app\.json$/.test(entry) && !entry.includes("/hooks/"), entry);
+      const text = data.toString("utf8");
+      assert.doesNotMatch(text, /openai-apps-challenge/, entry);
+      if (/(^|\/)\.?mcp\.json$/.test(entry) || entry.endsWith(".mcp.json")) {
+        assert.doesNotMatch(JSON.stringify(JSON.parse(text).mcpServers ?? JSON.parse(text).servers), CREDENTIAL_LIKE, entry);
+      }
+      for (const url of text.match(/https:\/\/[a-z0-9.-]*preset\.io\/mcp\b/gi) ?? []) assert.equal(url, ENDPOINT, entry);
+    }
+  });
+
+  test("the archive ships the skills, including the gateway skill, and the user-level templates", () => {
+    assert.ok(files.has(`${NAME}/skills/preset-mcp-gateway/SKILL.md`));
+    assert.ok(files.has(`${NAME}/skills/preset-mcp/SKILL.md`));
+    for (const rel of ["claude-code.mcp.json", "cursor.mcp.json", "vscode.mcp.json", "codex.config.toml", "clients.json", "gateway.json"]) {
+      assert.ok(files.has(`${NAME}/connections/${rel}`), rel);
+    }
+  });
+
+  test("the skills-only archives stay free of MCP config", () => {
+    for (const pkg of ["preset-api-skills", "preset-cli-skills", "preset-snowflake-cortex-skills"]) {
+      const version = fs.readFileSync(path.join(ROOT, "VERSION"), "utf8").trim();
+      execFileSync(process.execPath, ["scripts/build-openai-plugin-zip.mjs", "--plugin", pkg], { cwd: ROOT, stdio: "pipe" });
+      const archive = readZip(fs.readFileSync(path.join(ROOT, "dist", `${pkg}-${version}-openai.zip`)));
+      for (const entry of archive.keys()) assert.ok(!/(^|\/)\.?mcp\.json$/.test(entry) && !entry.endsWith(".app.json"), entry);
+    }
+    const refused = spawnSync("node", ["scripts/build-openai-plugin-zip.mjs", "--plugin", "preset-cli-skills", "--with-mcp"], { cwd: ROOT, encoding: "utf8" });
+    assert.notEqual(refused.status, 0);
   });
 });
 

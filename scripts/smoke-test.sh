@@ -28,7 +28,7 @@ mcp_zip="dist/preset-mcp-skills-$(jq -r .version "plugins/preset-mcp-skills/.cod
 test -f "$mcp_zip" || fail "missing $mcp_zip"
 if command -v unzip >/dev/null; then
   unzip -tq "$mcp_zip" >/dev/null || fail "OpenAI plugin ZIP $mcp_zip failed integrity check"
-  for entry in mcp.json .mcp.json cursor/mcp.json .claude-plugin/plugin.json .codex-plugin/plugin.json .cursor-plugin/plugin.json plugin.json; do
+  for entry in mcp.json cursor/mcp.json .claude-plugin/plugin.json .codex-plugin/plugin.json .cursor-plugin/plugin.json plugin.json; do
     unzip -Z1 "$mcp_zip" | grep -qx "preset-mcp-skills/$entry" || fail "OpenAI plugin ZIP $mcp_zip is missing $entry"
   done
 fi
@@ -577,8 +577,9 @@ require_jq '.endpoint == "https://mcp.app.preset.io/mcp"' "$MCP_ROOT/connections
 require_jq '.mcpServers.preset == {"type": "streamable-http", "url": "https://mcp.app.preset.io/mcp"}' "$MCP_ROOT/mcp.json"
 require_jq '.["$schema"] == "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json"' "$MCP_ROOT/mcp.json"
 require_jq '.["$schema"] == "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json" and .name == "preset-mcp-skills"' "$MCP_ROOT/plugin.json"
-require_jq '. == {"mcpServers": {"preset": {"url": "https://mcp.app.preset.io/mcp"}}}' "$MCP_ROOT/.mcp.json"
-require_jq '.mcpServers == "./.mcp.json"' "$MCP_ROOT/.codex-plugin/plugin.json"
+# Codex reads the root mcp.json by default; a root .mcp.json would be auto-discovered by Claude Code, which rejects an entry without type.
+reject_file "$MCP_ROOT/.mcp.json"
+require_jq 'has("mcpServers") | not' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.mcpServers == {"preset": {"type": "http", "url": "https://mcp.app.preset.io/mcp"}}' "$MCP_ROOT/.claude-plugin/plugin.json"
 require_jq '.mcpServers == "./cursor/mcp.json"' "$MCP_ROOT/.cursor-plugin/plugin.json"
 require_jq '. == {"mcpServers": {"preset": {"url": "https://mcp.app.preset.io/mcp"}}}' "$MCP_ROOT/cursor/mcp.json"

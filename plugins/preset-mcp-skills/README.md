@@ -12,12 +12,11 @@ The package bundles a plugin-scoped `preset` server for each plugin format, each
 
 | Target | File | Shape | Official documentation |
 |---|---|---|---|
-| Portable Agent Plugins / OpenAI plugin | `plugin.json` + `mcp.json` | `{"$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json", "mcpServers": {"preset": {"type": "streamable-http", "url": "https://mcp.app.preset.io/mcp"}}}` | https://developers.openai.com/plugins/build/plugins (Bundled MCP servers and lifecycle hooks), schema https://agent-plugins.org/schemas/1.0.0/mcp.schema.json |
-| OpenAI Codex compatibility | `.codex-plugin/plugin.json` with `"mcpServers": "./.mcp.json"` + `.mcp.json` | `{"mcpServers": {"preset": {"url": "https://mcp.app.preset.io/mcp"}}}` (no `$schema`, no `type`) | https://developers.openai.com/plugins/deploy/submission (Complete metadata examples, Codex format) |
+| Portable Agent Plugins / OpenAI Codex plugin | `plugin.json` + `mcp.json` (Codex discovers the root `mcp.json` by default; `.codex-plugin/plugin.json` declares no `mcpServers`) | `{"$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json", "mcpServers": {"preset": {"type": "streamable-http", "url": "https://mcp.app.preset.io/mcp"}}}` | https://developers.openai.com/plugins/build/plugins (Bundled MCP servers and lifecycle hooks), schema https://agent-plugins.org/schemas/1.0.0/mcp.schema.json |
 | Claude Code | `.claude-plugin/plugin.json`, inline `mcpServers` | `{"preset": {"type": "http", "url": "https://mcp.app.preset.io/mcp"}}` (`type` is required: an entry with `url` but no `type` is skipped) | https://code.claude.com/docs/en/plugins-reference (`mcpServers`), https://code.claude.com/docs/en/mcp (Plugin-provided MCP servers) |
 | Cursor | `.cursor-plugin/plugin.json` with `"mcpServers": "./cursor/mcp.json"` + `cursor/mcp.json` | `{"mcpServers": {"preset": {"url": "https://mcp.app.preset.io/mcp"}}}` | https://cursor.com/docs/reference/plugins (`mcpServers` overrides default `mcp.json` discovery), https://cursor.com/docs/context/mcp |
 
-The shapes differ on purpose; each target reads only its own. The server is plugin-scoped (for example `plugin:preset-mcp-skills:preset` in Claude Code), so it never replaces a connection you configured yourself, and it still needs interactive OAuth sign-in. It carries no credentials. The package declares no `apps` / `.app.json` mapping and no lifecycle hooks (neither is eligible for the public OpenAI directory), and no domain-verification challenge (that is not a plugin configuration field).
+The shapes differ on purpose; each target reads only its own. There is deliberately no root `.mcp.json`: Claude Code auto-discovers that path and rejects a `url` entry without `type`, while Codex reads the root `mcp.json`. The server is plugin-scoped (for example `plugin:preset-mcp-skills:preset` in Claude Code), so it never replaces a connection you configured yourself, and it still needs interactive OAuth sign-in. It carries no credentials. The package declares no `apps` / `.app.json` mapping and no lifecycle hooks (neither is eligible for the public OpenAI directory), and no domain-verification challenge (that is not a plugin configuration field).
 
 Separately, opt-in templates in [connections/](connections/README.md) cover user or project configuration for Claude Code, Cursor, VS Code, and OpenAI Codex (named `preset-gateway`). Claude (claude.ai and Claude Desktop) and ChatGPT are manual steps only. Templates contain the endpoint and nothing else and must not overwrite an existing connection. Per-client steps and official documentation links: [connect-clients.md](skills/preset-mcp-gateway/references/connect-clients.md).
 
@@ -82,7 +81,7 @@ Set `SUPERSET_MCP_SERVICE_PATH` instead of passing `--mcp-root` when the Superse
 
 ## Packaging
 
-The endpoint and server names live in one file, [connections/gateway.json](connections/gateway.json). Every connection config file for every target (portable `mcp.json`, Codex `.mcp.json`, Claude's inline `mcpServers`, Cursor `cursor/mcp.json`, the manifest pointers, and the user-level templates) is generated from it:
+The endpoint and server names live in one file, [connections/gateway.json](connections/gateway.json). Every connection config file for every target (portable `mcp.json`, which Codex reads, Claude's inline `mcpServers`, Cursor `cursor/mcp.json`, the manifest pointers, the user-level templates, and the add/login commands in `connections/clients.json`) is generated from it:
 
 ```bash
 node scripts/sync-mcp-config.mjs          # write

@@ -89,7 +89,7 @@
     "targets": [
       {
         "id": "agent-plugins-portable",
-        "name": "Portable Agent Plugins / OpenAI plugin",
+        "name": "Portable Agent Plugins / OpenAI Codex plugin",
         "file": "mcp.json",
         "manifest": "plugin.json",
         "shape": {
@@ -105,27 +105,7 @@
           "https://developers.openai.com/plugins/build/plugins",
           "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json"
         ],
-        "docSection": "Bundled MCP servers and lifecycle hooks (Remote HTTP server)"
-      },
-      {
-        "id": "codex-compat",
-        "name": "OpenAI Codex compatibility",
-        "file": ".mcp.json",
-        "manifest": ".codex-plugin/plugin.json",
-        "manifestField": {
-          "mcpServers": "./.mcp.json"
-        },
-        "shape": {
-          "mcpServers": {
-            "preset": {
-              "url": "https://mcp.app.preset.io/mcp"
-            }
-          }
-        },
-        "docs": [
-          "https://developers.openai.com/plugins/deploy/submission"
-        ],
-        "docSection": "Complete metadata examples (Codex format: .mcp.json omits the Agent Plugins schema and type)"
+        "docSection": "Bundled MCP servers and lifecycle hooks (Remote HTTP server: configure portable MCP servers in root mcp.json). Codex discovers root mcp.json by default; .codex-plugin/plugin.json declares no mcpServers."
       },
       {
         "id": "claude-code",

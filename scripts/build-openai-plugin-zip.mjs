@@ -286,11 +286,12 @@ if (withMcp) {
   } else {
     const read = (rel) => (isTracked(path.join(ROOT, rel)) ? fs.readFileSync(path.join(ROOT, rel), "utf8") : null);
     for (const problem of checkPackage(read, readSource(ROOT))) fail(problem);
-    if (manifest.mcpServers !== "./.mcp.json") fail('.codex-plugin/plugin.json mcpServers must be "./.mcp.json".');
+    if (manifest.mcpServers !== undefined) fail(".codex-plugin/plugin.json must not declare mcpServers; Codex discovers the root mcp.json.");
     if (manifest.apps !== undefined || manifest.hooks !== undefined) fail("Remove apps and hooks from the manifest; they are not eligible for the public directory.");
     if (isTracked(path.join(pluginDir, ".app.json"))) fail(".app.json must not be included.");
     if (trackedFiles.some((rel) => rel.startsWith(`${path.relative(ROOT, pluginDir)}/hooks/`))) fail("Lifecycle hooks are not eligible for the public directory.");
-    if (!isTracked(path.join(pluginDir, "mcp.json")) || !isTracked(path.join(pluginDir, ".mcp.json"))) fail("mcp.json and .mcp.json must both be tracked.");
+    if (!isTracked(path.join(pluginDir, "mcp.json"))) fail("mcp.json must be tracked.");
+    if (isTracked(path.join(pluginDir, ".mcp.json"))) fail(".mcp.json must not be tracked: Claude Code auto-discovers it and rejects an entry without type.");
   }
   if (isTracked(path.join(pluginDir, ".claude-plugin", "marketplace.json"))) fail(".claude-plugin/marketplace.json must not be included.");
 } else {

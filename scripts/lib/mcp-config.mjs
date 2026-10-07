@@ -4,8 +4,10 @@
 // every target, the exact file contents in that target's own official format.
 // Shapes differ on purpose and must not be unified:
 //   portable Agent Plugins  mcp.json            $schema + type "streamable-http"
-//   OpenAI Codex            .mcp.json           url only, no $schema, no type
+//   OpenAI Codex            mcp.json            discovered by default from the plugin root (the portable file);
+//                                               .codex-plugin/plugin.json declares no mcpServers
 //   Claude Code             plugin.json inline  type "http" (Claude skips a url entry without type)
+//                                               no root .mcp.json: Claude auto-discovers it and rejects an entry without type
 //   Cursor                  cursor/mcp.json     url only
 // Sources: https://developers.openai.com/plugins/build/plugins,
 //   https://developers.openai.com/plugins/deploy/submission,
@@ -37,7 +39,6 @@ export function generatedFiles(source) {
   const { endpoint, bundledServerName: bundled, userServerName: user } = source;
   return {
     [`${PACKAGE}/mcp.json`]: json({ $schema: AGENT_PLUGINS_MCP_SCHEMA, mcpServers: { [bundled]: { type: "streamable-http", url: endpoint } } }),
-    [`${PACKAGE}/.mcp.json`]: json({ mcpServers: { [bundled]: { url: endpoint } } }),
     [`${PACKAGE}/cursor/mcp.json`]: json({ mcpServers: { [bundled]: { url: endpoint } } }),
     [`${PACKAGE}/connections/claude-code.mcp.json`]: json({ mcpServers: { [user]: { type: "http", url: endpoint } } }),
     [`${PACKAGE}/connections/cursor.mcp.json`]: json({ mcpServers: { [user]: { url: endpoint } } }),
@@ -46,12 +47,13 @@ export function generatedFiles(source) {
   };
 }
 
-// Fields written into existing manifests, keyed by file.
+// Fields written into existing manifests, keyed by file. A value of undefined means
+// the field must be absent.
 export function manifestFields(source) {
   const { endpoint, bundledServerName: bundled } = source;
   return {
     [`${PACKAGE}/.claude-plugin/plugin.json`]: { mcpServers: { [bundled]: { type: "http", url: endpoint } } },
-    [`${PACKAGE}/.codex-plugin/plugin.json`]: { mcpServers: "./.mcp.json" },
+    [`${PACKAGE}/.codex-plugin/plugin.json`]: { mcpServers: undefined },
     [`${PACKAGE}/.cursor-plugin/plugin.json`]: { mcpServers: "./cursor/mcp.json" },
   };
 }
@@ -65,9 +67,16 @@ export function clientsIndexFields(source) {
     endpoint,
     serverName: user,
     pluginServerName: bundled,
+    // Per-client command strings that embed the endpoint and the user-level server name.
+    commands: {
+      "claude-code": {
+        cli: `claude mcp add --transport http ${user} ${endpoint}`,
+        signIn: `Run /mcp in Claude Code (or claude mcp login ${user}) and complete the browser sign-in.`,
+      },
+      codex: { signIn: `Run codex mcp login ${user} and complete the browser sign-in.` },
+    },
     shapes: {
       "agent-plugins-portable": parse("mcp.json"),
-      "codex-compat": parse(".mcp.json"),
       cursor: parse("cursor/mcp.json"),
       "claude-code": manifestFields(source)[`${PACKAGE}/.claude-plugin/plugin.json`].mcpServers,
     },
@@ -103,7 +112,9 @@ export function checkPackage(read, source) {
       continue;
     }
     for (const [key, value] of Object.entries(fields)) {
-      if (JSON.stringify(manifest[key]) !== JSON.stringify(value)) problems.push(`${rel}: "${key}" must be ${JSON.stringify(value)}`);
+      if (value === undefined) {
+        if (key in manifest) problems.push(`${rel}: "${key}" must be absent`);
+      } else if (JSON.stringify(manifest[key]) !== JSON.stringify(value)) problems.push(`${rel}: "${key}" must be ${JSON.stringify(value)}`);
     }
   }
   const portable = read(`${PACKAGE}/plugin.json`);
@@ -122,6 +133,8 @@ export function checkPackage(read, source) {
     }
     if (CREDENTIAL_LIKE.test(JSON.stringify(servers))) problems.push(`${rel}: credential-like content in MCP server config`);
   }
+  // Claude Code auto-discovers a root .mcp.json and rejects an entry without type; Codex reads the root mcp.json instead.
+  if (read(`${PACKAGE}/.mcp.json`) !== null) problems.push(`${PACKAGE}/.mcp.json must not exist: Claude Code auto-discovers it and rejects an entry without "type"`);
   for (const rel of [".app.json", "hooks/hooks.json"]) {
     if (read(`${PACKAGE}/${rel}`) !== null) problems.push(`${PACKAGE}/${rel} is not eligible for the OpenAI directory`);
   }

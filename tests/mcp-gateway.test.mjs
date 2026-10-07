@@ -10,12 +10,13 @@
 // The manual, read-only canary procedure is in plugins/preset-mcp-skills/README.md.
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { CREDENTIAL_LIKE, checkPackage, generatedFiles, manifestFields, PACKAGE as PKG_REL, readSource } from "../scripts/lib/mcp-config.mjs";
+import { CREDENTIAL_LIKE, checkPackage, clientsIndexFields, generatedFiles, manifestFields, PACKAGE as PKG_REL, readSource } from "../scripts/lib/mcp-config.mjs";
 import { findStaleClaims, scanRepository } from "../scripts/check-mcp-gateway-claims.mjs";
 import { validate } from "./lib/json-schema.mjs";
 import { readZip } from "./lib/zip.mjs";
@@ -275,8 +276,8 @@ describe("plugin-bundled MCP configuration (one exact shape per target)", () => 
     mcp: json(ROOT, "tests", "fixtures", "agent-plugins", "mcp.schema.json"),
   };
 
-  test("the index lists exactly the four targets, each with official documentation", () => {
-    assert.deepEqual(Object.keys(manifestTargets).sort(), ["agent-plugins-portable", "claude-code", "codex-compat", "cursor"]);
+  test("the index lists exactly the three config targets (Codex reads the portable one), each with official documentation", () => {
+    assert.deepEqual(Object.keys(manifestTargets).sort(), ["agent-plugins-portable", "claude-code", "cursor"]);
     assert.equal(clients.pluginManifests.serverName, "preset");
     for (const target of Object.values(manifestTargets)) {
       assert.ok(target.docs.length > 0 && target.docSection, `${target.id} cites docs`);
@@ -316,20 +317,22 @@ describe("plugin-bundled MCP configuration (one exact shape per target)", () => 
     for (const config of bad) assert.notDeepEqual(validate(schemas.mcp, config), [], JSON.stringify(config));
   });
 
-  test("Codex compatibility: .codex-plugin/plugin.json points at .mcp.json, which omits $schema and type", () => {
-    assert.equal(json(PKG, ".codex-plugin", "plugin.json").mcpServers, "./.mcp.json");
-    const config = json(PKG, ".mcp.json");
-    assert.deepEqual(config, { mcpServers: { preset: SERVER } });
-    assert.deepEqual(config, manifestTargets["codex-compat"].shape);
-    assert.ok(!("$schema" in config) && !("type" in config.mcpServers.preset));
+  test("Codex: reads the root mcp.json by default, so .codex-plugin/plugin.json declares no mcpServers", () => {
+    assert.ok(!("mcpServers" in json(PKG, ".codex-plugin", "plugin.json")));
+    assert.ok(fs.existsSync(path.join(PKG, "mcp.json")));
+  });
+
+  test("no root .mcp.json: Claude Code auto-discovers it and rejects a url entry without type", () => {
+    assert.ok(!fs.existsSync(path.join(PKG, ".mcp.json")));
+    const problems = checkPackage((file) => (file === `${PKG_REL}/.mcp.json` ? JSON.stringify({ mcpServers: { preset: { url: ENDPOINT } } }) : fs.existsSync(path.join(ROOT, file)) ? read(ROOT, file) : null), SOURCE);
+    assert.ok(problems.some((p) => p.includes(".mcp.json must not exist")));
   });
 
   test("Claude Code: inline mcpServers in .claude-plugin/plugin.json with type http", () => {
     const manifest = json(PKG, ".claude-plugin", "plugin.json");
     assert.deepEqual(manifest.mcpServers, { preset: { type: "http", ...SERVER } });
     assert.deepEqual(manifest.mcpServers, manifestTargets["claude-code"].manifestField.mcpServers);
-    // Claude Code skips a url entry that has no type, and it also loads the root .mcp.json.
-    // The inline server of the same name must win, so it must carry the type.
+    // Claude Code skips a url entry that has no type, so the inline server must carry it.
     assert.equal(manifest.mcpServers.preset.type, "http");
   });
 
@@ -340,23 +343,22 @@ describe("plugin-bundled MCP configuration (one exact shape per target)", () => 
     assert.deepEqual(config, manifestTargets.cursor.shape);
   });
 
-  test("each target keeps its own shape: portable and Claude carry a type, Codex and Cursor are url-only", () => {
+  test("each target keeps its own shape: portable (read by Codex) and Claude carry a type, Cursor is url-only", () => {
     const portable = json(PKG, "mcp.json");
-    const codex = json(PKG, ".mcp.json");
     const claude = json(PKG, ".claude-plugin", "plugin.json").mcpServers;
     const cursor = json(PKG, "cursor", "mcp.json");
     assert.equal(portable.mcpServers.preset.type, "streamable-http");
     assert.equal(claude.preset.type, "http");
     assert.notEqual(portable.mcpServers.preset.type, claude.preset.type);
-    assert.ok(!("type" in codex.mcpServers.preset) && !("type" in cursor.mcpServers.preset));
-    assert.ok("$schema" in portable && !("$schema" in codex) && !("$schema" in cursor));
+    assert.ok(!("type" in cursor.mcpServers.preset));
+    assert.ok("$schema" in portable && !("$schema" in cursor));
     assert.ok(!("mcpServers" in claude), "Claude's inline value is the server map itself, not a wrapped file");
     assert.ok(!JSON.stringify(json(PKG, ".codex-plugin", "plugin.json")).includes('"http"'));
     assert.ok(!JSON.stringify(json(PKG, ".cursor-plugin", "plugin.json")).includes("streamable-http"));
   });
 
   test("every bundled entry names only the production endpoint and carries no credentials or extra fields", () => {
-    const files = ["mcp.json", ".mcp.json", "cursor/mcp.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json", "plugin.json"];
+    const files = ["mcp.json", "cursor/mcp.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json", "plugin.json"];
     for (const file of files) {
       const config = JSON.parse(read(PKG, file));
       for (const server of Object.values(config.mcpServers ?? {})) {
@@ -422,6 +424,7 @@ describe("single-sourced endpoint and generated config", () => {
       assert.ok(!after[rel].includes(PINNED_ENDPOINT));
     }
     for (const fields of Object.values(manifestFields(other))) {
+      if (fields.mcpServers === undefined) continue;
       assert.ok(typeof fields.mcpServers === "string" || JSON.stringify(fields).includes("example.invalid"));
     }
   });
@@ -431,13 +434,72 @@ describe("single-sourced endpoint and generated config", () => {
     const mcp = `${PKG_REL}/mcp.json`;
     const wrongHost = readDisk(mcp).replace("mcp.app.preset.io", "mcp.staging.example");
     assert.ok(checkPackage(overlay(mcp, wrongHost), SOURCE).some((p) => p.includes(mcp)));
-    assert.ok(checkPackage(overlay(`${PKG_REL}/.mcp.json`, null), SOURCE).some((p) => p.includes("missing")));
+    const cursor = `${PKG_REL}/cursor/mcp.json`;
+    assert.ok(checkPackage(overlay(cursor, null), SOURCE).some((p) => p.includes("missing")));
     const extra = JSON.stringify({ mcpServers: { preset: { url: ENDPOINT, timeout: 5 } } }, null, 2) + "\n";
-    assert.ok(checkPackage(overlay(`${PKG_REL}/.mcp.json`, extra), SOURCE).some((p) => p.includes("unsolicited setting")));
+    assert.ok(checkPackage(overlay(cursor, extra), SOURCE).some((p) => p.includes("unsolicited setting")));
     const secret = JSON.stringify({ mcpServers: { preset: { url: ENDPOINT, headers: { Authorization: "Bearer x" } } } }, null, 2) + "\n";
-    const problems = checkPackage(overlay(`${PKG_REL}/.mcp.json`, secret), SOURCE);
+    const problems = checkPackage(overlay(cursor, secret), SOURCE);
     assert.ok(problems.some((p) => p.includes("credential-like")));
     assert.ok(checkPackage((file) => (file === `${PKG_REL}/.app.json` ? "{}" : readDisk(file)), SOURCE).some((p) => p.includes("not eligible")));
+  });
+
+  describe("a renamed user server name reaches every derived field", () => {
+    const RENAMED = "preset-other";
+    const syncIn = (dir, ...args) => spawnSync("node", [path.join(ROOT, "scripts", "sync-mcp-config.mjs"), ...args], { cwd: dir, encoding: "utf8" });
+    const tempCopy = () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "mcp-sync-"));
+      fs.cpSync(PKG, path.join(dir, PKG_REL), { recursive: true });
+      return dir;
+    };
+    const setUserName = (dir) => {
+      const file = path.join(dir, PKG_REL, "connections", "gateway.json");
+      fs.writeFileSync(file, `${JSON.stringify({ ...JSON.parse(fs.readFileSync(file, "utf8")), userServerName: RENAMED }, null, 2)}\n`);
+    };
+
+    test("the add and login commands in clients.json come from gateway.json", () => {
+      const fields = clientsIndexFields({ ...SOURCE, userServerName: RENAMED });
+      assert.equal(fields.commands["claude-code"].cli, `claude mcp add --transport http ${RENAMED} ${ENDPOINT}`);
+      assert.match(fields.commands["claude-code"].signIn, new RegExp(`claude mcp login ${RENAMED}\\)`));
+      assert.match(fields.commands.codex.signIn, new RegExp(`codex mcp login ${RENAMED} `));
+      const byId = Object.fromEntries(clients.clients.map((c) => [c.id, c]));
+      assert.equal(byId["claude-code"].cli, clientsIndexFields(SOURCE).commands["claude-code"].cli);
+      assert.equal(byId.codex.signIn, clientsIndexFields(SOURCE).commands.codex.signIn);
+    });
+
+    test("--check fails on a stale clients.json and a plain sync regenerates it", () => {
+      const dir = tempCopy();
+      try {
+        assert.equal(syncIn(dir, "--check").status, 0);
+        setUserName(dir);
+        const stale = syncIn(dir, "--check");
+        assert.notEqual(stale.status, 0, "templates and clients.json still carry the old name");
+        assert.match(stale.stderr, /clients\.json/);
+        assert.equal(syncIn(dir).status, 0);
+        assert.equal(syncIn(dir, "--check").status, 0);
+        const index = JSON.parse(fs.readFileSync(path.join(dir, PKG_REL, "connections", "clients.json"), "utf8"));
+        const text = JSON.stringify(index);
+        assert.ok(!text.includes("preset-gateway"), "no stale user server name left in clients.json");
+        assert.equal(index.serverName, RENAMED);
+        assert.equal(index.clients.find((c) => c.id === "claude-code").cli, `claude mcp add --transport http ${RENAMED} ${ENDPOINT}`);
+        assert.ok(index.clients.find((c) => c.id === "codex").signIn.includes(`codex mcp login ${RENAMED}`));
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("--check fails when only a command string in clients.json is stale", () => {
+      const dir = tempCopy();
+      try {
+        const file = path.join(dir, PKG_REL, "connections", "clients.json");
+        fs.writeFileSync(file, fs.readFileSync(file, "utf8").replace("codex mcp login preset-gateway", "codex mcp login stale-name"));
+        const result = syncIn(dir, "--check");
+        assert.notEqual(result.status, 0);
+        assert.match(result.stderr, /clients\.json/);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
   });
 
   test("every preset.io/mcp URL in package config files is the source endpoint", () => {
@@ -475,13 +537,13 @@ describe("built OpenAI archive carries every target's config", () => {
 
   test("every target's config file is in the archive with the exact derived shape and endpoint", () => {
     assert.deepEqual(checkPackage(inArchive, SOURCE), []);
-    for (const rel of ["mcp.json", ".mcp.json", "cursor/mcp.json", "plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json"]) {
+    for (const rel of ["mcp.json", "cursor/mcp.json", "plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json"]) {
       assert.ok(files.has(`${NAME}/${rel}`), `${rel} is archived`);
     }
     assert.deepEqual(JSON.parse(files.get(`${NAME}/mcp.json`)).mcpServers.preset, { type: "streamable-http", url: ENDPOINT });
-    assert.deepEqual(JSON.parse(files.get(`${NAME}/.mcp.json`)), { mcpServers: { preset: { url: ENDPOINT } } });
+    assert.ok(!files.has(`${NAME}/.mcp.json`), "a root .mcp.json would be auto-discovered by Claude Code");
     assert.deepEqual(JSON.parse(files.get(`${NAME}/.claude-plugin/plugin.json`)).mcpServers, { preset: { type: "http", url: ENDPOINT } });
-    assert.equal(JSON.parse(files.get(`${NAME}/.codex-plugin/plugin.json`)).mcpServers, "./.mcp.json");
+    assert.ok(!("mcpServers" in JSON.parse(files.get(`${NAME}/.codex-plugin/plugin.json`))));
     assert.equal(JSON.parse(files.get(`${NAME}/.cursor-plugin/plugin.json`)).mcpServers, "./cursor/mcp.json");
     assert.deepEqual(JSON.parse(files.get(`${NAME}/cursor/mcp.json`)), { mcpServers: { preset: { url: ENDPOINT } } });
   });

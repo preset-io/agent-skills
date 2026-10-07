@@ -41,7 +41,10 @@ for (const [rel, fields] of Object.entries(manifestFields(source))) {
   const keys = Object.keys(manifest);
   const next = {};
   for (const key of keys) next[key] = manifest[key];
-  for (const [key, value] of Object.entries(fields)) next[key] = value;
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === undefined) delete next[key];
+    else next[key] = value;
+  }
   sync(rel, `${JSON.stringify(next, null, 2)}\n`);
 }
 
@@ -51,6 +54,9 @@ const derived = clientsIndexFields(source);
 index.endpoint = derived.endpoint;
 index.serverName = derived.serverName;
 index.pluginManifests.serverName = derived.pluginServerName;
+for (const client of index.clients) {
+  Object.assign(client, derived.commands[client.id]);
+}
 for (const target of index.pluginManifests.targets) {
   const shape = derived.shapes[target.id];
   if (target.id === "claude-code") target.manifestField = { mcpServers: shape };

@@ -14,7 +14,9 @@ import path from "node:path";
 import { describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { spawnSync } from "node:child_process";
 import { findStaleClaims, scanRepository } from "../scripts/check-mcp-gateway-claims.mjs";
+import { validate } from "./lib/json-schema.mjs";
 import { walk } from "./lib/walkthrough.mjs";
 import { CONTRACT } from "./lib/mock-gateway.mjs";
 
@@ -241,17 +243,13 @@ describe("client connection manifests", () => {
     });
   }
 
-  test("the package never auto-connects or defaults to a non-production host", () => {
-    for (const manifest of [".claude-plugin", ".codex-plugin", ".cursor-plugin"]) {
-      const config = json(PKG, manifest, "plugin.json");
-      assert.ok(!("mcpServers" in config) && !("mcp_servers" in config), `${manifest} declares no MCP server`);
-    }
-    assert.ok(!fs.existsSync(path.join(PKG, ".mcp.json")), "no bundled .mcp.json");
+  test("only the production host appears and user-level templates keep a distinct name", () => {
     for (const file of packageFiles()) {
       if (!/\.(md|json|toml)$/.test(file)) continue;
       const hosts = read(file).match(/https:\/\/[a-z0-9.-]*preset\.io\/mcp\b/gi) ?? [];
       for (const host of hosts) assert.equal(host, ENDPOINT, `${path.relative(PKG, file)} only names the production endpoint`);
     }
+    assert.notEqual(clients.serverName, clients.pluginManifests.serverName);
     assert.match(read(PKG, "connections", "README.md"), /Never overwrite or merge over an existing connection/);
     assert.match(read(PKG, "connections", "README.md"), /Staging, sandbox, and other environments are opt-in only/);
     assert.match(read(SKILL, "references", "connect-clients.md"), /Never overwrite an existing connection/);
@@ -262,6 +260,139 @@ describe("client connection manifests", () => {
     const paths = cursor.skills.map((s) => s.path);
     assert.ok(paths.includes("skills/preset-mcp-gateway/SKILL.md"));
     for (const p of paths) assert.ok(fs.existsSync(path.join(PKG, p)), p);
+  });
+});
+
+describe("plugin-bundled MCP configuration (one exact shape per target)", () => {
+  const SERVER = { url: ENDPOINT };
+  const manifestTargets = Object.fromEntries(clients.pluginManifests.targets.map((t) => [t.id, t]));
+  const schemas = {
+    plugin: json(ROOT, "tests", "fixtures", "agent-plugins", "plugin.schema.json"),
+    mcp: json(ROOT, "tests", "fixtures", "agent-plugins", "mcp.schema.json"),
+  };
+
+  test("the index lists exactly the four targets, each with official documentation", () => {
+    assert.deepEqual(Object.keys(manifestTargets).sort(), ["agent-plugins-portable", "claude-code", "codex-compat", "cursor"]);
+    assert.equal(clients.pluginManifests.serverName, "preset");
+    for (const target of Object.values(manifestTargets)) {
+      assert.ok(target.docs.length > 0 && target.docSection, `${target.id} cites docs`);
+      for (const url of target.docs) {
+        assert.ok(
+          /^(developers\.openai\.com|agent-plugins\.org|code\.claude\.com|cursor\.com)$/.test(new URL(url).hostname),
+          `${target.id}: ${url} is an official host`,
+        );
+        assert.ok(read(PKG, "README.md").includes(url), `${url} appears in the package README`);
+        assert.ok(read(SKILL, "references", "connect-clients.md").includes(url), `${url} appears in connect-clients.md`);
+      }
+    }
+  });
+
+  test("portable Agent Plugins: root plugin.json and mcp.json validate against the published schemas", () => {
+    const plugin = json(PKG, "plugin.json");
+    assert.deepEqual(validate(schemas.plugin, plugin), []);
+    assert.equal(plugin.$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
+    assert.equal(plugin.name, "preset-mcp-skills");
+    assert.ok(!("extensions" in plugin), "OpenAI presentation stays in the .codex-plugin overlay");
+    const mcp = json(PKG, "mcp.json");
+    assert.deepEqual(validate(schemas.mcp, mcp), []);
+    assert.deepEqual(mcp, {
+      $schema: "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+      mcpServers: { preset: { type: "streamable-http", ...SERVER } },
+    });
+    assert.deepEqual(mcp, manifestTargets["agent-plugins-portable"].shape);
+  });
+
+  test("the schema validator rejects shapes the portable schema forbids", () => {
+    const bad = [
+      { $schema: schemas.mcp.properties.$schema.const, mcpServers: { preset: { type: "http", ...SERVER } } },
+      { $schema: schemas.mcp.properties.$schema.const, mcpServers: { preset: { ...SERVER } } },
+      { mcpServers: { preset: { type: "streamable-http", ...SERVER } } },
+      { $schema: schemas.mcp.properties.$schema.const, mcpServers: { preset: { type: "streamable-http", ...SERVER, oauth: {} } } },
+    ];
+    for (const config of bad) assert.notDeepEqual(validate(schemas.mcp, config), [], JSON.stringify(config));
+  });
+
+  test("Codex compatibility: .codex-plugin/plugin.json points at .mcp.json, which omits $schema and type", () => {
+    assert.equal(json(PKG, ".codex-plugin", "plugin.json").mcpServers, "./.mcp.json");
+    const config = json(PKG, ".mcp.json");
+    assert.deepEqual(config, { mcpServers: { preset: SERVER } });
+    assert.deepEqual(config, manifestTargets["codex-compat"].shape);
+    assert.ok(!("$schema" in config) && !("type" in config.mcpServers.preset));
+  });
+
+  test("Claude Code: inline mcpServers in .claude-plugin/plugin.json with type http", () => {
+    const manifest = json(PKG, ".claude-plugin", "plugin.json");
+    assert.deepEqual(manifest.mcpServers, { preset: { type: "http", ...SERVER } });
+    assert.deepEqual(manifest.mcpServers, manifestTargets["claude-code"].manifestField.mcpServers);
+    // Claude Code skips a url entry that has no type, and it also loads the root .mcp.json.
+    // The inline server of the same name must win, so it must carry the type.
+    assert.equal(manifest.mcpServers.preset.type, "http");
+  });
+
+  test("Cursor: .cursor-plugin/plugin.json points at cursor/mcp.json, a url-only entry", () => {
+    assert.equal(json(PKG, ".cursor-plugin", "plugin.json").mcpServers, "./cursor/mcp.json");
+    const config = json(PKG, "cursor", "mcp.json");
+    assert.deepEqual(config, { mcpServers: { preset: SERVER } });
+    assert.deepEqual(config, manifestTargets.cursor.shape);
+  });
+
+  test("each target keeps its own shape: portable and Claude carry a type, Codex and Cursor are url-only", () => {
+    const portable = json(PKG, "mcp.json");
+    const codex = json(PKG, ".mcp.json");
+    const claude = json(PKG, ".claude-plugin", "plugin.json").mcpServers;
+    const cursor = json(PKG, "cursor", "mcp.json");
+    assert.equal(portable.mcpServers.preset.type, "streamable-http");
+    assert.equal(claude.preset.type, "http");
+    assert.notEqual(portable.mcpServers.preset.type, claude.preset.type);
+    assert.ok(!("type" in codex.mcpServers.preset) && !("type" in cursor.mcpServers.preset));
+    assert.ok("$schema" in portable && !("$schema" in codex) && !("$schema" in cursor));
+    assert.ok(!("mcpServers" in claude), "Claude's inline value is the server map itself, not a wrapped file");
+    assert.ok(!JSON.stringify(json(PKG, ".codex-plugin", "plugin.json")).includes('"http"'));
+    assert.ok(!JSON.stringify(json(PKG, ".cursor-plugin", "plugin.json")).includes("streamable-http"));
+  });
+
+  test("every bundled entry names only the production endpoint and carries no credentials or extra fields", () => {
+    const files = ["mcp.json", ".mcp.json", "cursor/mcp.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json", "plugin.json"];
+    for (const file of files) {
+      const config = JSON.parse(read(PKG, file));
+      for (const server of Object.values(config.mcpServers ?? {})) {
+        if (typeof server === "object") {
+          assert.ok(Object.keys(server).every((key) => ["type", "url"].includes(key)), `${file} server keys`);
+          assert.equal(server.url, ENDPOINT);
+        }
+      }
+      const servers = JSON.stringify(config.mcpServers ?? {});
+      assert.doesNotMatch(servers, /token|secret|password|api[_-]?key|authorization|bearer|client[_-]?id|"headers"|"oauth"|\$\{/i, file);
+    }
+  });
+
+  test("nothing ineligible for the public OpenAI ZIP is included", () => {
+    assert.ok(!fs.existsSync(path.join(PKG, ".app.json")), "no .app.json");
+    assert.ok(!fs.existsSync(path.join(PKG, "hooks")), "no hooks directory");
+    for (const manifest of [".claude-plugin", ".codex-plugin", ".cursor-plugin"]) {
+      const config = json(PKG, manifest, "plugin.json");
+      assert.ok(!("apps" in config) && !("hooks" in config), `${manifest} declares no apps or hooks`);
+    }
+    assert.ok(!("apps" in json(PKG, "plugin.json")) && !("extensions" in json(PKG, "plugin.json")));
+    for (const file of packageFiles()) {
+      if (!/\.(md|json|toml)$/.test(file)) continue;
+      assert.doesNotMatch(read(file), /openai-apps-challenge/, `${path.relative(PKG, file)}: the domain-verification challenge is not a plugin field`);
+    }
+  });
+
+  test("the skills-only OpenAI ZIP builder refuses this package, and the skills-only packages stay MCP-free", () => {
+    for (const pkg of ["preset-api-skills", "preset-cli-skills", "preset-snowflake-cortex-skills"]) {
+      const dir = path.join(ROOT, "plugins", pkg);
+      for (const rel of [".mcp.json", "mcp.json", ".app.json", "hooks"]) assert.ok(!fs.existsSync(path.join(dir, rel)), `${pkg}/${rel}`);
+      assert.ok(!("mcpServers" in json(dir, ".codex-plugin", "plugin.json")));
+    }
+    const result = spawnSync("node", ["scripts/build-openai-plugin-zip.mjs", "--plugin", "preset-mcp-skills"], { cwd: ROOT, encoding: "utf8" });
+    assert.notEqual(result.status, 0, "building preset-mcp-skills as a skills-only upload must fail");
+    assert.match(result.stderr, /MCP|mcpServers/);
+  });
+
+  test("version is in lockstep for the portable manifest", () => {
+    assert.equal(json(PKG, "plugin.json").version, fs.readFileSync(path.join(ROOT, "VERSION"), "utf8").trim());
   });
 });
 

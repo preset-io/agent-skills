@@ -22,6 +22,7 @@
     "visualization"
   ],
   "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Preset MCP Skills",
     "shortDescription": "MCP-only Superset workflow skills. Do not use for direct API work.",

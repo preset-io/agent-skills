@@ -1,6 +1,6 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "preset-mcp-skills",
-  "displayName": "Preset MCP Skills",
   "version": "0.5.0",
   "description": "Preset MCP skills for the Preset MCP gateway and Superset MCP tool workflows only. Do not use for direct API work.",
   "author": {
@@ -10,12 +10,6 @@
   "homepage": "https://github.com/preset-io/agent-skills",
   "repository": "https://github.com/preset-io/agent-skills",
   "license": "Apache-2.0",
-  "mcpServers": {
-    "preset": {
-      "type": "http",
-      "url": "https://mcp.app.preset.io/mcp"
-    }
-  },
   "keywords": [
     "preset",
     "superset",

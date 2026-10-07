@@ -8,7 +8,18 @@ Do not use this package for direct Preset Management API, Superset REST API, Sno
 
 The hosted production endpoint is `https://mcp.app.preset.io/mcp` (Streamable HTTP, interactive OAuth sign-in in the browser; no API key, header, or client secret). It is the Preset MCP gateway: one connection that reaches every workspace the signed-in account is authorized for. Staging and sandbox gateways are opt-in only, with a URL the user supplies.
 
-Opt-in connection templates live in [connections/](connections/README.md) for clients whose official documentation defines a remote-MCP configuration format (Claude Code, Cursor, VS Code, OpenAI Codex). Claude (claude.ai and Claude Desktop) and ChatGPT are manual steps only. Templates contain the endpoint and nothing else, are never loaded by the plugin, and must not overwrite an existing connection. Per-client steps and official documentation links: [connect-clients.md](skills/preset-mcp-gateway/references/connect-clients.md).
+The package bundles a plugin-scoped `preset` server for each plugin format, each in that format's own shape (they differ):
+
+| Target | File | Shape | Official documentation |
+|---|---|---|---|
+| Portable Agent Plugins / OpenAI plugin | `plugin.json` + `mcp.json` | `{"$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json", "mcpServers": {"preset": {"type": "streamable-http", "url": "https://mcp.app.preset.io/mcp"}}}` | https://developers.openai.com/plugins/build/plugins (Bundled MCP servers and lifecycle hooks), schema https://agent-plugins.org/schemas/1.0.0/mcp.schema.json |
+| OpenAI Codex compatibility | `.codex-plugin/plugin.json` with `"mcpServers": "./.mcp.json"` + `.mcp.json` | `{"mcpServers": {"preset": {"url": "https://mcp.app.preset.io/mcp"}}}` (no `$schema`, no `type`) | https://developers.openai.com/plugins/deploy/submission (Complete metadata examples, Codex format) |
+| Claude Code | `.claude-plugin/plugin.json`, inline `mcpServers` | `{"preset": {"type": "http", "url": "https://mcp.app.preset.io/mcp"}}` (`type` is required: an entry with `url` but no `type` is skipped) | https://code.claude.com/docs/en/plugins-reference (`mcpServers`), https://code.claude.com/docs/en/mcp (Plugin-provided MCP servers) |
+| Cursor | `.cursor-plugin/plugin.json` with `"mcpServers": "./cursor/mcp.json"` + `cursor/mcp.json` | `{"mcpServers": {"preset": {"url": "https://mcp.app.preset.io/mcp"}}}` | https://cursor.com/docs/reference/plugins (`mcpServers` overrides default `mcp.json` discovery), https://cursor.com/docs/context/mcp |
+
+The shapes differ on purpose; each target reads only its own. The server is plugin-scoped (for example `plugin:preset-mcp-skills:preset` in Claude Code), so it never replaces a connection you configured yourself, and it still needs interactive OAuth sign-in. It carries no credentials. The package declares no `apps` / `.app.json` mapping and no lifecycle hooks (neither is eligible for the public OpenAI directory), and no domain-verification challenge (that is not a plugin configuration field).
+
+Separately, opt-in templates in [connections/](connections/README.md) cover user or project configuration for Claude Code, Cursor, VS Code, and OpenAI Codex (named `preset-gateway`). Claude (claude.ai and Claude Desktop) and ChatGPT are manual steps only. Templates contain the endpoint and nothing else and must not overwrite an existing connection. Per-client steps and official documentation links: [connect-clients.md](skills/preset-mcp-gateway/references/connect-clients.md).
 
 ## Choosing A Surface
 

@@ -20,7 +20,9 @@
       "destination": ".mcp.json at the project root (project scope), or use the CLI command",
       "cli": "claude mcp add --transport http preset-gateway https://mcp.app.preset.io/mcp",
       "signIn": "Run /mcp in Claude Code (or claude mcp login preset-gateway) and complete the browser sign-in.",
-      "docs": ["https://code.claude.com/docs/en/mcp"]
+      "docs": [
+        "https://code.claude.com/docs/en/mcp"
+      ]
     },
     {
       "id": "cursor",
@@ -31,7 +33,9 @@
       "rootKey": "mcpServers",
       "destination": ".cursor/mcp.json (project) or ~/.cursor/mcp.json (user)",
       "signIn": "Open Cursor MCP settings and authenticate the server in the browser when prompted.",
-      "docs": ["https://cursor.com/docs/context/mcp"]
+      "docs": [
+        "https://cursor.com/docs/context/mcp"
+      ]
     },
     {
       "id": "vscode",
@@ -56,21 +60,118 @@
       "rootKey": "mcp_servers",
       "destination": "~/.codex/config.toml, or .codex/config.toml in a trusted project",
       "signIn": "Run codex mcp login preset-gateway and complete the browser sign-in.",
-      "docs": ["https://learn.chatgpt.com/docs/extend/mcp?surface=cli"]
+      "docs": [
+        "https://learn.chatgpt.com/docs/extend/mcp?surface=cli"
+      ]
     },
     {
       "id": "claude-ai",
       "name": "Claude (claude.ai and Claude Desktop)",
       "support": "manual",
       "manualSteps": "Customize > Connectors > + Add > Add custom connector. Enter a name and the endpoint URL, then Continue. Leave the OAuth identity on Use Claude's published identity (Recommended), or Register automatically. Do not choose Use your own OAuth client unless a Preset administrator issued that client to you. On Team and Enterprise plans an Owner adds the connector and members then click Connect.",
-      "docs": ["https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp"]
+      "docs": [
+        "https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp"
+      ]
     },
     {
       "id": "chatgpt",
       "name": "ChatGPT",
       "support": "manual",
       "manualSteps": "Open ChatGPT Plugins, select the plus button, then Add custom MCP server. Enter a name and description and the endpoint URL including the /mcp path, then configure authentication, review the risk warning, and create it. Availability depends on the ChatGPT plan and workspace settings.",
-      "docs": ["https://developers.openai.com/apps-sdk/deploy/connect-chatgpt"]
+      "docs": [
+        "https://developers.openai.com/apps-sdk/deploy/connect-chatgpt"
+      ]
     }
-  ]
+  ],
+  "pluginManifests": {
+    "$comment": "What the package itself declares per target. Each target uses its own official format; the shapes differ on purpose and must not be unified. Server name is plugin-scoped, so it does not replace a user's own connection.",
+    "serverName": "preset",
+    "targets": [
+      {
+        "id": "agent-plugins-portable",
+        "name": "Portable Agent Plugins / OpenAI plugin",
+        "file": "mcp.json",
+        "manifest": "plugin.json",
+        "shape": {
+          "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+          "mcpServers": {
+            "preset": {
+              "type": "streamable-http",
+              "url": "https://mcp.app.preset.io/mcp"
+            }
+          }
+        },
+        "docs": [
+          "https://developers.openai.com/plugins/build/plugins",
+          "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json"
+        ],
+        "docSection": "Bundled MCP servers and lifecycle hooks (Remote HTTP server)"
+      },
+      {
+        "id": "codex-compat",
+        "name": "OpenAI Codex compatibility",
+        "file": ".mcp.json",
+        "manifest": ".codex-plugin/plugin.json",
+        "manifestField": {
+          "mcpServers": "./.mcp.json"
+        },
+        "shape": {
+          "mcpServers": {
+            "preset": {
+              "url": "https://mcp.app.preset.io/mcp"
+            }
+          }
+        },
+        "docs": [
+          "https://developers.openai.com/plugins/deploy/submission"
+        ],
+        "docSection": "Complete metadata examples (Codex format: .mcp.json omits the Agent Plugins schema and type)"
+      },
+      {
+        "id": "claude-code",
+        "name": "Claude Code",
+        "file": ".claude-plugin/plugin.json",
+        "manifestField": {
+          "mcpServers": {
+            "preset": {
+              "type": "http",
+              "url": "https://mcp.app.preset.io/mcp"
+            }
+          }
+        },
+        "docs": [
+          "https://code.claude.com/docs/en/plugins-reference",
+          "https://code.claude.com/docs/en/mcp"
+        ],
+        "docSection": "Plugin manifest reference > mcpServers; MCP > Plugin-provided MCP servers (an entry with url but no type is skipped, so type http is required)"
+      },
+      {
+        "id": "cursor",
+        "name": "Cursor",
+        "file": "cursor/mcp.json",
+        "manifest": ".cursor-plugin/plugin.json",
+        "manifestField": {
+          "mcpServers": "./cursor/mcp.json"
+        },
+        "shape": {
+          "mcpServers": {
+            "preset": {
+              "url": "https://mcp.app.preset.io/mcp"
+            }
+          }
+        },
+        "docs": [
+          "https://cursor.com/docs/reference/plugins",
+          "https://cursor.com/docs/context/mcp"
+        ],
+        "docSection": "Plugins reference > mcpServers field (path, inline, or array; overrides default mcp.json discovery); MCP guide > remote server format (url)"
+      }
+    ],
+    "notIncluded": [
+      "apps / .app.json registered-server mappings",
+      "lifecycle hooks",
+      "domain-verification challenge (not a plugin config field)",
+      "credentials, tokens, client IDs, client secrets, headers"
+    ]
+  }
 }

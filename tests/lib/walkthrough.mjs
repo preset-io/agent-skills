@@ -128,7 +128,7 @@ export function walk(scenario) {
     if (tool === "call_tool") {
       const definition = searched.get(`${envName}:${id}:${args.tool_name}`);
       if (!definition) flag("call-without-search", `${id}:${args.tool_name}`);
-      else if (definition.annotations?.readOnlyHint === false && !confirmed) {
+      else if (definition.annotations?.readOnlyHint !== true && !confirmed) {
         flag("write-without-confirmation", args.tool_name);
       }
     }

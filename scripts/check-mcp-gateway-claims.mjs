@@ -8,7 +8,7 @@
 // search_workspace_tools, call_tool, get_workspace_catalog, and the Knowledge
 // tools. Superset defines only the workspace tools reached through them. A
 // statement about "the source of truth for tools" must therefore be scoped to a
-// surface ("gateway", "direct", or "workspace tool").
+// surface ("gateway", "direct connection", or "workspace tool").
 //
 // Usage:
 //   node scripts/check-mcp-gateway-claims.mjs            # scan the repository docs
@@ -49,9 +49,9 @@ const FORBIDDEN = [
   },
 ];
 
-// A block that names Superset as a source of truth for tools must say which
-// surface it means.
-const SCOPE_WORDS = /\b(?:gateway|direct|workspace\s+tools?|workspace\s+\(Superset\)\s+tools?)\b/i;
+// A sentence that names Superset as a source of truth for tools must say which
+// surface it means; unrelated direct-API boundary text cannot scope the claim.
+const SCOPE_WORDS = /\b(?:gateway|direct\s+(?:connection|workspace)|workspace\s+tools?|workspace\s+\(Superset\)\s+tools?)\b/i;
 
 export function blocks(text) {
   const result = [];
@@ -81,15 +81,17 @@ export function findStaleClaims(text) {
     if (match) findings.push({ rule: rule.id, message: rule.message, excerpt: match[0].slice(0, 120) });
   }
   for (const block of blocks(text)) {
-    const body = block.text.replace(/\s+/g, " ");
-    if (/source\s+of\s+truth/i.test(body) && /\bSuperset\b/i.test(body) && /\btools?\b/i.test(body)) {
-      if (!SCOPE_WORDS.test(body)) {
-        findings.push({
-          rule: "unscoped-source-of-truth",
-          message: "names Superset as the source of truth for tools without saying gateway, direct, or workspace tools",
-          excerpt: body.slice(0, 120),
-          line: block.line,
-        });
+    const sentences = block.text.replace(/\s+/g, " ").split(/(?<=[.!?])\s+/);
+    for (const body of sentences) {
+      if (/source\s+of\s+truth/i.test(body) && /\bSuperset\b/i.test(body) && /\btools?\b/i.test(body)) {
+        if (!SCOPE_WORDS.test(body)) {
+          findings.push({
+            rule: "unscoped-source-of-truth",
+            message: "names Superset as the source of truth for tools without saying gateway, direct connection/workspace, or workspace tools",
+            excerpt: body.slice(0, 120),
+            line: block.line,
+          });
+        }
       }
     }
   }

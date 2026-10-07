@@ -28,8 +28,9 @@ mcp_zip="dist/preset-mcp-skills-$(jq -r .version "plugins/preset-mcp-skills/.cod
 test -f "$mcp_zip" || fail "missing $mcp_zip"
 if command -v unzip >/dev/null; then
   unzip -tq "$mcp_zip" >/dev/null || fail "OpenAI plugin ZIP $mcp_zip failed integrity check"
+  entries="$(unzip -Z1 "$mcp_zip")"
   for entry in mcp.json cursor/mcp.json .claude-plugin/plugin.json .codex-plugin/plugin.json .cursor-plugin/plugin.json plugin.json; do
-    unzip -Z1 "$mcp_zip" | grep -qx "preset-mcp-skills/$entry" || fail "OpenAI plugin ZIP $mcp_zip is missing $entry"
+    grep -qx "preset-mcp-skills/$entry" <<<"$entries" || fail "OpenAI plugin ZIP $mcp_zip is missing $entry"
   done
 fi
 node --test tests/mcp-gateway.test.mjs >/dev/null || fail "MCP gateway tests failed (run: node --test tests/mcp-gateway.test.mjs)"

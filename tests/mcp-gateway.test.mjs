@@ -149,6 +149,31 @@ describe("walkthroughs (mocked gateway and direct workspace)", () => {
     });
   }
 
+  for (const [label, annotations] of [
+    ["omitted annotations", undefined],
+    ["empty annotations", {}],
+    ["destructive-only annotations", { destructiveHint: true }],
+    ["declared write", { readOnlyHint: false }],
+    ["declared read", { readOnlyHint: true }],
+  ]) {
+    test(`confirmation defaults safely: ${label}`, () => {
+      const scenario = json(scenarioDir, "multi-workspace-gateway.json");
+      const tool = Object.values(scenario.environments)[0].workspaces[0].tools.find((t) => t.name === "list_databases");
+      if (annotations === undefined) delete tool.annotations;
+      else tool.annotations = annotations;
+      const expected = annotations?.readOnlyHint === true ? [] : ["write-without-confirmation"];
+      assert.deepEqual(walk(scenario).violations.map((v) => v.rule), expected);
+      scenario.steps.splice(-1, 0, { user: { confirms: true } });
+      assert.deepEqual(walk(scenario).violations, []);
+    });
+  }
+
+  test("client setup explicitly prohibits every credential kind in configs, chat, and commands", () => {
+    const setup = read(SKILL, "references", "connect-clients.md");
+    assert.match(setup, /Never put a token, password, API key, `Authorization` header, OAuth client ID, or client secret into a config file, chat message, or command\./);
+    assert.match(setup, /Do not create a confidential OAuth client/);
+  });
+
   test("every rule the checker enforces is taught in the skill text", () => {
     const taught = {
       "silent-workspace-choice": /never choose silently/i,
@@ -595,6 +620,11 @@ describe("stale gateway claims", () => {
       "Treat `superset/superset/mcp_service` as the only source of truth for MCP tool names, schemas, tags, and RBAC metadata.",
       "Superset alone defines the gateway's top-level tools.",
       "The gateway has no tools of its own.",
+      "Treat superset/superset/mcp_service as the source of truth for MCP tool names, schemas, and annotations. Do not use this package for direct Preset Management API work.",
+      "The Superset MCP server is the source of truth for MCP tool names and schemas. Do not use direct API calls.",
+      "Superset is the source of truth for every tool you can call here. No direct API fallback.",
+      "Superset is the source of truth for tool names. Use a direct connection separately.",
+      "Superset is the source of truth for tool names. The gateway is a separate surface.",
     ];
     for (const text of stale) assert.ok(findStaleClaims(text).length > 0, text);
   });
@@ -602,6 +632,8 @@ describe("stale gateway claims", () => {
   test("accepts surface-scoped wording", () => {
     const fine = [
       "Direct workspace connection: the Superset MCP server is the source of truth for tool names.",
+      "On a direct connection, Superset is the source of truth for tool names.",
+      "Superset is the source of truth for workspace tools.",
       "On the Preset gateway, the gateway defines the top-level tools and Superset defines the workspace tools.",
     ];
     for (const text of fine) assert.deepEqual(findStaleClaims(text), [], text);
@@ -621,5 +653,36 @@ describe("test labelling", () => {
     const readme = read(PKG, "README.md");
     assert.match(readme, /Mocked tests/);
     assert.match(readme, /Authenticated canaries \(manual, read-only, not part of CI/);
+  });
+});
+
+
+describe("smoke archive listing under pipefail", () => {
+  test("drains a large listing and still rejects missing entries", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "mcp-unzip-"));
+    try {
+      const fake = `#!${process.execPath}
+const fs = require("node:fs");
+if (process.argv[2] === "-tq") process.exit(0);
+try {
+  for (const entry of ["mcp.json", "cursor/mcp.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json", "plugin.json"]) {
+    if (entry !== process.env.MISSING_ENTRY) fs.writeSync(1, "preset-mcp-skills/" + entry + "\\n");
+  }
+  for (let i = 0; i < 4096; i++) fs.writeSync(1, "padding/" + "x".repeat(1024) + "\\n");
+} catch (error) { if (error.code === "EPIPE") process.exit(141); throw error; }
+`;
+      fs.writeFileSync(path.join(dir, "unzip"), fake, { mode: 0o755 });
+      const smoke = read(ROOT, "scripts", "smoke-test.sh");
+      const block = smoke.slice(smoke.indexOf("if command -v unzip"), smoke.indexOf("\nfi", smoke.indexOf("if command -v unzip")) + 3);
+      const run = (missing = "") => spawnSync("bash", ["-c", `set -euo pipefail; mcp_zip=mock.zip; fail() { echo "$*" >&2; exit 1; }; ${block}`], {
+        encoding: "utf8", env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, MISSING_ENTRY: missing },
+      });
+      assert.equal(run().status, 0, "present entries must not fail due to producer SIGPIPE");
+      const missing = run("cursor/mcp.json");
+      assert.notEqual(missing.status, 0);
+      assert.match(missing.stderr, /missing cursor\/mcp\.json/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

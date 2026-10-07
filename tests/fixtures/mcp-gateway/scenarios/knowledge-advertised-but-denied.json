@@ -1,0 +1,130 @@
+{
+  "id": "knowledge-advertised-but-denied",
+  "surface": "gateway",
+  "environment": "production",
+  "description": "Knowledge tools appear in tools/list but the launch flag is off: the call is denied once and the agent stops without retrying or searching elsewhere.",
+  "environments": {
+    "production": {
+      "scopes": [
+        "superset:read",
+        "superset:sqllab:write"
+      ],
+      "workspaces": [
+        {
+          "id": 123,
+          "name": "a1b2c3d4",
+          "title": "Sales analytics",
+          "services": [
+            "workspace_tools",
+            "knowledge"
+          ],
+          "knowledgeLaunched": false,
+          "catalog": false,
+          "tools": [
+            {
+              "name": "list_databases",
+              "description": "list databases",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "list_dashboards",
+              "description": "list dashboards",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "execute_sql",
+              "description": "execute sql",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true
+              }
+            },
+            {
+              "name": "get_chart_type_schema",
+              "description": "chart type schema",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "chart_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "chart_type"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "expectViolations": [],
+  "steps": [
+    {
+      "call": "list_workspaces",
+      "args": {},
+      "expect": {
+        "isError": false
+      }
+    },
+    {
+      "call": "read_knowledge_doc",
+      "args": {
+        "workspace_id": "123",
+        "slug": "metrics"
+      },
+      "expect": {
+        "isError": true,
+        "contains": "Unknown tool"
+      }
+    },
+    {
+      "stop": "Knowledge is not enabled for this workspace, so I cannot read that document."
+    }
+  ],
+  "label": "mocked"
+}

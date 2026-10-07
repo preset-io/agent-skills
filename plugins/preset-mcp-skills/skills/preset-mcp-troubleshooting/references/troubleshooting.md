@@ -7,6 +7,7 @@
 | Invalid parameters | Re-read the live tool schema and use the request wrapper if required. |
 | Permission denied | Treat permission denied as authoritative. Stop and explain the denied MCP operation. |
 | Response too large | Narrow with page size, filters, identifiers, row limits, or a more specific tool. |
+| Preset gateway: sign-in, scope, workspace, disabled service, or oversized search result | Use `preset-mcp-gateway` (`references/gateway-failures.md`). Stop after the one corrective step; no reconnect loops, no bypass. |
 | Unsupported chart type/capability | Use supported chart schemas from `get_chart_type_schema` or explain the limitation. |
 
 No permission workaround: do not search alternate tools, REST APIs, or direct APIs to expose restricted data.

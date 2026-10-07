@@ -1,6 +1,6 @@
 # MCP Tool Categories
 
-Use the live Superset MCP server as the source of truth. Current durable categories:
+These categories describe the workspace (Superset) tools. Use the connected workspace's live MCP service as the source of truth for them: directly on a direct connection, or through `search_workspace_tools` on the Preset gateway, whose own top-level tools (`list_workspaces`, `call_tool`, ...) are defined by the gateway and are not listed here. Current durable categories:
 
 | Tag | Purpose | Representative Tools |
 |---|---|---|

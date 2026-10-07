@@ -2,7 +2,7 @@
   "name": "preset-mcp-skills",
   "displayName": "Preset MCP Skills",
   "version": "0.5.0",
-  "description": "Preset MCP skills for Superset MCP tool workflows only. Do not use for direct API work.",
+  "description": "Preset MCP skills for the Preset MCP gateway and Superset MCP tool workflows only. Do not use for direct API work.",
   "author": {
     "name": "Preset",
     "url": "https://preset.io/"
@@ -14,6 +14,8 @@
     "preset",
     "superset",
     "mcp",
+    "mcp-gateway",
+    "oauth",
     "dashboards",
     "charts",
     "datasets",

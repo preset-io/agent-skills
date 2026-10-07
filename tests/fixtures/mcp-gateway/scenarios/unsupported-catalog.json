@@ -1,0 +1,150 @@
+{
+  "id": "unsupported-catalog",
+  "surface": "gateway",
+  "environment": "production",
+  "description": "get_workspace_catalog is not offered by list_workspace_services: the agent uses search_workspace_tools and a workspace list tool instead.",
+  "environments": {
+    "production": {
+      "scopes": [
+        "superset:read",
+        "superset:sqllab:write"
+      ],
+      "workspaces": [
+        {
+          "id": 123,
+          "name": "a1b2c3d4",
+          "title": "Sales analytics",
+          "services": [
+            "workspace_tools",
+            "knowledge"
+          ],
+          "knowledgeLaunched": false,
+          "catalog": false,
+          "tools": [
+            {
+              "name": "list_databases",
+              "description": "list databases",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "list_dashboards",
+              "description": "list dashboards",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "execute_sql",
+              "description": "execute sql",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true
+              }
+            },
+            {
+              "name": "get_chart_type_schema",
+              "description": "chart type schema",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "chart_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "chart_type"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "expectViolations": [],
+  "steps": [
+    {
+      "call": "list_workspaces",
+      "args": {},
+      "expect": {
+        "isError": false
+      }
+    },
+    {
+      "call": "list_workspace_services",
+      "args": {
+        "workspace_id": "123"
+      },
+      "expect": {
+        "isError": false
+      }
+    },
+    {
+      "call": "search_workspace_tools",
+      "args": {
+        "workspace_id": "123",
+        "query": "list_databases"
+      },
+      "expect": {
+        "isError": false
+      }
+    },
+    {
+      "call": "call_tool",
+      "args": {
+        "workspace_id": "123",
+        "tool_name": "list_databases",
+        "args": {
+          "request": {
+            "page": 1
+          }
+        }
+      },
+      "expect": {
+        "isError": false
+      }
+    }
+  ],
+  "label": "mocked"
+}

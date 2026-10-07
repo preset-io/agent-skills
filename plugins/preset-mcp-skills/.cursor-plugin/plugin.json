@@ -1,7 +1,7 @@
 {
   "name": "Preset MCP Skills",
   "version": "0.5.0",
-  "description": "AI agent skills for Superset MCP tool workflows only. Do not use for direct API work.",
+  "description": "AI agent skills for the Preset MCP gateway and Superset MCP tool workflows only. Do not use for direct API work.",
   "publisher": "preset-io",
   "repository": "https://github.com/preset-io/agent-skills",
   "skills": [
@@ -9,6 +9,11 @@
       "name": "preset-mcp",
       "path": "skills/preset-mcp/SKILL.md",
       "description": "Route Superset MCP tool workflows with a strict no-direct-API boundary; do not use for direct API work."
+    },
+    {
+      "name": "preset-mcp-gateway",
+      "path": "skills/preset-mcp-gateway/SKILL.md",
+      "description": "Connect to and use the Preset MCP gateway, choose between the aggregate gateway and a direct workspace connection, and select workspaces; do not use for direct API work."
     },
     {
       "name": "preset-mcp-discovery",

@@ -20,6 +20,8 @@ command -v node >/dev/null || fail "node is required"
 node scripts/validate-agent-skills.mjs
 node scripts/sync-version.mjs --check
 node scripts/check-gate-policy.mjs
+node scripts/check-mcp-gateway-claims.mjs
+node --test tests/mcp-gateway.test.mjs >/dev/null || fail "MCP gateway tests failed (run: node --test tests/mcp-gateway.test.mjs)"
 for openai_plugin in preset-cli-skills preset-api-skills preset-snowflake-cortex-skills; do
   node scripts/build-openai-plugin-zip.mjs --plugin "$openai_plugin"
   openai_zip="dist/$openai_plugin-$(jq -r .version "plugins/$openai_plugin/.codex-plugin/plugin.json")-openai.zip"
@@ -106,6 +108,7 @@ required_cortex_skills=(
 required_mcp_skills=(
   preset-mcp
   preset-mcp-discovery
+  preset-mcp-gateway
   preset-mcp-data
   preset-mcp-visualization
   preset-mcp-dashboard
@@ -556,6 +559,16 @@ require_file "$MCP_ROOT/README.md"
 require_file "$MCP_ROOT/references/tool-inventory.json"
 require_file "$MCP_ROOT/references/tool-inventory.md"
 require_file "$MCP_ROOT/scripts/check-tool-inventory.py"
+require_file "$MCP_ROOT/connections/README.md"
+require_file "$MCP_ROOT/connections/clients.json"
+require_jq '.endpoint == "https://mcp.app.preset.io/mcp"' "$MCP_ROOT/connections/clients.json"
+require_jq 'all(.clients[]; .support == "manual" or .support == "template")' "$MCP_ROOT/connections/clients.json"
+while IFS= read -r template; do
+  require_file "$MCP_ROOT/connections/$template"
+done < <(jq -r '.clients[] | select(.support == "template") | .template' "$MCP_ROOT/connections/clients.json")
+require_grep "https://mcp.app.preset.io/mcp" "$MCP_ROOT/README.md"
+require_grep "https://mcp.app.preset.io/mcp" "$MCP_ROOT/AGENTS.md"
+require_grep "https://mcp.app.preset.io/mcp" "$MCP_ROOT/.github/copilot-instructions.md"
 require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/AGENTS.md"
 require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/.github/copilot-instructions.md"
 require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/README.md"
@@ -582,6 +595,7 @@ require_jq '
     "skills/preset-mcp-data/SKILL.md",
     "skills/preset-mcp-datasets/SKILL.md",
     "skills/preset-mcp-discovery/SKILL.md",
+    "skills/preset-mcp-gateway/SKILL.md",
     "skills/preset-mcp-sqllab/SKILL.md",
     "skills/preset-mcp-troubleshooting/SKILL.md",
     "skills/preset-mcp-visualization/SKILL.md",

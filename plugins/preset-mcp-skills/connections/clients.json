@@ -1,0 +1,76 @@
+{
+  "$comment": "Index of Preset MCP gateway client connection templates. Templates carry the endpoint only: no credentials, tokens, client IDs, or client secrets. Verified against each vendor's official documentation on the date below; re-verify before changing a template.",
+  "verified": "2026-10-07",
+  "endpoint": "https://mcp.app.preset.io/mcp",
+  "serverName": "preset-gateway",
+  "gatewaySource": {
+    "repository": "preset-io/mcp-gateway",
+    "ref": "main",
+    "commit": "3e9ccac11bac2204a52dd42a835aa7baea99f1aa",
+    "registryManifest": "server.json"
+  },
+  "clients": [
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "support": "template",
+      "template": "claude-code.mcp.json",
+      "format": "json",
+      "rootKey": "mcpServers",
+      "destination": ".mcp.json at the project root (project scope), or use the CLI command",
+      "cli": "claude mcp add --transport http preset-gateway https://mcp.app.preset.io/mcp",
+      "signIn": "Run /mcp in Claude Code (or claude mcp login preset-gateway) and complete the browser sign-in.",
+      "docs": ["https://code.claude.com/docs/en/mcp"]
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "support": "template",
+      "template": "cursor.mcp.json",
+      "format": "json",
+      "rootKey": "mcpServers",
+      "destination": ".cursor/mcp.json (project) or ~/.cursor/mcp.json (user)",
+      "signIn": "Open Cursor MCP settings and authenticate the server in the browser when prompted.",
+      "docs": ["https://cursor.com/docs/context/mcp"]
+    },
+    {
+      "id": "vscode",
+      "name": "VS Code (GitHub Copilot)",
+      "support": "template",
+      "template": "vscode.mcp.json",
+      "format": "json",
+      "rootKey": "servers",
+      "destination": ".vscode/mcp.json in the workspace, or run MCP: Add Server",
+      "signIn": "VS Code opens a browser for authorization on the first connection to the server.",
+      "docs": [
+        "https://code.visualstudio.com/docs/agents/reference/mcp-configuration",
+        "https://code.visualstudio.com/docs/copilot/customization/mcp-servers"
+      ]
+    },
+    {
+      "id": "codex",
+      "name": "OpenAI Codex (CLI, IDE extension, ChatGPT desktop app)",
+      "support": "template",
+      "template": "codex.config.toml",
+      "format": "toml",
+      "rootKey": "mcp_servers",
+      "destination": "~/.codex/config.toml, or .codex/config.toml in a trusted project",
+      "signIn": "Run codex mcp login preset-gateway and complete the browser sign-in.",
+      "docs": ["https://learn.chatgpt.com/docs/extend/mcp?surface=cli"]
+    },
+    {
+      "id": "claude-ai",
+      "name": "Claude (claude.ai and Claude Desktop)",
+      "support": "manual",
+      "manualSteps": "Customize > Connectors > + Add > Add custom connector. Enter a name and the endpoint URL, then Continue. Leave the OAuth identity on Use Claude's published identity (Recommended), or Register automatically. Do not choose Use your own OAuth client unless a Preset administrator issued that client to you. On Team and Enterprise plans an Owner adds the connector and members then click Connect.",
+      "docs": ["https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp"]
+    },
+    {
+      "id": "chatgpt",
+      "name": "ChatGPT",
+      "support": "manual",
+      "manualSteps": "Open ChatGPT Plugins, select the plus button, then Add custom MCP server. Enter a name and description and the endpoint URL including the /mcp path, then configure authentication, review the risk warning, and create it. Availability depends on the ChatGPT plan and workspace settings.",
+      "docs": ["https://developers.openai.com/apps-sdk/deploy/connect-chatgpt"]
+    }
+  ]
+}

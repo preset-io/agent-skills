@@ -1,0 +1,103 @@
+{
+  "id": "direct-workspace",
+  "surface": "direct",
+  "description": "A direct workspace Superset MCP connection: no workspace selection, call_tool takes name and arguments.",
+  "world": {
+    "tools": [
+      {
+        "name": "list_dashboards",
+        "description": "list dashboards",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "request": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "request"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false
+        }
+      },
+      {
+        "name": "list_databases",
+        "description": "list databases",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "request": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "request"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false
+        }
+      },
+      {
+        "name": "get_chart_type_schema",
+        "description": "chart type schema",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "chart_type": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "chart_type"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false
+        }
+      }
+    ]
+  },
+  "expectViolations": [],
+  "steps": [
+    {
+      "call": "list_dashboards",
+      "args": {
+        "request": {
+          "page": 1
+        }
+      },
+      "expect": {
+        "isError": false
+      }
+    },
+    {
+      "call": "search_tools",
+      "args": {
+        "query": "chart"
+      },
+      "expect": {
+        "isError": false,
+        "contains": "get_chart_type_schema"
+      }
+    },
+    {
+      "call": "call_tool",
+      "args": {
+        "name": "get_chart_type_schema",
+        "arguments": {
+          "chart_type": "xy"
+        }
+      },
+      "expect": {
+        "isError": false
+      }
+    }
+  ],
+  "label": "mocked"
+}

@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "preset-gateway": {
+      "url": "https://mcp.app.preset.io/mcp"
+    }
+  }
+}

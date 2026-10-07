@@ -41,6 +41,7 @@ const PACKAGES = {
     "preset-mcp-data",
     "preset-mcp-datasets",
     "preset-mcp-discovery",
+    "preset-mcp-gateway",
     "preset-mcp-sqllab",
     "preset-mcp-troubleshooting",
     "preset-mcp-visualization",

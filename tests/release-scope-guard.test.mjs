@@ -1,7 +1,9 @@
 // Release-scope guard: Knowledge document tools are not in the initial public
 // release, so no Knowledge tool or service name may appear in the released copy
 // of plugins/preset-mcp-skills or in its fixtures and tests. This file and its
-// sample input are the deliberate allowlist entries (OUT_OF_SCOPE_ALLOWLIST in
+// synthetic sample input are public via mirror-public.yml, not confidential.
+// This is an agent-guidance scope policy, not history redaction. Both files are
+// deliberate allowlist entries (OUT_OF_SCOPE_ALLOWLIST in
 // scripts/check-mcp-gateway-claims.mjs) because they must name the term.
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -23,7 +25,17 @@ const FIXTURES = path.join(ROOT, "tests", "fixtures", "mcp-gateway");
 describe("release scope: no Knowledge tools in the released copy", () => {
   const samples = json(FIXTURES, "..", "mcp-gateway-guard", "knowledge-samples.json");
 
-  test("the guard flags every Knowledge tool and service name and accepts the neutral line", () => {
+  test("public guard samples are synthetic term probes, not a tool or implementation inventory", () => {
+    assert.deepEqual(samples.flagged, [
+      "Knowledge",
+      "knowledge",
+      "KNOWLEDGE",
+      "Example knowledge service",
+      "demo_knowledge_probe",
+    ]);
+  });
+
+  test("the guard flags Knowledge term probes and accepts the neutral line", () => {
     for (const text of samples.flagged) assert.ok(findKnowledgeTerms(text).length > 0, text);
     for (const text of samples.neutral) assert.deepEqual(findKnowledgeTerms(text), [], text);
   });

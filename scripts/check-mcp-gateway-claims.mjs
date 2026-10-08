@@ -50,7 +50,7 @@ const FORBIDDEN = [
 ];
 
 // A sentence that names Superset as a source of truth for tools must say which
-// surface it means; unrelated direct-API boundary text cannot scope the claim.
+// surface it means; unrelated sentences or table cells cannot scope the claim.
 const SCOPE_WORDS = /\b(?:gateway|direct\s+(?:connection|workspace)|workspace\s+tools?|workspace\s+\(Superset\)\s+tools?)\b/i;
 
 export function blocks(text) {
@@ -81,7 +81,7 @@ export function findStaleClaims(text) {
     if (match) findings.push({ rule: rule.id, message: rule.message, excerpt: match[0].slice(0, 120) });
   }
   for (const block of blocks(text)) {
-    const sentences = block.text.replace(/\s+/g, " ").split(/(?<=[.!?])\s+/);
+    const sentences = block.text.replace(/\s+/g, " ").split(/(?<=[.!?])\s+|\s*\|\s*/);
     for (const body of sentences) {
       if (/source\s+of\s+truth/i.test(body) && /\bSuperset\b/i.test(body) && /\btools?\b/i.test(body)) {
         if (!SCOPE_WORDS.test(body)) {
@@ -118,6 +118,11 @@ function listFiles(target) {
 // or in its fixtures and tests. A neutral line that some workspace services may
 // be unavailable is fine; naming Knowledge is not. Reintroducing the term needs
 // a deliberate change to OUT_OF_SCOPE_ALLOWLIST below, with a reason.
+// This is an agent-guidance scope policy, NOT a confidentiality/redaction gate.
+// mirror-public.yml publishes the full master tree and reachable history to
+// preset-io/agent-skills; allowlisted files are public too. The guard test and
+// synthetic term probes are safe public test inputs, not an operational tool
+// inventory. Removing text here does not remove it from mirrored git history.
 export const OUT_OF_SCOPE_PATTERN = /knowledge/i;
 export const OUT_OF_SCOPE_SCAN_ROOTS = [
   "plugins/preset-mcp-skills",
@@ -130,11 +135,11 @@ const OUT_OF_SCOPE_SCAN_EXTENSIONS = new Set([".md", ".json", ".toml", ".mjs"]);
 export const OUT_OF_SCOPE_ALLOWLIST = [
   {
     file: "tests/fixtures/mcp-gateway-guard/knowledge-samples.json",
-    reason: "Inputs that must contain the forbidden terms so the guard itself can be tested.",
+    reason: "Public synthetic term probes required to test the guard, with no operational tool or implementation inventory.",
   },
   {
     file: "tests/release-scope-guard.test.mjs",
-    reason: "Tests of the guard; they have to name the forbidden term to prove it is caught.",
+    reason: "Public tests of the agent-guidance scope policy; naming the term here verifies detection, not service availability.",
   },
 ];
 

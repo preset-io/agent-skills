@@ -174,6 +174,14 @@ describe("walkthroughs (mocked gateway and direct workspace)", () => {
     assert.match(setup, /Do not create a confidential OAuth client/);
   });
 
+  test("the gateway skill teaches the conservative annotation default", () => {
+    assert.match(read(SKILL, "SKILL.md"), /does not explicitly declare `readOnlyHint: true`[^.]*require confirmation/i);
+  });
+
+  test("the gateway skill permits chosen IDs within the current connection", () => {
+    assert.match(read(SKILL, "SKILL.md"), /Within the current session and gateway connection, reuse the chosen `id`[^.]*after changing connections, list and choose again/i);
+  });
+
   test("every rule the checker enforces is taught in the skill text", () => {
     const taught = {
       "silent-workspace-choice": /never choose silently/i,
@@ -625,6 +633,9 @@ describe("stale gateway claims", () => {
       "Superset is the source of truth for every tool you can call here. No direct API fallback.",
       "Superset is the source of truth for tool names. Use a direct connection separately.",
       "Superset is the source of truth for tool names. The gateway is a separate surface.",
+      "| Top-level tools | Superset is the source of truth for every tool you can call | gateway |",
+      "| direct connection | Superset is the source of truth for tool names |",
+      "| Superset is the source of truth for tool names | workspace tools |",
     ];
     for (const text of stale) assert.ok(findStaleClaims(text).length > 0, text);
   });
@@ -634,6 +645,8 @@ describe("stale gateway claims", () => {
       "Direct workspace connection: the Superset MCP server is the source of truth for tool names.",
       "On a direct connection, Superset is the source of truth for tool names.",
       "Superset is the source of truth for workspace tools.",
+      "| Workspace tools | On a direct connection, Superset is the source of truth for tool names |",
+      "| Workspace tools | Superset is the source of truth for workspace tools | gateway |",
       "On the Preset gateway, the gateway defines the top-level tools and Superset defines the workspace tools.",
     ];
     for (const text of fine) assert.deepEqual(findStaleClaims(text), [], text);

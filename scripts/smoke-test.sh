@@ -33,7 +33,7 @@ if command -v unzip >/dev/null; then
     grep -qx "preset-mcp-skills/$entry" <<<"$entries" || fail "OpenAI plugin ZIP $mcp_zip is missing $entry"
   done
 fi
-node --test tests/mcp-gateway.test.mjs >/dev/null || fail "MCP gateway tests failed (run: node --test tests/mcp-gateway.test.mjs)"
+node --test tests/mcp-gateway.test.mjs tests/release-scope-guard.test.mjs >/dev/null || fail "MCP gateway tests failed (run: node --test tests/mcp-gateway.test.mjs tests/release-scope-guard.test.mjs)"
 for openai_plugin in preset-cli-skills preset-api-skills preset-snowflake-cortex-skills; do
   node scripts/build-openai-plugin-zip.mjs --plugin "$openai_plugin"
   openai_zip="dist/$openai_plugin-$(jq -r .version "plugins/$openai_plugin/.codex-plugin/plugin.json")-openai.zip"

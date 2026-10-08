@@ -29,7 +29,7 @@ Use the `skills/*/SKILL.md` files as the canonical instructions:
 ## Source Of Truth
 
 - Direct workspace connection: the live Superset MCP server under `superset/superset/mcp_service` is the source of truth for tool names, schemas, tags, annotations, prompts, resources, and RBAC metadata.
-- Preset MCP gateway: the gateway (`preset-io/mcp-gateway`) defines its own top-level tools (`list_workspaces`, `list_workspace_services`, `search_workspace_tools`, `call_tool`, `get_workspace_catalog`, Knowledge tools). Superset defines only the workspace tools reached through them, and the `inputSchema` returned by `search_workspace_tools` for the chosen workspace is authoritative.
+- Preset MCP gateway: the gateway (`preset-io/mcp-gateway`) defines its own top-level tools (`list_workspaces`, `list_workspace_services`, `search_workspace_tools`, `call_tool`, `get_workspace_catalog`). Superset defines only the workspace tools reached through them, and the `inputSchema` returned by `search_workspace_tools` for the chosen workspace is authoritative.
 
 These skills are workflow and safety guidance only.
 

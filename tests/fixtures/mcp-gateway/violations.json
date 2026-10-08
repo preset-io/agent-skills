@@ -22,10 +22,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -111,10 +109,8 @@
                 "name": "e5f6a7b8",
                 "title": "Finance",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -237,10 +233,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -326,10 +320,8 @@
                 "name": "e5f6a7b8",
                 "title": "Finance",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -456,10 +448,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -545,10 +535,8 @@
                 "name": "e5f6a7b8",
                 "title": "Finance",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -675,10 +663,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -806,10 +792,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -945,10 +929,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -1042,10 +1024,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -1168,10 +1148,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -1301,10 +1279,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -1389,10 +1365,7 @@
                 "id": 456,
                 "name": "e5f6a7b8",
                 "title": "Finance",
-                "services": [
-                  "knowledge"
-                ],
-                "knowledgeLaunched": false,
+                "services": [],
                 "catalog": false,
                 "tools": [
                   {
@@ -1506,139 +1479,6 @@
       }
     },
     {
-      "name": "knowledge-retry-after-denial",
-      "expectViolations": [
-        "repeated-failed-call"
-      ],
-      "scenario": {
-        "surface": "gateway",
-        "label": "mocked",
-        "environment": "production",
-        "environments": {
-          "production": {
-            "scopes": [
-              "superset:read",
-              "superset:sqllab:write"
-            ],
-            "workspaces": [
-              {
-                "id": 123,
-                "name": "a1b2c3d4",
-                "title": "Sales analytics",
-                "services": [
-                  "workspace_tools",
-                  "knowledge"
-                ],
-                "knowledgeLaunched": false,
-                "catalog": false,
-                "tools": [
-                  {
-                    "name": "list_databases",
-                    "description": "list databases",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "request": {
-                          "type": "object"
-                        }
-                      },
-                      "required": [
-                        "request"
-                      ]
-                    },
-                    "annotations": {
-                      "readOnlyHint": true,
-                      "destructiveHint": false
-                    }
-                  },
-                  {
-                    "name": "list_dashboards",
-                    "description": "list dashboards",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "request": {
-                          "type": "object"
-                        }
-                      },
-                      "required": [
-                        "request"
-                      ]
-                    },
-                    "annotations": {
-                      "readOnlyHint": true,
-                      "destructiveHint": false
-                    }
-                  },
-                  {
-                    "name": "execute_sql",
-                    "description": "execute sql",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "request": {
-                          "type": "object"
-                        }
-                      },
-                      "required": [
-                        "request"
-                      ]
-                    },
-                    "annotations": {
-                      "readOnlyHint": false,
-                      "destructiveHint": true
-                    }
-                  },
-                  {
-                    "name": "get_chart_type_schema",
-                    "description": "chart type schema",
-                    "inputSchema": {
-                      "type": "object",
-                      "properties": {
-                        "chart_type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "chart_type"
-                      ]
-                    },
-                    "annotations": {
-                      "readOnlyHint": true,
-                      "destructiveHint": false
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        "steps": [
-          {
-            "call": "list_workspaces",
-            "args": {},
-            "expect": {
-              "isError": false
-            }
-          },
-          {
-            "call": "read_knowledge_doc",
-            "args": {
-              "workspace_id": "123",
-              "slug": "metrics"
-            }
-          },
-          {
-            "call": "read_knowledge_doc",
-            "args": {
-              "workspace_id": "123",
-              "slug": "metrics"
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "unsupported-catalog-call",
       "expectViolations": [
         "unlisted-service-call"
@@ -1659,10 +1499,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -1953,10 +1791,8 @@
                 "name": "a1b2c3d4",
                 "title": "Sales analytics",
                 "services": [
-                  "workspace_tools",
-                  "knowledge"
+                  "workspace_tools"
                 ],
-                "knowledgeLaunched": false,
                 "catalog": false,
                 "tools": [
                   {
@@ -2041,10 +1877,7 @@
                 "id": 456,
                 "name": "e5f6a7b8",
                 "title": "Finance",
-                "services": [
-                  "knowledge"
-                ],
-                "knowledgeLaunched": false,
+                "services": [],
                 "catalog": false,
                 "tools": [
                   {

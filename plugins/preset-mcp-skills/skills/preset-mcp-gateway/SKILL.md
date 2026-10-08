@@ -19,7 +19,7 @@ Use when the connected MCP surface is the Preset gateway (`https://mcp.app.prese
 
 1. `list_workspaces` (omit arguments, or pass `limit`). Use only the returned `id` values.
 2. Pick the workspace. Exactly one workspace returned, or the user named one that matches exactly one result: use it and say which. Several candidates, no clear match, or a name that matches more than one: ask the user which one. Never choose silently, never guess an `id` from a name or hostname, never reuse an `id` from a previous session, another environment, or another gateway URL. Within the current session and gateway connection, reuse the chosen `id` from this listing for steps 3–5; after changing connections, list and choose again.
-3. `list_workspace_services` with `workspace_id` when you need to know whether `workspace_tools` or `knowledge` is available. A service that is not listed is not available to this user; do not call its tools.
+3. `list_workspace_services` with `workspace_id` when you need to know whether `workspace_tools` is available. A service that is not listed is not available to this user; do not call its tools.
 4. `search_workspace_tools` with `workspace_id` and a specific `query` (an exact tool name is best). Read the returned `inputSchema` and the tool's `annotations`.
 5. `call_tool` with `workspace_id`, `tool_name` (exact name returned by the search), and `args` built from that `inputSchema`. Most workspace tools need `args` shaped as `{"request": {...}}`; some are flat. Follow the schema, not habit.
 
@@ -33,7 +33,7 @@ Detail, argument shapes, and the direct-connection contrast: [references/gateway
 
 ## Failures and Optional Services
 
-Disabled services, the Knowledge launch flag, an unsupported catalog, oversized or omitted search results, scope errors, and authentication failures each have a fixed response: [references/gateway-failures.md](references/gateway-failures.md).
+Disabled or unavailable services, an unsupported catalog, oversized or omitted search results, scope errors, and authentication failures each have a fixed response: [references/gateway-failures.md](references/gateway-failures.md).
 
 ## Connect a Client
 

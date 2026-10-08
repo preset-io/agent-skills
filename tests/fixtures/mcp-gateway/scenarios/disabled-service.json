@@ -15,10 +15,8 @@
           "name": "a1b2c3d4",
           "title": "Sales analytics",
           "services": [
-            "workspace_tools",
-            "knowledge"
+            "workspace_tools"
           ],
-          "knowledgeLaunched": false,
           "catalog": false,
           "tools": [
             {
@@ -103,10 +101,7 @@
           "id": 456,
           "name": "e5f6a7b8",
           "title": "Finance",
-          "services": [
-            "knowledge"
-          ],
-          "knowledgeLaunched": false,
+          "services": [],
           "catalog": false,
           "tools": [
             {

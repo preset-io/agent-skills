@@ -15,10 +15,8 @@
           "name": "a1b2c3d4",
           "title": "Sales analytics",
           "services": [
-            "workspace_tools",
-            "knowledge"
+            "workspace_tools"
           ],
-          "knowledgeLaunched": false,
           "catalog": false,
           "tools": [
             {

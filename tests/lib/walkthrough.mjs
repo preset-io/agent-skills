@@ -15,8 +15,6 @@ const GATEWAY_ONLY = new Set([
   "list_workspace_services",
   "search_workspace_tools",
   "get_workspace_catalog",
-  "list_knowledge_docs",
-  "read_knowledge_doc",
 ]);
 const AUTH_FAILURE = /authentication required|lacks the required Superset capability|did not authorize the connected identity/;
 
@@ -115,12 +113,7 @@ export function walk(scenario) {
     if (listedWorkspaces.length > 1 && userSelected === null) flag("silent-workspace-choice", id);
     else if (listedWorkspaces.length > 1 && userSelected !== id) flag("workspace-differs-from-user-choice", id);
     const svc = services.get(`${envName}:${id}`);
-    const needs =
-      tool === "search_workspace_tools" || tool === "call_tool" || tool === "get_workspace_catalog"
-        ? "workspace_tools"
-        : tool === "list_knowledge_docs" || tool === "read_knowledge_doc"
-          ? "knowledge"
-          : null;
+    const needs = tool === "search_workspace_tools" || tool === "call_tool" || tool === "get_workspace_catalog" ? "workspace_tools" : null;
     if (needs && svc && !svc.includes(needs)) flag("unlisted-service-call", `${tool} needs ${needs}`);
     if (tool === "get_workspace_catalog" && svc && !svc.includes("get_workspace_catalog")) {
       flag("unlisted-service-call", "get_workspace_catalog not offered");

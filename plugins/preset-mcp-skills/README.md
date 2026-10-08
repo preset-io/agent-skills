@@ -39,7 +39,7 @@ The source of truth depends on the connected surface:
   superset/superset/mcp_service
   ```
 
-- Preset MCP gateway: the gateway (`preset-io/mcp-gateway`, `src/mcp_gateway/app.py`) defines the top-level tools (`list_workspaces`, `list_workspace_services`, `search_workspace_tools`, `call_tool`, `get_workspace_catalog`, and the Knowledge tools). Superset defines only the workspace tools reached through `search_workspace_tools` and `call_tool`, and each workspace's live `inputSchema` is authoritative for those.
+- Preset MCP gateway: the gateway (`preset-io/mcp-gateway`, `src/mcp_gateway/app.py`) defines the top-level tools (`list_workspaces`, `list_workspace_services`, `search_workspace_tools`, `call_tool`, and `get_workspace_catalog`). Superset defines only the workspace tools reached through `search_workspace_tools` and `call_tool`, and each workspace's live `inputSchema` is authoritative for those.
 
 These skills describe durable workflows and safety boundaries. They do not replace live MCP tool schemas.
 

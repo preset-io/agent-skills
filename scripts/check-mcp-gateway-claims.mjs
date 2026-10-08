@@ -5,8 +5,8 @@
 //
 // The gateway (preset-io/mcp-gateway, src/mcp_gateway/app.py) defines its own
 // top-level tools: list_workspaces, list_workspace_services,
-// search_workspace_tools, call_tool, get_workspace_catalog, and the Knowledge
-// tools. Superset defines only the workspace tools reached through them. A
+// search_workspace_tools, call_tool, and get_workspace_catalog. Superset
+// defines only the workspace tools reached through them. A
 // statement about "the source of truth for tools" must therefore be scoped to a
 // surface ("gateway", "direct connection", or "workspace tool").
 //
@@ -112,11 +112,73 @@ function listFiles(target) {
   return out;
 }
 
+// Release scope: Knowledge document tools are not part of the initial public
+// release, so no Knowledge tool or service name may appear in the released copy
+// of the MCP package (skills, docs, manifests, listing metadata, starter prompts)
+// or in its fixtures and tests. A neutral line that some workspace services may
+// be unavailable is fine; naming Knowledge is not. Reintroducing the term needs
+// a deliberate change to OUT_OF_SCOPE_ALLOWLIST below, with a reason.
+export const OUT_OF_SCOPE_PATTERN = /knowledge/i;
+export const OUT_OF_SCOPE_SCAN_ROOTS = [
+  "plugins/preset-mcp-skills",
+  "README.md",
+  "tests/fixtures/mcp-gateway",
+  "tests/lib",
+  "tests",
+];
+const OUT_OF_SCOPE_SCAN_EXTENSIONS = new Set([".md", ".json", ".toml", ".mjs"]);
+export const OUT_OF_SCOPE_ALLOWLIST = [
+  {
+    file: "tests/fixtures/mcp-gateway-guard/knowledge-samples.json",
+    reason: "Inputs that must contain the forbidden terms so the guard itself can be tested.",
+  },
+  {
+    file: "tests/release-scope-guard.test.mjs",
+    reason: "Tests of the guard; they have to name the forbidden term to prove it is caught.",
+  },
+];
+
+export function findOutOfScopeTerms(text) {
+  return text
+    .split("\n")
+    .map((line, index) => ({ line: index + 1, excerpt: line.trim().slice(0, 120), hit: OUT_OF_SCOPE_PATTERN.test(line) }))
+    .filter((entry) => entry.hit)
+    .map(({ line, excerpt }) => ({
+      rule: "release-scope-knowledge",
+      message: "names Knowledge, which is not in the initial public release",
+      excerpt,
+      line,
+    }));
+}
+
+function listOutOfScopeFiles(target) {
+  const full = path.join(ROOT, target);
+  if (!fs.existsSync(full)) return [];
+  if (fs.statSync(full).isFile()) return [full];
+  return fs.readdirSync(full, { withFileTypes: true }).flatMap((entry) => {
+    const child = path.join(target, entry.name);
+    if (entry.isDirectory()) return listOutOfScopeFiles(child);
+    return OUT_OF_SCOPE_SCAN_EXTENSIONS.has(path.extname(entry.name)) ? [path.join(ROOT, child)] : [];
+  });
+}
+
 export function scanRepository() {
   const failures = [];
   for (const file of SCAN_ROOTS.flatMap(listFiles)) {
     for (const finding of findStaleClaims(fs.readFileSync(file, "utf8"))) {
       failures.push({ file: path.relative(ROOT, file), ...finding });
+    }
+  }
+  const allowed = new Set(OUT_OF_SCOPE_ALLOWLIST.map((entry) => entry.file));
+  for (const file of OUT_OF_SCOPE_SCAN_ROOTS.flatMap(listOutOfScopeFiles)) {
+    const rel = path.relative(ROOT, file);
+    if (allowed.has(rel)) continue;
+    for (const finding of findOutOfScopeTerms(fs.readFileSync(file, "utf8"))) failures.push({ file: rel, ...finding });
+  }
+  // An allowlist entry must point at a real file and carry a reason.
+  for (const entry of OUT_OF_SCOPE_ALLOWLIST) {
+    if (!entry.reason || !fs.existsSync(path.join(ROOT, entry.file))) {
+      failures.push({ file: entry.file, rule: "release-scope-allowlist-invalid", message: "allowlist entry needs an existing file and a reason", excerpt: "" });
     }
   }
   return failures;

@@ -30,7 +30,6 @@ export class MockGateway {
   }
 
   listedTools() {
-    // Knowledge tools can be advertised from a cached tools/list while calls are denied.
     return Object.keys(CONTRACT.tools);
   }
 
@@ -64,16 +63,9 @@ export class MockGateway {
       return ok(
         services.map((id) => ({
           service_id: id,
-          tools:
-            id === "workspace_tools"
-              ? ["search_workspace_tools", "call_tool", ...(ws.catalog ? ["get_workspace_catalog"] : [])]
-              : ["list_knowledge_docs", "read_knowledge_doc"],
+          tools: ["search_workspace_tools", "call_tool", ...(ws.catalog ? ["get_workspace_catalog"] : [])],
         })),
       );
-    }
-    if (CONTRACT.tools[tool].service === "knowledge") {
-      if (!services.includes("knowledge")) return fail(CONTRACT.messages.unknownKnowledgeTool.replace("{tool}", tool));
-      return ok({ slug: args.slug ?? null });
     }
     // search_workspace_tools, call_tool, get_workspace_catalog need workspace_tools and a scope.
     if (!this.world.scopes.some((s) => s.startsWith("superset:"))) return fail(CONTRACT.messages.capabilityRequired);
@@ -86,7 +78,7 @@ export class MockGateway {
   }
 
   enabledServices(ws) {
-    return ws.services.filter((s) => s !== "knowledge" || ws.knowledgeLaunched);
+    return ws.services;
   }
 
   search(ws, { query, limit, offset = 0 }) {

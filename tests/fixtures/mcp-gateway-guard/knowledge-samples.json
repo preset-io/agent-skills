@@ -1,0 +1,16 @@
+{
+  "$comment": "Inputs for the Knowledge-term guard in scripts/check-mcp-gateway-claims.mjs. This file is the only deliberate allowlist entry (KNOWLEDGE_ALLOWLIST): it must contain the forbidden terms so the guard can be tested. Do not add released copy here.",
+  "flagged": [
+    "Gateway tools: list_workspaces, call_tool, list_knowledge_docs, read_knowledge_doc",
+    "Administration tools create_knowledge_doc, edit_knowledge_doc, delete_knowledge_doc, restore_knowledge_doc",
+    "Knowledge tools are visible when the launch flag is on.",
+    "The knowledge service is not enabled for this workspace.",
+    "Manager reports knowledge_enabled and can_manage_knowledge.",
+    "KnowledgeToolVisibilityMiddleware hides the tools.",
+    "Read my Knowledge documents"
+  ],
+  "neutral": [
+    "Some workspace services may be unavailable to a user or workspace.",
+    "A gateway tool that returns Unknown tool is unavailable; do not retry it."
+  ]
+}

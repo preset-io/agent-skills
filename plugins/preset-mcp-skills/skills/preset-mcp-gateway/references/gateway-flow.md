@@ -6,21 +6,20 @@ Tool names, parameters, and behavior below were read from `preset-io/mcp-gateway
 
 | Fact | Source path in `preset-io/mcp-gateway` |
 |---|---|
-| Registered gateway tools and signatures (`list_workspaces`, `list_workspace_services`, `search_workspace_tools`, `call_tool`, `get_workspace_catalog`, Knowledge tools) | `src/mcp_gateway/app.py` (`@gateway.tool` definitions) |
+| Registered gateway tools and signatures (`list_workspaces`, `list_workspace_services`, `search_workspace_tools`, `call_tool`, `get_workspace_catalog`) | `src/mcp_gateway/app.py` (`@gateway.tool` definitions) |
 | Production remote URL `https://mcp.app.preset.io/mcp` | `server.json` (`remotes[0].url`) |
-| Service ids `workspace_tools`, `knowledge` | `src/mcp_gateway/service_manifest.py` |
+| Service ids returned by `list_workspace_services` | `src/mcp_gateway/service_manifest.py` |
 | Service descriptors returned by `list_workspace_services` | `src/mcp_gateway/app.py` (`_SERVICE_DESCRIPTORS`) |
 | Workflow table and argument examples | `README.md` ("Discover a workspace, a tool, and call it") |
 | Capability scopes and reviewed-tool policy | `src/mcp_gateway/workspace_capabilities.py`, `docs/mcp-scopes.md` |
 | `call_tool` error classes, missing `request` wrapper hint | `src/mcp_gateway/workspace_failures.py`, `docs/sc-121710-call-tool-error-classes.md` |
 | Catalog availability and limits | `src/mcp_gateway/catalog.py`, `docs/workspace-catalog.md` |
-| Knowledge tool visibility | `src/mcp_gateway/app.py` (`KnowledgeToolVisibilityMiddleware`) |
 
 ## Which surface am I on
 
 | Signal | Aggregate gateway | Direct workspace Superset MCP |
 |---|---|---|
-| Top-level tools | `list_workspaces`, `list_workspace_services`, `search_workspace_tools`, `call_tool`, `get_workspace_catalog`, Knowledge tools when visible | Superset tools such as `health_check`, `get_instance_info`, `list_dashboards`, `execute_sql` (or a `search_tools` / `call_tool` pair) |
+| Top-level tools | `list_workspaces`, `list_workspace_services`, `search_workspace_tools`, `call_tool`, `get_workspace_catalog` | Superset tools such as `health_check`, `get_instance_info`, `list_dashboards`, `execute_sql` (or a `search_tools` / `call_tool` pair) |
 | `call_tool` arguments | `workspace_id`, `tool_name`, `args` | `name`, `arguments` (no workspace parameter) |
 | Tool discovery | `search_workspace_tools(workspace_id, query)` returns full MCP definitions | `search_tools` or the client's own `tools/list` |
 | Workspace selection | You must select one with `list_workspaces` and pass `workspace_id` on every workspace call | The connection is already one workspace; there is no `workspace_id` |
@@ -38,11 +37,10 @@ Rules:
 | Tool | Arguments | Notes |
 |---|---|---|
 | `list_workspaces` | optional `limit` (1-100), `offset` (0-10000) | Returns `[{"id", "name", "title"}]` for workspaces the signed-in user can see. With `limit`, follow `_meta["io.preset/pagination"]` `has_more` / `next_offset`. |
-| `list_workspace_services` | `workspace_id` | Returns service families (`service_id` `workspace_tools` or `knowledge`) with the gateway tools of each. Omission means unavailable, unauthorized, or unconfirmed. |
+| `list_workspace_services` | `workspace_id` | Returns the service families available to the caller (for example `workspace_tools`) with the gateway tools of each. Omission means unavailable, unauthorized, or unconfirmed. |
 | `search_workspace_tools` | `query` (required, max 500 chars), `workspace_id`, optional `limit`, `offset` | Returns complete MCP definitions (`name`, `inputSchema`, `annotations`, ...). Needs a reviewed Superset capability scope. |
 | `call_tool` | `workspace_id`, `tool_name`, `args` (object) | Calls one workspace tool. Needs a reviewed Superset capability scope; unreviewed names are refused. |
 | `get_workspace_catalog` | `workspace_id`, `asset_type` (`databases`, `datasets`, `charts`, `dashboards`), optional `cursor`, `page_size`, `search`, `format` | Optional. Listed in `list_workspace_services` only when available. |
-| `list_knowledge_docs`, `read_knowledge_doc` | `workspace_id` (+ `limit`/`offset`, or `slug`) | Optional; see [gateway-failures.md](gateway-failures.md). |
 
 `workspace_id` must be the exact `id` that `list_workspaces` returned (numeric, passed as a string such as `"123"`). A workspace name or hostname is rejected.
 
@@ -64,7 +62,7 @@ Rules:
    -> [{"service_id": "workspace_tools", "tools": ["search_workspace_tools", "call_tool", "get_workspace_catalog"]}]
    ```
 
-   No `workspace_tools` entry: workspace tools are not available to this user here. Stop and say so. No `knowledge` entry: do not call Knowledge tools for this workspace.
+   No `workspace_tools` entry: workspace tools are not available to this user here. Stop and say so. A service or tool that is not listed is not available to this user; do not call it.
 
 4. Search for the tool and read its live schema.
 

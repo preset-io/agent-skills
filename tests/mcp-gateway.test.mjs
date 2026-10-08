@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 import { execFileSync, spawnSync } from "node:child_process";
 import { CREDENTIAL_LIKE, checkPackage, clientsIndexFields, generatedFiles, manifestFields, PACKAGE as PKG_REL, readSource } from "../scripts/lib/mcp-config.mjs";
-import { findStaleClaims, scanRepository } from "../scripts/check-mcp-gateway-claims.mjs";
+import { findOutOfScopeTerms, findStaleClaims, scanRepository } from "../scripts/check-mcp-gateway-claims.mjs";
 import { validate } from "./lib/json-schema.mjs";
 import { readZip } from "./lib/zip.mjs";
 import { walk } from "./lib/walkthrough.mjs";
@@ -201,9 +201,8 @@ describe("failure and optional-service guidance", () => {
   test("covers the required failure classes without bypasses", () => {
     const failures = read(SKILL, "references", "gateway-failures.md");
     for (const needle of [
-      "Knowledge",
-      "launch flag",
       "Unknown tool: '<name>'",
+      "Some workspace services or gateway tools may be unavailable",
       "get_workspace_catalog",
       "not enabled on this gateway",
       "omitted",
@@ -585,6 +584,7 @@ describe("built OpenAI archive carries every target's config", () => {
       assert.ok(!/(^|\/)\.app\.json$/.test(entry) && !entry.includes("/hooks/"), entry);
       const text = data.toString("utf8");
       assert.doesNotMatch(text, /openai-apps-challenge/, entry);
+      assert.deepEqual(findOutOfScopeTerms(text), [], `${entry}: out-of-scope term in the archive`);
       if (/(^|\/)\.?mcp\.json$/.test(entry) || entry.endsWith(".mcp.json")) {
         assert.doesNotMatch(JSON.stringify(JSON.parse(text).mcpServers ?? JSON.parse(text).servers), CREDENTIAL_LIKE, entry);
       }

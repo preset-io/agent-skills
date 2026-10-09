@@ -9,6 +9,7 @@ Use for MCP metadata discovery that does not require result data or persistent c
 
 ## Always
 
+- On the Preset gateway, start with `preset-mcp-gateway` (`list_workspaces`, workspace selection). The list/detail tools below are workspace tools called through `call_tool`.
 - Use the single narrowest tool that answers the question; discovery calls are for missing IDs, names, or schemas — not a mandatory ladder.
 - Do not repeat an identical list call; reuse earlier results. Following pagination or refining a search filter when the target was not in the returned page is fine.
 - When a call fails on filter, sort, pagination, or request wrapper fields, fix it against the live tool schema rather than guessing again.

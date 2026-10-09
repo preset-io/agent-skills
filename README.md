@@ -7,7 +7,7 @@ Agent guidance for working with [Preset](https://preset.io), Apache Superset, an
 The installable packages are:
 
 - [`preset-api-skills`](plugins/preset-api-skills/README.md) — focused skills for direct Preset Management API and Superset workspace API workflows.
-- [`preset-mcp-skills`](plugins/preset-mcp-skills/README.md) — focused skills for Superset MCP tool workflows.
+- [`preset-mcp-skills`](plugins/preset-mcp-skills/README.md) — focused skills for the Preset MCP gateway (`https://mcp.app.preset.io/mcp`) and Superset MCP tool workflows, with opt-in client connection templates.
 - [`preset-cli-skills`](plugins/preset-cli-skills/README.md) — focused skills for Preset CLI (`sup`) shell, scripting, CI/CD, read/export, SQL, and gated mutation workflows.
 - [`preset-snowflake-cortex-skills`](plugins/preset-snowflake-cortex-skills/README.md) — separate package for direct Snowflake Cortex Agent REST and SQL workflows (account/auth context, agent management, and confirmation-gated agent runs). These two skills used to ship inside `preset-api-skills`.
 
@@ -24,12 +24,13 @@ See the [API package README](plugins/preset-api-skills/README.md) for the full c
 MCP package highlights:
 
 - **`preset-mcp`** — route MCP intent and enforce the no-direct-API boundary.
+- **`preset-mcp-gateway`** — connect to the Preset MCP gateway, choose between the gateway and a direct workspace connection, select a workspace, and use `search_workspace_tools` and `call_tool`.
 - **`preset-mcp-discovery`** — use MCP health, list, detail, schema, and chart-type discovery tools.
 - **`preset-mcp-visualization`** — create Explore links, chart previews, saved charts, and chart updates through MCP.
 - **`preset-mcp-sqllab`** — run SQL, open SQL Lab links, and save SQL queries through MCP.
 - **`preset-mcp-troubleshooting`** — handle MCP health, validation, permission, response-size, and bug-report workflows.
 
-See the [MCP package README](plugins/preset-mcp-skills/README.md) for the full 8-skill catalog.
+See the [MCP package README](plugins/preset-mcp-skills/README.md) for the full 10-skill catalog.
 
 CLI package highlights:
 
@@ -243,6 +244,8 @@ Run the repository smoke test before publishing changes:
 It builds the OpenAI submission archives (`dist/<package>-<version>-openai.zip`) for `preset-api-skills`, `preset-cli-skills`, and `preset-snowflake-cortex-skills` with `node scripts/build-openai-plugin-zip.mjs --plugin <package>`, then runs `node --test tests/package-split.test.mjs`, which asserts that the API archive ships no Cortex skills, files, or Cortex listing copy, that the Cortex archive ships both Cortex skills and every file they link to, that every relative link in every package resolves inside that package, and that each skill belongs to exactly one package. Passing the preflight does not guarantee a package passes OpenAI directory review.
 
 The smoke test also runs `node scripts/validate-agent-skills.mjs`, which checks the source skill folders against the Agent Skills structural rules: required frontmatter, name and description limits, parent-directory name matching, compact `SKILL.md` files, and local Markdown links that stay inside each skill folder.
+
+The smoke test also runs `node scripts/check-mcp-gateway-claims.mjs` (flags stale claims about who defines the Preset MCP gateway's top-level tools) and `node --test tests/mcp-gateway.test.mjs`, which validates the MCP package's client connection templates and replays mocked walkthroughs (multi-workspace gateway, direct workspace, disabled service, missing request wrapper) against fixtures. These are mocked tests, not authenticated canaries; the manual canary procedure is in the [MCP package README](plugins/preset-mcp-skills/README.md#verification).
 
 ## Releasing
 

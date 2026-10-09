@@ -36,6 +36,9 @@ for (const plugin of PLUGINS) {
   for (const manifest of MANIFESTS) {
     targets.push(path.join("plugins", plugin, manifest));
   }
+  // Portable Agent Plugins manifest at the package root, for packages that ship one.
+  const portable = path.join("plugins", plugin, "plugin.json");
+  if (fs.existsSync(path.join(ROOT, portable))) targets.push(portable);
 }
 
 const drift = [];

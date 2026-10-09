@@ -10,7 +10,7 @@ Use when Superset MCP tools fail, return validation errors, return permission er
 ## Always
 
 - Stay on MCP troubleshooting; do not switch to direct APIs.
-- Use `health_check` first for service availability.
+- Use `health_check` first for service availability on a direct connection. On the Preset gateway, `health_check` is a workspace tool reached through `call_tool`; follow `preset-mcp-gateway` for gateway authentication, scope, workspace, and service failures.
 - Use `generate_bug_report` when the user says MCP is broken or asks how to report an issue.
 - Treat permission denied as authoritative.
 - No permission workaround: do not search alternate tools, REST APIs, or direct APIs to expose restricted data.

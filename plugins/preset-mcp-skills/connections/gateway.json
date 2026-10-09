@@ -1,0 +1,6 @@
+{
+  "$comment": "Single source for the Preset MCP gateway endpoint and the MCP server names. Every config file for every target is generated from this by scripts/sync-mcp-config.mjs; do not edit those files by hand.",
+  "endpoint": "https://mcp.app.preset.io/mcp",
+  "bundledServerName": "preset",
+  "userServerName": "preset-gateway"
+}

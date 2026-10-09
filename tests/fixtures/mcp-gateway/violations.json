@@ -1,0 +1,1990 @@
+{
+  "label": "mocked",
+  "cases": [
+    {
+      "name": "silent-workspace-choice",
+      "expectViolations": [
+        "silent-workspace-choice"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              },
+              {
+                "id": 456,
+                "name": "e5f6a7b8",
+                "title": "Finance",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "call": "search_workspace_tools",
+            "args": {
+              "workspace_id": "123",
+              "query": "list_databases"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "invented-workspace-id",
+      "expectViolations": [
+        "invented-workspace-id"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              },
+              {
+                "id": 456,
+                "name": "e5f6a7b8",
+                "title": "Finance",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "user": {
+              "selects": 999
+            }
+          },
+          {
+            "call": "list_workspace_services",
+            "args": {
+              "workspace_id": "999"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "workspace-differs-from-user-choice",
+      "expectViolations": [
+        "workspace-differs-from-user-choice"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              },
+              {
+                "id": 456,
+                "name": "e5f6a7b8",
+                "title": "Finance",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "user": {
+              "selects": 123
+            }
+          },
+          {
+            "call": "list_workspace_services",
+            "args": {
+              "workspace_id": "456"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "call-without-search",
+      "expectViolations": [
+        "call-without-search"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "call": "call_tool",
+            "args": {
+              "workspace_id": "123",
+              "tool_name": "list_databases",
+              "args": {
+                "request": {
+                  "page": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "write-without-confirmation",
+      "expectViolations": [
+        "write-without-confirmation"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "call": "search_workspace_tools",
+            "args": {
+              "workspace_id": "123",
+              "query": "execute_sql"
+            }
+          },
+          {
+            "call": "call_tool",
+            "args": {
+              "workspace_id": "123",
+              "tool_name": "execute_sql",
+              "args": {
+                "request": {
+                  "database_id": 1,
+                  "sql": "UPDATE t SET a=1"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "cross-environment-workspace-id",
+      "expectViolations": [
+        "cross-environment-workspace-id"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "staging": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 777,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "connect": "staging"
+          },
+          {
+            "call": "list_workspace_services",
+            "args": {
+              "workspace_id": "123"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "retry-loop-after-auth-failure",
+      "expectViolations": [
+        "continued-after-auth-failure",
+        "repeated-failed-call"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "call": "search_workspace_tools",
+            "args": {
+              "workspace_id": "123",
+              "query": "list_databases"
+            }
+          },
+          {
+            "call": "search_workspace_tools",
+            "args": {
+              "workspace_id": "123",
+              "query": "list_databases"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "unlisted-service-call",
+      "expectViolations": [
+        "unlisted-service-call"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              },
+              {
+                "id": 456,
+                "name": "e5f6a7b8",
+                "title": "Finance",
+                "services": [],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "user": {
+              "selects": 456
+            }
+          },
+          {
+            "call": "list_workspace_services",
+            "args": {
+              "workspace_id": "456"
+            }
+          },
+          {
+            "call": "search_workspace_tools",
+            "args": {
+              "workspace_id": "456",
+              "query": "list_databases"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "unsupported-catalog-call",
+      "expectViolations": [
+        "unlisted-service-call"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "call": "list_workspace_services",
+            "args": {
+              "workspace_id": "123"
+            }
+          },
+          {
+            "call": "get_workspace_catalog",
+            "args": {
+              "workspace_id": "123",
+              "asset_type": "databases"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "gateway-tool-on-direct",
+      "expectViolations": [
+        "gateway-tool-on-direct"
+      ],
+      "scenario": {
+        "surface": "direct",
+        "label": "mocked",
+        "world": {
+          "tools": [
+            {
+              "name": "list_dashboards",
+              "description": "list dashboards",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "list_databases",
+              "description": "list databases",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "get_chart_type_schema",
+              "description": "chart type schema",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "chart_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "chart_type"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            }
+          ]
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {}
+          }
+        ]
+      }
+    },
+    {
+      "name": "gateway-shape-on-direct",
+      "expectViolations": [
+        "gateway-shape-on-direct"
+      ],
+      "scenario": {
+        "surface": "direct",
+        "label": "mocked",
+        "world": {
+          "tools": [
+            {
+              "name": "list_dashboards",
+              "description": "list dashboards",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "list_databases",
+              "description": "list databases",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "get_chart_type_schema",
+              "description": "chart type schema",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "chart_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "chart_type"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            }
+          ]
+        },
+        "steps": [
+          {
+            "call": "call_tool",
+            "args": {
+              "workspace_id": "123",
+              "tool_name": "list_dashboards",
+              "args": {
+                "request": {
+                  "page": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "action-after-stop",
+      "expectViolations": [
+        "action-after-stop"
+      ],
+      "scenario": {
+        "surface": "gateway",
+        "label": "mocked",
+        "environment": "production",
+        "environments": {
+          "production": {
+            "scopes": [
+              "superset:read",
+              "superset:sqllab:write"
+            ],
+            "workspaces": [
+              {
+                "id": 123,
+                "name": "a1b2c3d4",
+                "title": "Sales analytics",
+                "services": [
+                  "workspace_tools"
+                ],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              },
+              {
+                "id": 456,
+                "name": "e5f6a7b8",
+                "title": "Finance",
+                "services": [],
+                "catalog": false,
+                "tools": [
+                  {
+                    "name": "list_databases",
+                    "description": "list databases",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "list_dashboards",
+                    "description": "list dashboards",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  },
+                  {
+                    "name": "execute_sql",
+                    "description": "execute sql",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "request": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "request"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": false,
+                      "destructiveHint": true
+                    }
+                  },
+                  {
+                    "name": "get_chart_type_schema",
+                    "description": "chart type schema",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "chart_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "chart_type"
+                      ]
+                    },
+                    "annotations": {
+                      "readOnlyHint": true,
+                      "destructiveHint": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "steps": [
+          {
+            "call": "list_workspaces",
+            "args": {},
+            "expect": {
+              "isError": false
+            }
+          },
+          {
+            "user": {
+              "selects": 456
+            }
+          },
+          {
+            "stop": "done"
+          },
+          {
+            "call": "list_workspace_services",
+            "args": {
+              "workspace_id": "456"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

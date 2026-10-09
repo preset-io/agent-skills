@@ -1,0 +1,125 @@
+{
+  "id": "auth-failure",
+  "surface": "gateway",
+  "environment": "production",
+  "description": "The token has no reviewed Superset scope: the agent reports it and stops. No retries, no other tools.",
+  "environments": {
+    "production": {
+      "scopes": [],
+      "workspaces": [
+        {
+          "id": 123,
+          "name": "a1b2c3d4",
+          "title": "Sales analytics",
+          "services": [
+            "workspace_tools"
+          ],
+          "catalog": false,
+          "tools": [
+            {
+              "name": "list_databases",
+              "description": "list databases",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "list_dashboards",
+              "description": "list dashboards",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "execute_sql",
+              "description": "execute sql",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true
+              }
+            },
+            {
+              "name": "get_chart_type_schema",
+              "description": "chart type schema",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "chart_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "chart_type"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "expectViolations": [],
+  "steps": [
+    {
+      "call": "list_workspaces",
+      "args": {},
+      "expect": {
+        "isError": false
+      }
+    },
+    {
+      "call": "search_workspace_tools",
+      "args": {
+        "workspace_id": "123",
+        "query": "list_databases"
+      },
+      "expect": {
+        "isError": true,
+        "contains": "lacks the required Superset capability"
+      }
+    },
+    {
+      "stop": "Your token lacks the Superset capability scope. An administrator must enable it and you must reauthorize the client."
+    }
+  ],
+  "label": "mocked"
+}

@@ -17,12 +17,20 @@
 //   node scripts/build-openai-plugin-zip.mjs                  # check + build
 //   node scripts/build-openai-plugin-zip.mjs --check           # preflight only
 //   node scripts/build-openai-plugin-zip.mjs --plugin <name>   # default preset-cli-skills
+//   node scripts/build-openai-plugin-zip.mjs --plugin preset-mcp-skills --with-mcp
+//
+// --with-mcp builds the archive for a plugin that bundles its remote MCP
+// connection config (the "With MCP" path). The archive ships every target's
+// config file in that target's own shape, derived from one endpoint source
+// (scripts/lib/mcp-config.mjs); the preflight checks them. Without the flag a
+// package that carries MCP configuration is refused, as the skills-only path requires.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import zlib from "node:zlib";
+import { checkPackage, PACKAGE as MCP_PACKAGE, readSource } from "./lib/mcp-config.mjs";
 
 const ROOT = process.cwd();
 const OUT_DIR = path.join(ROOT, "dist");
@@ -69,10 +77,11 @@ const CRC_TABLE = (() => {
 
 const args = process.argv.slice(2);
 const checkOnly = args.includes("--check");
+const withMcp = args.includes("--with-mcp");
 const pluginArg = args.indexOf("--plugin");
 const pluginName = pluginArg === -1 ? "preset-cli-skills" : args[pluginArg + 1];
 if (!pluginName || pluginName.startsWith("--")) {
-  console.error("Usage: node scripts/build-openai-plugin-zip.mjs [--check] [--plugin <name>]");
+  console.error("Usage: node scripts/build-openai-plugin-zip.mjs [--check] [--with-mcp] [--plugin <name>]");
   process.exit(1);
 }
 const pluginDir = path.join(ROOT, "plugins", pluginName);
@@ -269,13 +278,31 @@ if (!fs.existsSync(skillsDir)) {
   }
 }
 
-for (const rel of EXCLUDED_FILES) {
-  if (isTracked(path.join(pluginDir, rel))) {
-    fail(`${rel} must not be included in a skills-only upload. Submit MCP servers through the With MCP path instead.`);
+if (withMcp) {
+  // "With MCP" path: the package bundles its remote MCP connection. Only the MCP
+  // configuration is allowed; app mappings, hooks, and screenshots stay excluded.
+  if (path.relative(ROOT, pluginDir) !== MCP_PACKAGE) {
+    fail(`--with-mcp is only supported for ${MCP_PACKAGE}, which defines the connection config.`);
+  } else {
+    const read = (rel) => (isTracked(path.join(ROOT, rel)) ? fs.readFileSync(path.join(ROOT, rel), "utf8") : null);
+    for (const problem of checkPackage(read, readSource(ROOT))) fail(problem);
+    if (manifest.mcpServers !== undefined) fail(".codex-plugin/plugin.json must not declare mcpServers; Codex discovers the root mcp.json.");
+    if (manifest.apps !== undefined || manifest.hooks !== undefined) fail("Remove apps and hooks from the manifest; they are not eligible for the public directory.");
+    if (isTracked(path.join(pluginDir, ".app.json"))) fail(".app.json must not be included.");
+    if (trackedFiles.some((rel) => rel.startsWith(`${path.relative(ROOT, pluginDir)}/hooks/`))) fail("Lifecycle hooks are not eligible for the public directory.");
+    if (!isTracked(path.join(pluginDir, "mcp.json"))) fail("mcp.json must be tracked.");
+    if (isTracked(path.join(pluginDir, ".mcp.json"))) fail(".mcp.json must not be tracked: Claude Code auto-discovers it and rejects an entry without type.");
   }
-}
-if (manifest.mcpServers !== undefined || manifest.apps !== undefined) {
-  fail("Remove mcpServers and apps from the manifest for a skills-only upload.");
+  if (isTracked(path.join(pluginDir, ".claude-plugin", "marketplace.json"))) fail(".claude-plugin/marketplace.json must not be included.");
+} else {
+  for (const rel of EXCLUDED_FILES) {
+    if (isTracked(path.join(pluginDir, rel))) {
+      fail(`${rel} must not be included in a skills-only upload. Submit MCP servers through the With MCP path instead (--with-mcp).`);
+    }
+  }
+  if (manifest.mcpServers !== undefined || manifest.apps !== undefined) {
+    fail("Remove mcpServers and apps from the manifest for a skills-only upload.");
+  }
 }
 
 for (const warning of warnings) console.warn(`warning: ${warning}`);
@@ -286,7 +313,7 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log(`Preflight passed for ${pluginName} (${skillCount} skill(s)).`);
+console.log(`Preflight passed for ${pluginName} (${skillCount} skill(s)${withMcp ? ", MCP connection config for every target" : ""}).`);
 if (checkOnly) process.exit(0);
 
 // Zip with a single top-level directory named after the plugin, which is the
@@ -302,7 +329,9 @@ const entries = trackedFiles.map((rel) => ({
 fs.writeFileSync(zipPath, buildZip(entries));
 const sizeKib = (fs.statSync(zipPath).size / 1024).toFixed(1);
 console.log(`Wrote ${path.relative(ROOT, zipPath)} (${entries.length} files, ${sizeKib} KiB).`);
-console.log("Upload it at https://platform.openai.com/plugins -> Create plugin -> Skills only.");
+console.log(withMcp
+  ? "This archive bundles the MCP connection config. Submission goes through https://platform.openai.com/plugins -> Create plugin -> With MCP, which needs review metadata this script does not produce."
+  : "Upload it at https://platform.openai.com/plugins -> Create plugin -> Skills only.");
 
 function buildZip(files) {
   const locals = [];

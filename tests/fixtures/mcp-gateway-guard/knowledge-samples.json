@@ -1,0 +1,14 @@
+{
+  "$comment": "Synthetic term probes for the release-scope guard. This file is public via mirror-public.yml; it is not an operational tool inventory or capability contract. Never add real tool names, feature flags, middleware identifiers, credentials, or workspace data here.",
+  "flagged": [
+    "Knowledge",
+    "knowledge",
+    "KNOWLEDGE",
+    "Example knowledge service",
+    "demo_knowledge_probe"
+  ],
+  "neutral": [
+    "Some workspace services may be unavailable to a user or workspace.",
+    "A gateway tool that returns Unknown tool is unavailable; do not retry it."
+  ]
+}

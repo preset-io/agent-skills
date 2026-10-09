@@ -1,0 +1,219 @@
+{
+  "id": "disabled-service",
+  "surface": "gateway",
+  "environment": "production",
+  "description": "Finance has workspace_tools disabled for this user: the agent checks services, reports, and stops without probing or calling.",
+  "environments": {
+    "production": {
+      "scopes": [
+        "superset:read",
+        "superset:sqllab:write"
+      ],
+      "workspaces": [
+        {
+          "id": 123,
+          "name": "a1b2c3d4",
+          "title": "Sales analytics",
+          "services": [
+            "workspace_tools"
+          ],
+          "catalog": false,
+          "tools": [
+            {
+              "name": "list_databases",
+              "description": "list databases",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "list_dashboards",
+              "description": "list dashboards",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "execute_sql",
+              "description": "execute sql",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true
+              }
+            },
+            {
+              "name": "get_chart_type_schema",
+              "description": "chart type schema",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "chart_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "chart_type"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            }
+          ]
+        },
+        {
+          "id": 456,
+          "name": "e5f6a7b8",
+          "title": "Finance",
+          "services": [],
+          "catalog": false,
+          "tools": [
+            {
+              "name": "list_databases",
+              "description": "list databases",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "list_dashboards",
+              "description": "list dashboards",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            },
+            {
+              "name": "execute_sql",
+              "description": "execute sql",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true
+              }
+            },
+            {
+              "name": "get_chart_type_schema",
+              "description": "chart type schema",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "chart_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "chart_type"
+                ]
+              },
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "expectViolations": [],
+  "steps": [
+    {
+      "call": "list_workspaces",
+      "args": {},
+      "expect": {
+        "isError": false
+      }
+    },
+    {
+      "ask": "Which workspace: Sales analytics (123) or Finance (456)?"
+    },
+    {
+      "user": {
+        "selects": 456
+      }
+    },
+    {
+      "call": "list_workspace_services",
+      "args": {
+        "workspace_id": "456"
+      },
+      "expect": {
+        "isError": false
+      }
+    },
+    {
+      "stop": "Workspace tools are not enabled for you in Finance. Choose another workspace or ask your administrator."
+    }
+  ],
+  "label": "mocked"
+}

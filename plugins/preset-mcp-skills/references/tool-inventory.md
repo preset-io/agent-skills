@@ -1,6 +1,6 @@
 # Superset MCP Tool Inventory
 
-This inventory is a snapshot of the live Superset MCP server under `superset/superset/mcp_service`. Validate it from the repository root with `python3 plugins/preset-mcp-skills/scripts/check-tool-inventory.py` when the Superset checkout is available.
+This inventory is a snapshot of the workspace (Superset) tools served by the live Superset MCP server under `superset/superset/mcp_service`. It does not list the Preset MCP gateway's top-level tools (`list_workspaces`, `list_workspace_services`, `search_workspace_tools`, `call_tool`, `get_workspace_catalog`); the gateway defines those, and a gateway reaches the tools below only through `search_workspace_tools` and `call_tool`. A workspace's live schema overrides this snapshot. Validate it from the repository root with `python3 plugins/preset-mcp-skills/scripts/check-tool-inventory.py` when the Superset checkout is available.
 
 | Tool | Tags | Permission | Read Only | Destructive |
 |---|---|---|---|---|

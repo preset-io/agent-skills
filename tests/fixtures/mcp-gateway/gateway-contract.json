@@ -1,0 +1,90 @@
+{
+  "$comment": "MOCKED contract fixture. Tool names and argument shapes were read from preset-io/mcp-gateway main with gh api. It is a hand-copied snapshot for offline tests, not a live capture; the live tools/list of a connected gateway is authoritative.",
+  "label": "mocked",
+  "source": {
+    "repository": "preset-io/mcp-gateway",
+    "ref": "main",
+    "commit": "3e9ccac11bac2204a52dd42a835aa7baea99f1aa",
+    "checked": "2026-10-07",
+    "files": {
+      "tools": "src/mcp_gateway/app.py",
+      "services": "src/mcp_gateway/service_manifest.py",
+      "reviewedPolicy": "src/mcp_gateway/workspace_capabilities.py",
+      "errorText": "src/mcp_gateway/workspace_failures.py",
+      "productionRemote": "server.json"
+    }
+  },
+  "productionEndpoint": "https://mcp.app.preset.io/mcp",
+  "tools": {
+    "list_workspaces": {
+      "required": [],
+      "optional": [
+        "limit",
+        "offset"
+      ],
+      "readOnly": true
+    },
+    "list_workspace_services": {
+      "required": [
+        "workspace_id"
+      ],
+      "optional": [],
+      "readOnly": true
+    },
+    "search_workspace_tools": {
+      "required": [
+        "query",
+        "workspace_id"
+      ],
+      "optional": [
+        "limit",
+        "offset"
+      ],
+      "readOnly": true
+    },
+    "call_tool": {
+      "required": [
+        "workspace_id",
+        "tool_name",
+        "args"
+      ],
+      "optional": [],
+      "readOnly": false
+    },
+    "get_workspace_catalog": {
+      "required": [
+        "workspace_id",
+        "asset_type"
+      ],
+      "optional": [
+        "cursor",
+        "page_size",
+        "search",
+        "format"
+      ],
+      "readOnly": true
+    }
+  },
+  "directCallTool": {
+    "required": [
+      "name",
+      "arguments"
+    ]
+  },
+  "reviewedWorkspaceTools": [
+    "get_instance_info",
+    "health_check",
+    "list_dashboards",
+    "list_databases",
+    "list_datasets",
+    "get_chart_type_schema",
+    "execute_sql"
+  ],
+  "messages": {
+    "workspaceNotAvailable": "That Preset workspace does not exist or is not authorized for the connected identity. Call list_workspaces and use an id it returns; this will not resolve on its own.",
+    "capabilityRequired": "This workspace operation was not run: the connected token lacks the required Superset capability. Ask your administrator to configure the intended scope grant, then reauthorize the client with that scope. Workspace RBAC still applies.",
+    "unreviewedTool": "No reviewed Preset workspace tool has this name, so the call was not run.",
+    "wrapperHint": "The Preset workspace rejected the arguments for '{tool}' and did not run it. The workspace did not report which field failed. These arguments have no top-level `request` key: most Preset workspace tools take one, so resend the same fields as {\"request\": {...}} if this tool's inputSchema declares it.",
+    "workspaceIdNotNumeric": "workspace_id must be the numeric workspace ID"
+  }
+}

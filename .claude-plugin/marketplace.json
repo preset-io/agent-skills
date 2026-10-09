@@ -20,7 +20,7 @@
     },
     {
       "name": "preset-mcp-skills",
-      "description": "Preset MCP skills for Superset MCP tool workflows. Do not use for direct API work.",
+      "description": "Preset MCP skills for the Preset MCP gateway and Superset MCP tool workflows. Do not use for direct API work.",
       "author": {
         "name": "Preset",
         "url": "https://preset.io/"

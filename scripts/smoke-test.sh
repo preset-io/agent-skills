@@ -20,6 +20,20 @@ command -v node >/dev/null || fail "node is required"
 node scripts/validate-agent-skills.mjs
 node scripts/sync-version.mjs --check
 node scripts/check-gate-policy.mjs
+node scripts/check-mcp-gateway-claims.mjs
+node scripts/sync-mcp-config.mjs --check
+# The MCP package bundles its connection config, so it builds through the With MCP path.
+node scripts/build-openai-plugin-zip.mjs --plugin preset-mcp-skills --with-mcp
+mcp_zip="dist/preset-mcp-skills-$(jq -r .version "plugins/preset-mcp-skills/.codex-plugin/plugin.json")-openai.zip"
+test -f "$mcp_zip" || fail "missing $mcp_zip"
+if command -v unzip >/dev/null; then
+  unzip -tq "$mcp_zip" >/dev/null || fail "OpenAI plugin ZIP $mcp_zip failed integrity check"
+  entries="$(unzip -Z1 "$mcp_zip")"
+  for entry in mcp.json cursor/mcp.json .claude-plugin/plugin.json .codex-plugin/plugin.json .cursor-plugin/plugin.json plugin.json; do
+    grep -qx "preset-mcp-skills/$entry" <<<"$entries" || fail "OpenAI plugin ZIP $mcp_zip is missing $entry"
+  done
+fi
+node --test tests/mcp-gateway.test.mjs tests/release-scope-guard.test.mjs >/dev/null || fail "MCP gateway tests failed (run: node --test tests/mcp-gateway.test.mjs tests/release-scope-guard.test.mjs)"
 for openai_plugin in preset-cli-skills preset-api-skills preset-snowflake-cortex-skills; do
   node scripts/build-openai-plugin-zip.mjs --plugin "$openai_plugin"
   openai_zip="dist/$openai_plugin-$(jq -r .version "plugins/$openai_plugin/.codex-plugin/plugin.json")-openai.zip"
@@ -106,6 +120,7 @@ required_cortex_skills=(
 required_mcp_skills=(
   preset-mcp
   preset-mcp-discovery
+  preset-mcp-gateway
   preset-mcp-data
   preset-mcp-visualization
   preset-mcp-dashboard
@@ -540,7 +555,7 @@ fi
 
 require_jq '.name == "preset-mcp-skills"' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.description | contains("Do not use for direct API work")' "$MCP_ROOT/.codex-plugin/plugin.json"
-require_jq '.interface.shortDescription | contains("MCP-only")' "$MCP_ROOT/.codex-plugin/plugin.json"
+require_jq '.interface.shortDescription == "Preset MCP gateway workflows"' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.skills == "./skills/"' "$MCP_ROOT/.codex-plugin/plugin.json"
 require_jq '.name == "preset-mcp-skills"' "$MCP_ROOT/.claude-plugin/plugin.json"
 require_jq '.displayName == "Preset MCP Skills"' "$MCP_ROOT/.claude-plugin/plugin.json"
@@ -556,6 +571,28 @@ require_file "$MCP_ROOT/README.md"
 require_file "$MCP_ROOT/references/tool-inventory.json"
 require_file "$MCP_ROOT/references/tool-inventory.md"
 require_file "$MCP_ROOT/scripts/check-tool-inventory.py"
+require_file "$MCP_ROOT/connections/README.md"
+require_file "$MCP_ROOT/connections/clients.json"
+require_jq '.endpoint == "https://mcp.app.preset.io/mcp"' "$MCP_ROOT/connections/clients.json"
+# Per-target bundled MCP configuration: each target keeps its own official shape.
+require_jq '.mcpServers.preset == {"type": "streamable-http", "url": "https://mcp.app.preset.io/mcp"}' "$MCP_ROOT/mcp.json"
+require_jq '.["$schema"] == "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json"' "$MCP_ROOT/mcp.json"
+require_jq '.["$schema"] == "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json" and .name == "preset-mcp-skills"' "$MCP_ROOT/plugin.json"
+# Codex reads the root mcp.json by default; a root .mcp.json would be auto-discovered by Claude Code, which rejects an entry without type.
+reject_file "$MCP_ROOT/.mcp.json"
+require_jq 'has("mcpServers") | not' "$MCP_ROOT/.codex-plugin/plugin.json"
+require_jq '.mcpServers == {"preset": {"type": "http", "url": "https://mcp.app.preset.io/mcp"}}' "$MCP_ROOT/.claude-plugin/plugin.json"
+require_jq '.mcpServers == "./cursor/mcp.json"' "$MCP_ROOT/.cursor-plugin/plugin.json"
+require_jq '. == {"mcpServers": {"preset": {"url": "https://mcp.app.preset.io/mcp"}}}' "$MCP_ROOT/cursor/mcp.json"
+reject_file "$MCP_ROOT/.app.json"
+reject_file "$MCP_ROOT/hooks"
+require_jq 'all(.clients[]; .support == "manual" or .support == "template")' "$MCP_ROOT/connections/clients.json"
+while IFS= read -r template; do
+  require_file "$MCP_ROOT/connections/$template"
+done < <(jq -r '.clients[] | select(.support == "template") | .template' "$MCP_ROOT/connections/clients.json")
+require_grep "https://mcp.app.preset.io/mcp" "$MCP_ROOT/README.md"
+require_grep "https://mcp.app.preset.io/mcp" "$MCP_ROOT/AGENTS.md"
+require_grep "https://mcp.app.preset.io/mcp" "$MCP_ROOT/.github/copilot-instructions.md"
 require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/AGENTS.md"
 require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/.github/copilot-instructions.md"
 require_grep "Do not use this package for direct Preset Management API" "$MCP_ROOT/README.md"
@@ -582,6 +619,7 @@ require_jq '
     "skills/preset-mcp-data/SKILL.md",
     "skills/preset-mcp-datasets/SKILL.md",
     "skills/preset-mcp-discovery/SKILL.md",
+    "skills/preset-mcp-gateway/SKILL.md",
     "skills/preset-mcp-sqllab/SKILL.md",
     "skills/preset-mcp-troubleshooting/SKILL.md",
     "skills/preset-mcp-visualization/SKILL.md",
